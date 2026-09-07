@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>if(new URLSearchParams(location.search).has('embedded'))document.documentElement.classList.add('is-embedded')</script>
+  <link rel="stylesheet" href="bim-home-motion.css">
+  <title>BIM+创新应用平台</title>
+  <style>
+    :root{--green:#00442f;--green-soft:#e9f4ea;--page:#f1f8fd;--line:#e5edf0;--text:#303337;--muted:#7d8790;--blue:#2879ea}
+    *{box-sizing:border-box}body{margin:0;min-width:1180px;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;background:#fff}.is-embedded .top{display:none}.top{height:72px;background:#f9fbf9;border-bottom:1px solid #b7d4b9;display:flex;align-items:center;padding:0 26px}.brand{font-size:21px;font-weight:700;display:flex;align-items:center;gap:12px;white-space:nowrap}.logo{width:34px;height:34px;border-radius:50%;background:#09884d;position:relative}.logo:after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#f9fbf9;left:12px;top:5px}.nav{margin:auto;display:flex;align-items:center;gap:32px}.nav a{font-weight:600;font-size:16px;color:#303337;text-decoration:none;padding:9px 22px;border-radius:22px;white-space:nowrap}.nav a.active{color:#fff;background:var(--green);box-shadow:0 2px 7px rgba(0,68,47,.25)}.user{display:flex;align-items:center;gap:15px;font-weight:600}.user i{font-style:normal;color:#17533f;font-size:18px}.hero{height:455px;position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(11,79,58,.13),transparent 45%),url('home-hero-building.png') center/cover}.is-embedded .hero{height:315px}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,45,31,.20),transparent 53%)}.hero-text{position:absolute;z-index:1;left:max(10%,calc((100% - 1400px)/2 + 30px));top:150px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.22)}.is-embedded .hero-text{top:78px}.hero-text span{font-size:13px;letter-spacing:1.8px}.hero-text h1{font-size:36px;margin:12px 0;font-weight:650}.hero-text p{margin:0;max-width:430px;line-height:1.8;font-size:14px}.content{background:var(--page);padding:62px 30px 75px}.is-embedded .content{padding-top:30px}.inner{max-width:1365px;margin:auto}.title{text-align:center;margin:0 0 39px}.title h2{font-size:28px;margin:0;font-weight:650}.title i{display:block;width:114px;height:3px;background:var(--blue);margin:14px auto 0}.title p{margin:11px 0 0;color:#87949d;font-size:13px}.abilities{display:grid;grid-template-columns:1fr 1fr;gap:18px}.ability{height:218px;display:grid;grid-template-columns:48% 52%;overflow:hidden;background:#fff;border:1px solid #edf1f3;border-radius:3px;transition:.2s}.ability:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(29,74,95,.11);border-color:#d8e6ec}.ability-visual{position:relative;background:linear-gradient(135deg,#dbeef5,#f7fbfc);overflow:hidden}.ability-visual:before{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-70px;top:-65px;border:30px solid rgba(57,141,178,.13)}.ability-visual b{position:absolute;left:25px;bottom:20px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;background:#2b8db5;font-size:18px;box-shadow:0 4px 9px rgba(0,91,135,.18)}.ability-visual span{position:absolute;left:26px;top:26px;color:#5c8292;font-size:12px;letter-spacing:1.5px}.ability-copy{padding:33px 28px}.ability-copy h3{font-size:20px;margin:0 0 13px;font-weight:650}.ability-copy p{font-size:14px;line-height:1.85;color:#75818a;margin:0}.ability-copy a{display:inline-block;margin-top:17px;color:var(--blue);font-size:13px;text-decoration:none}.gif-slot{grid-column:span 2;height:260px;background:#fff;border:1px solid #edf1f3;border-radius:3px;display:grid;grid-template-columns:54% 46%;overflow:hidden}.gif-stage{position:relative;background:#e4f0e8;overflow:hidden}.gif-stage img{width:100%;height:100%;object-fit:cover;display:block}.gif-stage:has(img[style*="none"]) .placeholder{display:block}.placeholder{display:none;position:absolute;inset:0;background:linear-gradient(135deg,#d3ead9,#f5faf6)}.placeholder:before{content:"";position:absolute;width:230px;height:128px;left:28%;top:62px;border:2px solid #79a88a;background:repeating-linear-gradient(90deg,rgba(10,139,79,.16) 0 6px,transparent 6px 27px),repeating-linear-gradient(0deg,rgba(10,139,79,.18) 0 2px,transparent 2px 24px);transform:skewY(-7deg)}.placeholder:after{content:"BIM 模型动态展示";position:absolute;left:28px;bottom:24px;padding:7px 11px;background:rgba(255,255,255,.9);color:#477157;font-size:13px}.gif-copy{padding:50px 42px;background:#fff}.gif-copy span{font-size:12px;color:#4c8d62;letter-spacing:1px}.gif-copy h3{font-size:22px;margin:13px 0}.gif-copy p{color:#75818a;line-height:1.85;font-size:14px;margin:0;max-width:340px}.gif-copy a{display:inline-block;margin-top:18px;color:var(--blue);font-size:13px;text-decoration:none}.cases{background:#fff;padding:62px 30px 76px}.case-list{max-width:1365px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:28px}.case{background:#fff;border:1px solid #edf0f1;box-shadow:0 4px 13px rgba(25,45,55,.05);padding:22px}.case-img{height:150px;background:linear-gradient(135deg,#dcecef,#f8fbfc);position:relative;overflow:hidden}.case-img:before{content:"";position:absolute;width:115%;height:2px;top:50%;left:-8%;background:#99bfc8;transform:rotate(-21deg);box-shadow:0 32px 0 #b9d4da,-20px -43px 0 #c2dce1}.case h3{font-size:17px;margin:19px 0 9px;text-align:center}.case p{font-size:13px;color:#8b959b;line-height:1.6;margin:0}.case a{display:block;margin-top:13px;color:var(--blue);font-size:13px;text-decoration:none}
+  </style>
+  <style>
+    /* 仅增加低饱和绿色科技细节，不改变既有页面结构 */
+    .hero:after{background:linear-gradient(90deg,rgba(0,55,38,.28),rgba(0,68,47,.08) 54%,transparent 75%)}
+    .hero:before{content:"";position:absolute;z-index:1;right:8%;top:58px;width:260px;height:260px;border-radius:50%;border:1px solid rgba(186,239,206,.52);box-shadow:0 0 0 26px rgba(186,239,206,.07),0 0 0 52px rgba(186,239,206,.04)}
+    .content{background:linear-gradient(180deg,#f1f8fd 0%,#eef8f2 100%)}
+    .title i{background:linear-gradient(90deg,#0a8b4f,#5dbd7c)}
+    .ability{border-color:#e1ece4}.ability:hover{border-color:#9bc9a8;box-shadow:0 8px 20px rgba(0,68,47,.10)}
+    .ability-visual{background:linear-gradient(135deg,#e4f3e8,#f7fbf8)}
+    .ability-visual:after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(10,139,79,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(10,139,79,.08) 1px,transparent 1px);background-size:26px 26px;mask-image:linear-gradient(135deg,#000,transparent 78%)}
+    .ability-visual:before{border-color:rgba(10,139,79,.13)}
+    .ability-visual b{background:linear-gradient(145deg,#0b9255,#057343);box-shadow:0 4px 10px rgba(0,97,55,.22)}
+    .ability-visual span{color:#477c5a}.ability-copy a,.gif-copy a,.case a{color:#07814b}
+    .gif-slot{border-color:#dbeade}.gif-stage{background:#e7f3e9}.placeholder{background:linear-gradient(135deg,#d4eddc,#f6fbf7)}
+    .placeholder:before{box-shadow:14px 14px 0 rgba(0,68,47,.08)}
+    .case-img{background:linear-gradient(135deg,#e4f1e7,#f8fbf8)}.case-img:after{content:"";position:absolute;inset:0;background-image:linear-gradient(90deg,transparent 48%,rgba(10,139,79,.12) 49%,transparent 50%);background-size:34px 34px;opacity:.55}
+    /* UI 2.0：央国企数字平台的克制科技细节 */
+    .top{background:rgba(250,252,250,.92);backdrop-filter:blur(12px);box-shadow:0 3px 14px rgba(0,55,38,.06)}
+    .nav a{transition:background .35s,box-shadow .35s,transform .35s}.nav a.active{background:linear-gradient(135deg,#003b29,#087c4c);box-shadow:0 5px 12px rgba(0,68,47,.20)}.nav a:hover{background:#e6f4e9;box-shadow:0 0 0 4px rgba(10,139,79,.07)}
+    .hero{border-bottom:1px solid rgba(44,143,94,.22)}.hero:after{background:linear-gradient(90deg,rgba(0,49,34,.43) 0%,rgba(0,68,47,.20) 46%,transparent 76%)}
+    .hero-text span{color:#b9f6d1;font-weight:650}.hero-text h1{font-size:40px;letter-spacing:.5px}.hero-text:after{content:"MODEL DATA CENTER · DIGITAL TWIN";display:block;margin-top:16px;color:rgba(226,255,237,.72);font:11px/1.5 ui-monospace,monospace;letter-spacing:1.7px}
+    .content{position:relative}.content:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(9,133,76,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(9,133,76,.045) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.4),transparent 65%)}.inner{position:relative}
+    .ability{border-radius:12px;box-shadow:0 4px 12px rgba(0,62,40,.045);transition:transform .35s,box-shadow .35s,border-color .35s}.ability:hover{transform:translateY(-5px);border-color:#83c89b;box-shadow:0 13px 25px rgba(0,68,47,.13),0 0 0 3px rgba(16,151,87,.055)}
+    .ability-visual:after{opacity:.78}.ability-visual b{border:1px solid rgba(229,255,238,.7);transition:transform .5s}.ability:hover .ability-visual b{transform:rotate(10deg) scale(1.07)}.ability-copy h3:after{content:"";display:block;width:28px;height:2px;margin-top:9px;background:linear-gradient(90deg,#0a8b4f,#92d8a6)}
+    .ability-copy a,.gif-copy a,.case a{transition:transform .3s,color .3s}.ability:hover a,.gif-slot:hover a,.case:hover a{transform:translateX(4px)}
+    .gif-slot{border-radius:12px;box-shadow:0 5px 14px rgba(0,62,40,.05);position:relative}.gif-slot:before{content:"LIVE · MODEL STREAM";position:absolute;z-index:2;top:16px;left:18px;color:#3f7651;font:10px ui-monospace,monospace;letter-spacing:1.4px}.gif-stage{border-right:1px solid #cfe7d6}.gif-stage:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(92,240,145,.12),transparent);transform:translateX(-100%);animation:modelScan 4s ease-in-out infinite}@keyframes modelScan{50%{transform:translateX(100%)}}
+    .case{border-radius:12px;padding:0;overflow:hidden;transition:transform .35s,box-shadow .35s,border-color .35s}.case h3,.case p,.case a{margin-left:22px;margin-right:22px}.case:hover{transform:translateY(-5px);border-color:#95cfaa;box-shadow:0 14px 28px rgba(0,68,47,.13)}.case:hover .case-img:before{transform:rotate(-21deg) scale(1.07)}.case-img:before{transition:transform .5s}.case h3{margin-top:18px}.case a{margin-bottom:21px}.case:before{content:"BIM APPLICATION";position:absolute;z-index:2;margin:14px;padding:5px 8px;border-radius:5px;background:rgba(255,255,255,.86);color:#087b49;font:10px ui-monospace,monospace;letter-spacing:.8px}
+    /* UI 3.0：真实 BIM 数字资产插画与数字孪生 Hero */
+    .ability-visual{background-image:url('bim-capability-illustrations.png');background-size:400% 100%;background-repeat:no-repeat;background-color:#f7faf8}.ability:nth-child(1) .ability-visual{background-position:0 50%}.ability:nth-child(2) .ability-visual{background-position:33.333% 50%}.ability:nth-child(3) .ability-visual{background-position:66.666% 50%}.ability:nth-child(4) .ability-visual{background-position:100% 50%}.ability-visual:before{display:none}.ability-visual:after{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(1,64,41,.08));mask-image:none}.ability-visual b{display:none}.ability-visual span{z-index:1;padding:5px 8px;background:rgba(255,255,255,.78);border-left:2px solid #0a8b4f;color:#075a37;font-weight:650}
+    .hero:before{width:420px;height:420px;right:5%;top:8px;border-color:rgba(198,255,217,.42);box-shadow:0 0 0 1px rgba(198,255,217,.10),0 0 0 32px rgba(198,255,217,.04),0 0 55px rgba(64,255,156,.10);background:repeating-radial-gradient(circle at center,transparent 0 34px,rgba(206,255,222,.10) 35px 36px,transparent 37px 69px)}
+    .hero{animation:heroBreathe 9s ease-in-out infinite}@keyframes heroBreathe{50%{filter:saturate(1.08) brightness(1.03)}}.hero-text{z-index:3}
+    .gif-slot{background:linear-gradient(120deg,#fbfdfb,#f2faf4)}.gif-slot:after{content:"IFC / LOD 300 / ONLINE";position:absolute;right:19px;bottom:16px;color:#629172;font:10px ui-monospace,monospace;letter-spacing:1px}.placeholder:before{width:310px;height:160px;left:22%;top:45px;border-color:#3b9460;box-shadow:18px 18px 0 rgba(0,68,47,.08),-15px 30px 0 rgba(10,139,79,.04)}
+  </style>
+</head>
+<style>
+  /* 行业化插画替换：仅影响四张核心能力卡片的左侧视觉 */
+  .ability:nth-child(1) .ability-visual{background-image:url('tobacco-bim-process.png');background-size:cover;background-position:center}
+  .ability:nth-child(2) .ability-visual{background-image:url('tobacco-bim-quality.png');background-size:cover;background-position:center}
+  .ability:nth-child(3) .ability-visual{background-image:url('tobacco-bim-utility.png');background-size:cover;background-position:center}
+  .ability:nth-child(4) .ability-visual{background-image:url('bim-capability-illustrations.png');background-size:400% 100%;background-position:100% 50%}
+  /* 独立模型动图窗口：保留模块位置，仅强化展示属性 */
+  .gif-slot.model-viewer{height:380px;grid-template-columns:minmax(0,65%) minmax(330px,35%);cursor:default;border-color:#d5e8dc;box-shadow:0 10px 28px rgba(0,68,47,.07)}
+  .model-viewer .gif-stage{background:radial-gradient(circle at 52% 50%,#fafffc 0%,#eef8f2 78%,#e8f4ed 100%);border-right:1px solid #cce3d4}
+  .model-viewer .gif-stage img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;transform:scale(1.01)}
+  .model-viewer .gif-stage:after{opacity:.42;animation-duration:5.6s}
+  .model-viewer .gif-copy{padding:58px 50px;display:flex;flex-direction:column;justify-content:center}
+  .model-viewer .gif-copy p{max-width:370px}
+  .model-viewer .gif-copy a{display:none}
+  .model-viewer:before{left:22px;top:19px}
+  .model-viewer:after{right:22px;bottom:18px}
+  /* 首页数据概览与快捷操作 */
+  .data-overview{max-width:1365px;margin:0 auto 42px;padding:23px 26px 25px;border:1px solid #dcebe1;border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 8px 24px rgba(0,68,47,.07)}
+  .data-overview-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:19px}.data-overview-head h2{margin:0;color:#1c3829;font-size:21px}.data-overview-head p{margin:6px 0 0;color:#7a8c81;font-size:13px}.data-overview-actions{display:flex;align-items:center;gap:8px}.data-updated{padding:6px 9px;background:#eff8f1;color:#438059;font:11px ui-monospace,monospace;letter-spacing:.3px}.home-requirement-btn{height:27px;padding:0 9px;border:1px solid #b9d8c2;background:#fff;color:#28724b;font-size:12px;cursor:pointer}.home-requirement-btn:hover{background:#eef8f0}
+  .data-overview-grid{display:grid;grid-template-columns:1.05fr 1.05fr 1.3fr 1.5fr;gap:16px}.data-metric,.data-distribution,.data-shortcuts{min-height:148px;border:1px solid #e3eee6;background:#fff}.data-metric{position:relative;padding:21px;overflow:hidden}.data-metric:after{content:"";position:absolute;right:-27px;bottom:-38px;width:108px;height:108px;border:16px solid #dff1e4;border-radius:50%}.data-metric i{display:block;margin-bottom:14px;color:#74877a;font-size:13px;font-style:normal}.data-metric b{position:relative;z-index:1;display:block;color:#126943;font-size:30px;line-height:1}.data-metric small{display:block;margin-top:10px;color:#5d976f;font-size:12px}.data-distribution{padding:17px 18px}.data-distribution h3,.data-shortcuts h3{margin:0 0 13px;color:#415a4b;font-size:14px}.distribution-body{display:flex;align-items:center;gap:13px}.donut{width:90px;height:90px;border-radius:50%;background:conic-gradient(#0a8550 0 41%,#51b57a 41% 68%,#86cfa2 68% 84%,#c7e9d3 84% 100%);position:relative;flex:none}.donut:after{content:"数据分类";position:absolute;inset:18px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#557163;font-size:11px}.distribution-list{display:grid;gap:7px;font-size:11px;color:#617368}.distribution-list span:before{content:"";display:inline-block;width:7px;height:7px;margin-right:5px;border-radius:50%;background:#0a8550}.distribution-list span:nth-child(2):before{background:#51b57a}.distribution-list span:nth-child(3):before{background:#86cfa2}.distribution-list span:nth-child(4):before{background:#c7e9d3}.data-shortcuts{padding:17px 18px}.shortcut-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.shortcut-btn{min-height:47px;border:1px solid #cde5d4;background:#f6fbf7;color:#246e49;font-size:13px;font-weight:650;cursor:pointer;transition:.2s}.shortcut-btn:hover{border-color:#168251;background:#e5f5e9;transform:translateY(-1px)}.shortcut-btn span{display:block;margin-top:4px;color:#7a9484;font-size:11px;font-weight:400}.home-quick-modal{position:fixed;z-index:40;inset:0;display:none;align-items:center;justify-content:center;background:rgba(20,43,32,.34)}.home-quick-modal.open{display:flex}.home-quick-dialog{width:500px;padding:24px;background:#fff;box-shadow:0 12px 34px rgba(0,48,31,.2)}.home-quick-dialog h3{margin:0 0 12px;color:#265640}.home-quick-dialog p{color:#718178;font-size:13px;line-height:1.7}.quick-search-row{display:flex;gap:8px;margin-top:16px}.quick-search-row input{flex:1;height:35px;padding:0 10px;border:1px solid #d3e3d8}.quick-search-row button,.quick-close{height:35px;padding:0 14px;border:0;background:#087b49;color:#fff;cursor:pointer}.quick-close{float:right;margin-top:16px;background:#6e8176}
+</style>
+<style>
+  /* 首页数据分类与“数据可视化统计”采用同一组文件口径 */
+  .data-overview-grid{grid-template-columns:1fr 1fr 2.4fr 1.35fr}
+  .data-distribution{padding:17px 20px}
+  .distribution-body{justify-content:space-between;gap:20px}
+  .donut{width:142px;height:142px;background:conic-gradient(#20c4bf 0 86.72%,#43a8f6 86.72% 93.70%,#247df1 93.70% 95.16%,#f5ad4c 95.16% 100%)}
+  .donut:after{inset:42px;content:"文件分类";font-size:11px}
+  .distribution-list{min-width:175px;gap:13px;font-size:12px}
+  .distribution-list span:before{width:10px;height:10px;margin-right:8px;background:#20c4bf}.distribution-list span:nth-child(2):before{background:#43a8f6}.distribution-list span:nth-child(3):before{background:#247df1}.distribution-list span:nth-child(4):before{background:#f5ad4c}
+  .distribution-list b{color:#3c5145;font-weight:650}
+  .data-metric small{position:relative;z-index:1}
+  .shortcut-btn.is-disabled{border-color:#d9e1dc;background:#f1f3f2;color:#a5afa9;cursor:not-allowed;transform:none}.shortcut-btn.is-disabled span{color:#aeb7b2}
+</style>
+<body>
+  <header class="top"><div class="brand"><i class="logo"></i>BIM+创新应用平台</div><nav class="nav"><a class="active" href="#">首页</a><a href="#">工作台</a><a href="#">BIM数据管理</a><a href="#">智慧运维</a><a href="#">BIM模型展示</a><a href="#">BIM公共服务</a><a href="#">后台管理</a><a href="#">我的中心</a></nav><div class="user"><i>?</i><i>♟</i><span>admin</span></div></header>
+  <section class="hero"><div class="hero-real-image" aria-hidden="true"></div><div class="hero-text"><span>BIM INNOVATION PLATFORM</span><h1>让 BIM 数据服务于建设与运营</h1><p>汇聚模型、数据与业务应用，为项目全生命周期管理提供统一的数字化支撑。</p></div></section>
+  <main class="content"><div class="inner"><section class="data-overview"><div class="data-overview-head"><div><h2>数据概览</h2><p>按平台所有文件统计，数据口径与“数据可视化统计”一致</p></div><div class="data-overview-actions"><button class="home-requirement-btn" type="button" data-open-home-requirement>研发需求说明</button><span class="data-updated">DATA STATUS · 实时更新</span></div></div><div class="data-overview-grid"><article class="data-metric"><i>总数据量</i><b>1,303</b><small>平台所有文件总数</small></article><article class="data-metric"><i>今日新增数据量</i><b>0</b><small>当日新增文件数</small></article><section class="data-distribution"><h3>数据类型统计</h3><div class="distribution-body"><div class="donut" aria-label="模型数据 1130 个，图纸资料 91 个，图片资料 19 个，其他 63 个"></div><div class="distribution-list"><span><b>模型数据：</b>1130 个（86.72%）</span><span><b>图纸资料：</b>91 个（6.98%）</span><span><b>图片资料：</b>19 个（1.46%）</span><span><b>其他：</b>63 个（4.84%）</span></div></div></section><section class="data-shortcuts"><h3>快捷操作</h3><div class="shortcut-actions"><button class="shortcut-btn" type="button" data-quick-import>＋ 快速导入数据<span>上传模型、图纸或文档</span></button><button class="shortcut-btn" type="button" data-quick-search>⌕ 常用数据检索<span>按项目、文件名称或关键字查找</span></button></div></section></div></section><div class="title"><h2>核心能力</h2><i></i><p>围绕模型资产与业务场景，构建一体化 BIM 应用能力</p></div><div class="abilities"><article class="ability"><div class="ability-visual"><span>MODEL DATA</span><b>▦</b></div><div class="ability-copy"><h3>模型数据管理</h3><p>集中管理多专业模型、构件与关联资料，实现模型数据统一归档和持续沉淀。</p><a href="#">了解更多 <span class="link-arrow" aria-hidden="true">→</span></a></div></article><article class="ability"><div class="ability-visual"><span>QUALITY CHECK</span><b>✓</b></div><div class="ability-copy"><h3>数据质量检查</h3><p>支持完整性、规范性与空间合理性检查，保障模型成果的交付质量。</p><a href="#">了解更多 <span class="link-arrow" aria-hidden="true">→</span></a></div></article><article class="ability"><div class="ability-visual"><span>SMART O&M</span><b>◉</b></div><div class="ability-copy"><h3>智慧运维</h3><p>连接空间、设备、巡检与工单信息，支撑项目运营过程协同管理。</p><a href="#">了解更多 <span class="link-arrow" aria-hidden="true">→</span></a></div></article><article class="ability"><div class="ability-visual"><span>PUBLIC SERVICE</span><b>↗</b></div><div class="ability-copy"><h3>BIM 公共服务</h3><p>提供轻量化浏览、模型共享与协同服务，促进 BIM 资产高效应用。</p><a href="#">了解更多 <span class="link-arrow" aria-hidden="true">→</span></a></div></article><article class="gif-slot model-viewer"><div class="gif-stage"><img src="model-showcase.gif" alt="工业 BIM 模型动态展示"><div class="placeholder"></div></div><div class="gif-copy"><span>BIM MODEL SHOWCASE</span><h3>模型动态展示</h3><p>此处用于展示项目 BIM 模型动画，可放置模型旋转、构件拆分或漫游 GIF，作为核心能力的直观补充。</p><a href="#">进入模型展示 <span class="link-arrow" aria-hidden="true">→</span></a></div></article></div></div></main>
+  <div class="home-quick-modal home-requirement-modal" id="homeRequirementModal"><div class="home-quick-dialog"><h3>首页新增功能｜研发需求说明</h3><div class="home-requirement-content"><h4>1. 数据概览统计</h4><p><b>统计对象：</b>平台内的所有文件；一个文件版本计为一条。已删除、草稿、解析失败文件不计入。</p><p><b>总数据量：</b>实时/定时汇总平台所有文件数量。<b>今日新增：</b>按自然日（系统时区）统计 created_at 当日新增的文件数。</p><p><b>分类图表：</b>按文件类型分为模型数据、图纸资料、图片资料、其他；数量、百分比及图例必须与“数据可视化统计”使用同一统计口径。百分比保留两位小数。</p><h4>2. 快速导入数据</h4><p>用户具备数据导入权限时，点击后进入 BIM 数据管理的导入入口。无权限时，快速导入和常用数据检索两个入口均展示为置灰不可用状态；用户点击置灰入口时提示“暂无数据导入权限，暂无法使用该功能”，不执行跳转或检索。</p><h4>3. 常用数据检索</h4><p>仅支持项目名称、文件名称及关键字的模糊匹配；不支持模型名称、构件编码等检索条件。点击检索先展示最多 3 条匹配结果；点击结果或“查看全部”后跳转 BIM 数据管理，并携带 keyword 参数展示完整结果。</p><p><b>空状态：</b>无匹配数据时显示“未找到相关数据”，并保留重新检索入口。检索内容需按用户数据权限过滤。</p></div><button type="button" class="quick-close" data-close-home-requirement>关闭</button></div></div>
+  <section class="cases"><div class="title"><h2>应用案例</h2><i></i><p>以 BIM 为基础，服务项目建设与运维管理</p></div><div class="case-list"><article class="case" data-case-tag="LIVE CASE · DIGITAL TWIN"><div class="case-img"></div><h3>项目模型管理</h3><p>基于统一的模型数据底座，支撑项目模型的集中管理与在线共享。</p><a href="#">了解更多 <span class="link-arrow" aria-hidden="true">→</span></a></article><article class="case" data-case-tag="INDUSTRY · MODEL QUALITY"><div class="case-img"></div><h3>模型质量检查</h3><p>通过标准化检查规则，快速定位模型问题并形成检查报告。</p><a href="#">了解更多 <span class="link-arrow" aria-hidden="true">→</span></a></article><article class="case" data-case-tag="PROJECT · SMART O&amp;M"><div class="case-img"></div><h3>智慧运维应用</h3><p>基于 BIM 模型连接运维业务数据，提升设施设备管理效率。</p><a href="#">了解更多 <span class="link-arrow" aria-hidden="true">→</span></a></article></div></section>
+  <style>
+    /* 首页内的轻量入口：不改变原有首屏与内容结构 */
+    .publish-guide-entry{display:inline-flex;align-items:center;gap:7px;margin-top:20px;padding:7px 12px;border:1px solid rgba(224,255,235,.72);border-radius:3px;background:rgba(0,57,39,.26);color:#fff;font:13px/1 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;cursor:pointer}.publish-guide-entry:hover{background:rgba(0,68,47,.48)}.publish-guide-entry:before{content:"i";display:grid;place-items:center;width:15px;height:15px;border:1px solid currentColor;border-radius:50%;font-size:10px;font-weight:700}
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hasBimDataPermission = new URLSearchParams(location.search).get('bimDataPermission') !== 'false';
+      document.querySelectorAll('[data-quick-import], [data-quick-search]').forEach(button => {
+        button.title = hasBimDataPermission ? (button.matches('[data-quick-import]') ? '进入BIM数据管理，上传和管理模型、图纸等数据' : '进入项目列表，使用项目检索') : '暂无BIM数据管理权限';
+        button.classList.toggle('is-disabled', !hasBimDataPermission);
+        button.setAttribute('aria-disabled', String(!hasBimDataPermission));
+      });
+      document.addEventListener('click', event => {
+        const quickEntry = event.target.closest('[data-quick-import], [data-quick-search]');
+        if (!quickEntry) return;
+        event.preventDefault();
+        if (!hasBimDataPermission) return;
+        window.top.location.href = 'index.html#bim-data-management';
+      });
+    });
+  </script>
+  <script src="./bim-home-motion.global.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      window.bimHomeMotion = new BimHomeMotion.BimHomeMotionController({
+        quality: 'auto',
+        digitalScan: { duration: 8000, scanGlowHeight: 120, opacity: 0.1, wireframeOpacity: 0.08 },
+        pipelineFlow: { speed: 1, particleCount: 2 },
+        bimModelMotion: { mode: 'float', duration: 9000, explodeDistance: 14 },
+        nodePulse: { duration: 2400, stagger: 350 },
+        networkDataFlow: { interval: 3000, duration: 2200, maxConcurrentFlows: 2 },
+        modelShowcase: { stepDurations: [2000, 2000, 2000, 2000, 2000, 2000] }
+      });
+      window.bimHomeMotion.init().start();
+
+      const heroText = document.querySelector('.hero-text');
+      if (heroText) {
+        const entry = document.createElement('button');
+        entry.type = 'button'; entry.className = 'publish-guide-entry'; entry.textContent = 'BIM 发布流程指引';
+        entry.addEventListener('click', () => window.parent?.postMessage({ type: 'open-bim-publish-guide' }, '*'));
+        heroText.appendChild(entry);
+      }
+      const requirementModal = document.getElementById('homeRequirementModal');
+      document.addEventListener('click', event => {
+        if (event.target.closest('[data-open-home-requirement]')) requirementModal.classList.add('open');
+        if (event.target.closest('[data-close-home-requirement]') || event.target === requirementModal) requirementModal.classList.remove('open');
+      });
+      if (location.protocol === 'file:' || location.search.includes('debugMotion=1')) {
+        window.__bimMotionDebug = {
+          pipelineFlow: window.bimHomeMotion.items.pipelineFlow,
+          network: window.bimHomeMotion.items.networkDataFlow,
+          modelShowcase: window.bimHomeMotion.items.modelShowcase,
+          modelMotion: window.bimHomeMotion.items.modelShowcase?.motion,
+          nodePulse: window.bimHomeMotion.items.nodePulse,
+          controller: window.bimHomeMotion
+        };
+      }
+    });
+  </script>
+</body></html>
