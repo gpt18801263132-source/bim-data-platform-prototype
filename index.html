@@ -5204,6 +5204,11 @@
       const downloadPage = document.createElement('section');
       downloadPage.id = 'downloadManagementPage'; downloadPage.className = 'page download-management-page';
       content.appendChild(downloadPage);
+      const renderBackendPrimary = active => {
+        document.querySelectorAll('.top-btn').forEach(button => button.classList.toggle('active', button === backendButton));
+        document.getElementById('primarySide').innerHTML = `<div class="primary-item ${active === 'permission' ? 'active' : ''}" data-backend-permission><span class="primary-icon">▦</span><span>权限<br>管理</span></div><div class="primary-item"><span class="primary-icon">●</span><span>运维<br>管理</span></div><div class="primary-item"><span class="primary-icon">▥</span><span>日志<br>管理</span></div><div class="primary-item ${active === 'download' ? 'active' : ''}" data-download-primary><span class="primary-icon">⇩</span><span>下载<br>管理</span></div>`;
+      };
+      window.renderBackendPrimary = renderBackendPrimary;
       const records = [
         { user:'赵蕾', key:'bim_sk_7Qx9••••K8v2', time:'2026-09-01 10:42:24', status:'成功', file:'联合工房-建筑模型.ifc', type:'模型文件', project:'联合工房数字化项目', flow:'1.39 GB', id:'DL20260901104224' },
         { user:'陈鸿佳', key:'bim_sk_2Lm8••••R4c1', time:'2026-09-01 10:16:25', status:'成功', file:'建筑专业施工图.pdf', type:'图纸文件', project:'零特外国语学校项目', flow:'68.42 MB', id:'DL20260901101625' },
@@ -5217,10 +5222,6 @@
       const detailModal = document.createElement('div'); detailModal.className = 'modal-mask'; detailModal.id = 'downloadDetailModal';
       detailModal.innerHTML = '<div class="modal download-detail-modal"><div class="modal-head">下载流量明细<button class="modal-close" type="button" data-close-download-detail>×</button></div><div class="modal-body"><div class="download-user-meta" data-download-user-meta></div><table class="download-detail-table"><thead><tr><th>下载时间</th><th>下载状态</th><th>实际流量</th><th>下载内容</th><th>所属项目</th></tr></thead><tbody data-download-detail-body></tbody></table><div class="download-metering-note"><b>流量统计口径：</b>所有项目文件下载按 API Key 跨项目累计实际响应字节；断点续传按返回分片、重复下载重复计量，中断下载累计已下发字节。</div></div><div class="modal-foot"><button class="btn primary" type="button" data-close-download-detail>关闭</button></div></div>';
       document.body.appendChild(detailModal);
-      const ensurePrimary = () => {
-        const primary = document.getElementById('primarySide'); if (!primary || primary.querySelector('[data-download-primary]')) return;
-        primary.insertAdjacentHTML('beforeend', '<div class="primary-item" data-download-primary><span class="primary-icon">⇩</span><span>下载<br>管理</span></div>');
-      };
       const renderDownloadInfo = () => `<section class="download-admin-page"><div class="download-page-head"><div><h2>下载信息</h2><p>查询项目文件下载记录，流量按 API Key 跨项目统一累计</p></div></div><section class="download-filter-card"><input class="input" data-download-user placeholder="请输入用户名或 API Key"><input class="input" data-download-date placeholder="选择起止时间（原型）"><select class="select" data-download-status><option value="全部">全部状态</option><option value="成功">成功</option><option value="中断">中断</option><option value="失败">失败</option></select><button class="btn primary" type="button" data-download-search>查询</button><button class="btn light" type="button" data-download-reset>重置</button></section><section class="download-table-card"><div class="download-table-title"><b>下载记录</b><span data-download-count>共 ${records.length} 条</span></div><table class="download-info-table"><thead><tr><th>序号</th><th>用户名</th><th>API Key</th><th>下载时间</th><th>下载状态</th><th>文件名称</th><th>所属项目</th><th>实际流量</th></tr></thead><tbody data-download-records>${records.map((row,index) => `<tr><td>${index+1}</td><td><button class="link" type="button" data-download-detail="${row.user}">${row.user}</button></td><td><code>${row.key}</code></td><td>${row.time}</td><td><span class="download-status ${row.status === '成功' ? 'success' : 'interrupted'}">● ${row.status}</span></td><td title="${row.file}">${row.file}<small>${row.type}</small></td><td title="${row.project}">${row.project}</td><td>${row.flow}</td></tr>`).join('')}</tbody></table></section><div class="download-retention-tip">下载明细及相关调用审计日志保留 7 天，到期后自动清理。</div></section>`;
       const renderFlowControl = () => `<section class="download-admin-page"><div class="download-page-head"><div><h2>流量控制</h2><p>监测 API Key 对所有项目文件的下载流量与下载次数</p></div><span class="download-unit-tip">统计单位：实际响应字节</span></div><section class="flow-overview"><div class="flow-card"><span>当前输出速率</span><b>38.6 <small>Mbps</small></b><em>较昨日同一时段 +12.4%</em></div><div class="flow-chart-panel"><div class="flow-chart-tools"><b>流量趋势</b><div><button class="flow-period active" type="button" data-flow-period>日</button><button class="flow-period" type="button" data-flow-period>周</button><button class="flow-period" type="button" data-flow-period>月</button><button class="flow-period" type="button" data-flow-period>年</button></div></div><div class="flow-chart"><i>Mbps</i><svg viewBox="0 0 850 180" preserveAspectRatio="none" aria-label="流量趋势图"><path d="M0,142 L70,132 L140,138 L210,96 L280,116 L350,73 L420,101 L490,45 L560,82 L630,61 L700,89 L780,34 L850,54 L850,180 L0,180Z" fill="rgba(47,145,91,.13)"></path><polyline points="0,142 70,132 140,138 210,96 280,116 350,73 420,101 490,45 560,82 630,61 700,89 780,34 850,54" fill="none" stroke="#27875a" stroke-width="3"></polyline></svg><div class="flow-axis"><span>00:00</span><span>04:00</span><span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>24:00</span></div></div></div></section><section class="flow-ranking-card"><div class="flow-ranking-head"><div><h3>流量监控详情</h3><span>按 API Key 汇总所有项目文件下载量</span></div><div><button class="flow-rank-tab active" type="button" data-flow-rank>按流量排名</button><button class="flow-rank-tab" type="button" data-flow-rank>按下载次数排名</button></div></div><table class="flow-ranking-table"><thead><tr><th>排名</th><th>用户名</th><th>API Key</th><th>累计流量</th><th>下载次数</th><th>查看详情</th></tr></thead><tbody>${rankings.map((row,index)=>`<tr><td>${index+1}</td><td>${row[0]}</td><td><code>${row[1]}</code></td><td><b>${row[2]}</b></td><td>${row[3]}</td><td><button class="link" type="button" data-download-detail="${row[0]}">查看</button></td></tr>`).join('')}</tbody></table></section><div class="download-retention-tip">限额未配置时默认为不限；如设置限额，超出调用频率或下载流量额度时返回 429。</div></section>`;
       const showDownloadPage = page => {
@@ -5228,9 +5229,8 @@
         document.querySelectorAll('.page').forEach(item => item.classList.remove('active'));
         downloadPage.classList.add('active');
         downloadPage.innerHTML = page === 'flow' ? renderFlowControl() : renderDownloadInfo();
-        document.querySelectorAll('.top-btn').forEach(button => button.classList.toggle('active', button === backendButton));
         document.getElementById('breadcrumb').textContent = `后台管理 / 下载管理 / ${page === 'flow' ? '流量控制' : '下载信息'}`;
-        document.getElementById('primarySide').innerHTML = '<div class="primary-item"><span class="primary-icon">▦</span><span>权限<br>管理</span></div><div class="primary-item"><span class="primary-icon">●</span><span>运维<br>管理</span></div><div class="primary-item"><span class="primary-icon">▥</span><span>日志<br>管理</span></div><div class="primary-item active" data-download-primary><span class="primary-icon">⇩</span><span>下载<br>管理</span></div>';
+        renderBackendPrimary('download');
         document.getElementById('secondarySide').innerHTML = `<button class="sub-btn ${page === 'info' ? 'active' : ''}" type="button" data-download-page="info">◩ 下载信息</button><button class="sub-btn ${page === 'flow' ? 'active' : ''}" type="button" data-download-page="flow">◩ 流量控制</button>`;
         window.simplifyDownloadManagement?.();
       };
@@ -5241,9 +5241,6 @@
         detailModal.querySelector('[data-download-detail-body]').innerHTML = fallback.map(item => `<tr><td>${item.time}</td><td><span class="download-status ${item.status === '成功' ? 'success' : 'interrupted'}">● ${item.status}</span></td><td>${item.flow}</td><td>${item.type}</td><td>${item.project}</td></tr>`).join(''); detailModal.classList.add('open');
       };
       document.addEventListener('click', event => {
-        if (event.target.closest('.top-btn') === backendButton) setTimeout(ensurePrimary, 0);
-        if (event.target.closest('[data-download-primary]')) { showDownloadPage('info'); return; }
-        const sub = event.target.closest('[data-download-page]'); if (sub) { showDownloadPage(sub.dataset.downloadPage); return; }
         const detail = event.target.closest('[data-download-detail]'); if (detail) openDetail(detail.dataset.downloadDetail);
         if (event.target.closest('[data-close-download-detail]')) detailModal.classList.remove('open');
         if (event.target.closest('[data-flow-period]')) { document.querySelectorAll('[data-flow-period]').forEach(button => button.classList.toggle('active', button === event.target.closest('[data-flow-period]'))); }
@@ -6014,16 +6011,13 @@
     /* 后台管理统一入口：顶部与权限管理均进入同一套后台壳 */
     (() => {
       window.openBackendManagement = () => {
+        window.renderBackendPrimary?.('permission');
         if (typeof window.openOrganizationManagement === 'function') window.openOrganizationManagement();
         else if (typeof window.openBackendUserManagement === 'function') window.openBackendUserManagement();
-        const primary = document.getElementById('primarySide');
-        if (primary && !primary.querySelector('[data-download-primary]')) {
-          primary.insertAdjacentHTML('beforeend', '<div class="primary-item" data-download-primary><span class="primary-icon">⇩</span><span>下载<br>管理</span></div>');
-        }
       };
       document.addEventListener('click', event => {
         const primary = event.target.closest('#primarySide .primary-item');
-        if (!primary || !primary.textContent.replace(/\s+/g, '').includes('权限管理')) return;
+        if (!primary?.matches('[data-backend-permission]')) return;
         event.preventDefault(); event.stopImmediatePropagation(); window.openBackendManagement();
       }, true);
     })();
