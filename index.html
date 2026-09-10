@@ -6971,5 +6971,161 @@
       render();
     })();
   </script>
+  <script>
+    /* 入库数据统计闭环：构件 / 空间 / 系统统一检索、模型定位与反向追溯 */
+    (() => {
+      const page = document.getElementById('assetStorageStatisticsPage');
+      const viewer = document.getElementById('semanticModelBrowserModal');
+      if (!page || !viewer) return;
+
+      const assetState = { type: 'component', keyword: '' };
+      const typeMeta = {
+        component: { label: '构件', total: '150,496,764', count: '2,300' },
+        space: { label: '空间', total: '2,488,587', count: '128' },
+        system: { label: '系统', total: '32,864', count: '32' }
+      };
+      const rows = {
+        component: [
+          {dictionary:'墙体',name:'外墙-基本墙-200mm',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-建筑模型.ifc',unit:'车间',project:'白玉兰测试20260203',major:'建筑专业'},
+          {dictionary:'楼板',name:'结构楼板-F2-150mm',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-结构模型.ifc',unit:'车间',project:'白玉兰测试20260203',major:'结构专业'},
+          {dictionary:'桥架',name:'电缆桥架-CT-400×100',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-总图-机电专业.ifc',unit:'原辅料周转库',project:'白玉兰测试20260203',major:'电气专业'},
+          {dictionary:'立式污水泵',name:'立式水泵-4139197',standard:'—',model:'联合工房-给排水模型.ifc',unit:'地下车库',project:'白玉兰测试20260203',major:'给排水专业'},
+          {dictionary:'风管',name:'矩形风管-800×400',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-暖通模型.ifc',unit:'生产管理用房',project:'白玉兰测试20260203',major:'暖通专业'}
+        ],
+        space: [
+          {dictionary:'生产空间',name:'F1 生产区',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-建筑模型.ifc',unit:'车间',project:'白玉兰测试20260203',major:'建筑专业'},
+          {dictionary:'办公空间',name:'F2 办公区',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-建筑模型.ifc',unit:'生产管理用房',project:'白玉兰测试20260203',major:'建筑专业'},
+          {dictionary:'设备空间',name:'B1 设备用房',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-机电模型.ifc',unit:'地下车库',project:'白玉兰测试20260203',major:'机电专业'},
+          {dictionary:'交通空间',name:'F1 疏散走道',standard:'—',model:'联合工房-建筑模型.ifc',unit:'原辅料周转库',project:'白玉兰测试20260203',major:'建筑专业'},
+          {dictionary:'后勤服务空间',name:'F1 更衣室',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-建筑模型.ifc',unit:'后勤保障用房',project:'白玉兰测试20260203',major:'建筑专业'}
+        ],
+        system: [
+          {dictionary:'给排水系统',name:'生活给水系统-JL1',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-总图-机电专业.ifc',unit:'车间',project:'白玉兰测试20260203',major:'给排水专业'},
+          {dictionary:'消防系统',name:'自动喷淋系统-ZP1',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-消防模型.ifc',unit:'原辅料周转库',project:'白玉兰测试20260203',major:'给排水专业'},
+          {dictionary:'暖通系统',name:'空调送风系统-KT1',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-暖通模型.ifc',unit:'生产管理用房',project:'白玉兰测试20260203',major:'暖通专业'},
+          {dictionary:'电气系统',name:'动力配电系统-AP1',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-电气模型.ifc',unit:'车间',project:'白玉兰测试20260203',major:'电气专业'},
+          {dictionary:'弱电系统',name:'综合布线系统-ZH1',standard:'—',model:'联合工房-弱电模型.ifc',unit:'生产管理用房',project:'白玉兰测试20260203',major:'电气专业'}
+        ]
+      };
+      const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const visibleRows = () => {
+        const word = assetState.keyword.trim().toLowerCase();
+        return rows[assetState.type].filter(row => !word || Object.values(row).some(value => String(value).toLowerCase().includes(word)));
+      };
+      const standardCell = value => value === '—' ? '<span class="asset-standard-empty" title="历史数据未保存解析标准">—</span>' : `<button class="asset-standard-link" type="button" data-view-standard>${safe(value)}</button>`;
+      const tableRows = () => visibleRows().map((row,index) => {
+        const payload = encodeURIComponent(JSON.stringify({...row,type:assetState.type,index:index+1}));
+        return `<tr><td><span class="asset-type-tag">${typeMeta[assetState.type].label}</span></td><td>${safe(row.dictionary)}</td><td title="${safe(row.name)}">${safe(row.name)}</td><td>${standardCell(row.standard)}</td><td title="${safe(row.model)}">${safe(row.model)}</td><td>${safe(row.unit)}</td><td>${safe(row.project)}</td><td class="asset-closed-actions"><button type="button" data-instance-action="view" data-instance="${payload}">查看实例</button><button type="button" data-instance-action="property" data-instance="${payload}">查看属性</button><span class="asset-more-wrap"><button type="button" data-instance-more>更多⌄</button><span class="asset-more-menu" hidden><button type="button" data-instance-action="unit" data-instance="${payload}">查看单体</button><button type="button" data-instance-action="project" data-instance="${payload}">查看项目</button></span></span></td></tr>`;
+      }).join('') || '<tr><td colspan="8" class="asset-no-result">未找到匹配的实例数据</td></tr>';
+      const render = () => {
+        const meta = typeMeta[assetState.type];
+        page.innerHTML = `<div class="asset-closed-page"><header class="asset-closed-head"><h2>入库数据统计</h2><span>仅统计已解析并正式入库的数据</span></header><section class="asset-dimension-grid">${Object.entries(typeMeta).map(([key,item]) => `<button type="button" class="asset-dimension-card ${key === assetState.type ? 'active' : ''}" data-closed-type="${key}"><span>${item.label}统计</span><b>${item.total}</b><small>${item.count} 个${item.label}类型</small><i>查看数据 ›</i></button>`).join('')}</section><section class="asset-closed-results"><div class="asset-closed-toolbar"><div><b>${meta.label}数据</b><span>共 ${meta.total} 条实例</span></div><label><span>关键词</span><input class="input" data-closed-keyword value="${safe(assetState.keyword)}" placeholder="筛选语义字典、实例、模型或项目"><button class="btn light" type="button" data-closed-filter>筛选</button></label></div><div class="asset-closed-table-wrap"><table class="asset-closed-table"><thead><tr><th>类型</th><th>语义字典</th><th>实例名称</th><th>所属标准</th><th>所属模型/模型文件</th><th>所属单体</th><th>所属项目</th><th>操作</th></tr></thead><tbody>${tableRows()}</tbody></table></div><div class="asset-closed-pager"><span>显示 ${visibleRows().length} 条示例数据</span><button type="button" disabled>‹</button><button type="button" class="active">1</button><button type="button" disabled>›</button></div></section></div>`;
+      };
+      const show = () => {
+        document.querySelectorAll('.page').forEach(item => item.classList.remove('active'));
+        page.classList.add('active');
+        if (typeof renderMenu === 'function') renderMenu('data', 'assetStorageStatisticsPage');
+        document.querySelectorAll('.top-btn').forEach(button => button.classList.toggle('active', button.dataset.top === 'data'));
+        document.querySelectorAll('#primarySide .primary-item').forEach(item => item.classList.toggle('active', item.textContent.includes('数据资产')));
+        const secondary = document.getElementById('secondarySide');
+        if (secondary) secondary.innerHTML = '<button class="sub-btn" type="button" data-open-asset-catalog>◩ 数据资产目录</button><button class="sub-btn active" type="button" data-open-asset-stats-page>◩ 入库数据统计</button><button class="sub-btn" type="button">◩ 数据可视化统计</button><button class="sub-btn" type="button">◩ 资产全览图</button>';
+        const crumb = document.getElementById('breadcrumb'); if (crumb) crumb.textContent = '项目数据管理 / 数据资产全览 / 入库数据统计';
+        render();
+      };
+      window.openAssetStatistics = show;
+      if (location.hash === '#asset-statistics') window.addEventListener('load', () => setTimeout(show, 60));
+
+      const businessTrees = {
+        component:[['墙体','外墙-基本墙-200mm'],['楼板','结构楼板-F2-150mm'],['桥架','电缆桥架-CT-400×100']],
+        space:[['生产空间','F1 生产区'],['办公空间','F2 办公区'],['设备空间','B1 设备用房']],
+        system:[['给排水系统','生活给水系统-JL1'],['暖通系统','空调送风系统-KT1'],['电气系统','动力配电系统-AP1']]
+      };
+      const renderViewerBusinessTree = (type, selectedName) => {
+        const tree = viewer.querySelector('[data-viewer-tree]');
+        const title = viewer.querySelector('[data-viewer-tree-title]');
+        if (title) title.textContent = `${typeMeta[type].label}分类 · 业务语义字典`;
+        viewer.querySelectorAll('[data-viewer-tab]').forEach(button => button.classList.toggle('active', button.dataset.viewerTab === type));
+        if (tree) tree.innerHTML = businessTrees[type].map(([group,name]) => `<button type="button" class="${name === selectedName ? 'selected' : ''}" data-closed-viewer-node data-node-type="${type}" data-node-name="${safe(name)}"><span>⌄　<b>${safe(group)}</b><small>${safe(name)}</small></span><em>${name === selectedName ? '已定位' : '›'}</em></button>`).join('');
+      };
+      const selectInViewer = (data, propertyOpen) => {
+        const type = data.type;
+        viewer.dataset.assetLocated = 'true';
+        viewer.dataset.activeTab = type;
+        viewer.querySelector('.semantic-viewer-modal')?.classList.add('asset-located-viewer');
+        const fileName = viewer.querySelector('.semantic-viewer-bar span b'); if (fileName) fileName.textContent = data.model;
+        const standard = viewer.querySelector('[data-viewer-standard]'); if (standard) standard.textContent = `解析标准：${data.standard}`;
+        const original = viewer.querySelector('.semantic-viewer-original-tree');
+        if (original) {
+          original.classList.add('asset-obv-tree');
+          original.innerHTML = `<b>模型树（OBV）</b><button type="button">⌄ ${safe(data.model)}</button><button type="button">　⌄ Site</button><button type="button">　　⌄ Building</button><button type="button" class="located">　　　${safe(data.unit)} / ${safe(data.name)}</button>`;
+        }
+        const classification = viewer.querySelector('.semantic-viewer-tree'); if (classification) classification.hidden = false;
+        const toggles = [...viewer.querySelectorAll('[data-toggle-file-tree]')]; toggles.slice(1).forEach(button => button.remove());
+        if (toggles[0]) toggles[0].textContent = '分类树';
+        renderViewerBusinessTree(type, data.name);
+        const building = viewer.querySelector('[data-semantic-building]'); if (building) building.dataset.highlight = type;
+        const hint = viewer.querySelector('.semantic-stage-hint'); if (hint) hint.innerHTML = `<b>已从${typeMeta[type].label}数据定位</b>　${safe(data.name)}`;
+        const panel = viewer.querySelector('.semantic-property-panel');
+        if (panel) {
+          panel.classList.toggle('property-open', propertyOpen);
+          panel.querySelector('h4').textContent = propertyOpen ? '实例属性' : '定位信息';
+          panel.querySelector('[data-viewer-selection]').className = '';
+          panel.querySelector('[data-viewer-selection]').innerHTML = `<b>${safe(data.name)}</b><dl><dt>语义字典</dt><dd>${safe(data.dictionary)}</dd><dt>所属单体</dt><dd>${safe(data.unit)}</dd><dt>所属项目</dt><dd>${safe(data.project)}</dd>${propertyOpen ? `<dt>专业</dt><dd>${safe(data.major)}</dd><dt>所属模型</dt><dd>${safe(data.model)}</dd><dt>定位状态</dt><dd><span>已高亮并聚焦</span></dd>` : '<dt>定位状态</dt><dd><span>已高亮并聚焦</span></dd>'}</dl>`;
+        }
+        viewer.classList.add('open');
+      };
+      const goProject = (data, unitOnly) => {
+        if (typeof showPage === 'function') showPage('projectPage','data');
+        else document.querySelector('[data-page-to="projectPage"]')?.click();
+        const crumb = document.getElementById('breadcrumb'); if (crumb) crumb.textContent = unitOnly ? `项目数据管理 / ${data.project} / ${data.unit}` : `项目数据管理 / 项目详情 / ${data.project}`;
+        document.querySelector('.project-page-toast')?.remove();
+        const toast = document.createElement('div'); toast.className = 'project-page-toast show'; toast.textContent = unitOnly ? `已进入所属单体：${data.unit}` : `已进入所属项目：${data.project}`; document.body.appendChild(toast); setTimeout(()=>toast.remove(),1800);
+      };
+
+      document.addEventListener('click', event => {
+        if (event.target.closest('[data-open-asset-stats-page]')) { event.preventDefault(); event.stopImmediatePropagation(); show(); return; }
+        const typeButton = event.target.closest('[data-closed-type]');
+        if (typeButton) { event.preventDefault(); event.stopImmediatePropagation(); assetState.type = typeButton.dataset.closedType; assetState.keyword = ''; render(); return; }
+        if (event.target.closest('[data-closed-filter]')) { event.preventDefault(); event.stopImmediatePropagation(); assetState.keyword = page.querySelector('[data-closed-keyword]')?.value || ''; render(); return; }
+        const more = event.target.closest('[data-instance-more]');
+        if (more) { event.preventDefault(); event.stopImmediatePropagation(); const menu = more.nextElementSibling; page.querySelectorAll('.asset-more-menu').forEach(item => { if (item !== menu) item.hidden = true; }); menu.hidden = !menu.hidden; return; }
+        const action = event.target.closest('[data-instance-action]');
+        if (action) { event.preventDefault(); event.stopImmediatePropagation(); const data = JSON.parse(decodeURIComponent(action.dataset.instance)); const kind = action.dataset.instanceAction; if (kind === 'view' || kind === 'property') selectInViewer(data, kind === 'property'); else goProject(data, kind === 'unit'); return; }
+        if (event.target.closest('[data-view-standard]')) { event.preventDefault(); event.stopImmediatePropagation(); const standardEntry = [...document.querySelectorAll('#primarySide .primary-item')].find(item => item.textContent.includes('标准数字')); if (standardEntry) standardEntry.click(); return; }
+        const tab = event.target.closest('#semanticModelBrowserModal [data-viewer-tab]');
+        if (tab && viewer.dataset.assetLocated === 'true') { event.preventDefault(); event.stopImmediatePropagation(); renderViewerBusinessTree(tab.dataset.viewerTab, ''); const building = viewer.querySelector('[data-semantic-building]'); if (building) building.dataset.highlight = tab.dataset.viewerTab; return; }
+        const node = event.target.closest('[data-closed-viewer-node]');
+        if (node) { event.preventDefault(); event.stopImmediatePropagation(); viewer.querySelectorAll('[data-closed-viewer-node]').forEach(item => item.classList.toggle('selected', item === node)); const building = viewer.querySelector('[data-semantic-building]'); if (building) building.dataset.highlight = node.dataset.nodeType; const hint = viewer.querySelector('.semantic-stage-hint'); if (hint) hint.innerHTML = `<b>已在模型中高亮</b>　${safe(node.dataset.nodeName)}`; return; }
+        page.querySelectorAll('.asset-more-menu').forEach(item => item.hidden = true);
+      }, true);
+      document.addEventListener('keydown', event => { if (event.key === 'Enter' && event.target.matches('[data-closed-keyword]')) { assetState.keyword = event.target.value; render(); } });
+
+      document.querySelectorAll('.asset-search-result-page').forEach(oldPage => oldPage.remove());
+      document.querySelectorAll('[data-open-search-result]').forEach(button => button.removeAttribute('data-open-search-result'));
+      document.querySelectorAll('[data-toggle-file-tree]').forEach((button,index) => { if (index > 0) button.remove(); });
+      const syncStandardGrouping = () => {
+        document.querySelectorAll('.dictionary-filter label').forEach(label => {
+          if (!label.textContent.trim().startsWith('类别')) return;
+          const select = label.querySelector('select');
+          if (select && !select.dataset.semanticGroupReady) {
+            select.dataset.semanticGroupReady = 'true';
+            select.innerHTML = '<option value="">请选择类别</option><option>构件</option><option>空间</option><option>系统</option><option>未分组</option>';
+          }
+        });
+      };
+      syncStandardGrouping();
+      new MutationObserver(syncStandardGrouping).observe(document.getElementById('assetTagCatalogPage') || document.body, {childList:true,subtree:true});
+      render();
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .asset-storage-statistics-page{padding:0!important;background:#f5f7f6!important;overflow:auto!important}.asset-closed-page{padding:14px 16px 18px}.asset-closed-head{display:flex;align-items:baseline;gap:12px;height:34px}.asset-closed-head h2{margin:0;color:#2f4236;font-size:19px}.asset-closed-head span{color:#89948d;font-size:12px}.asset-dimension-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:8px 0 12px}.asset-dimension-card{position:relative;height:82px;padding:11px 14px;border:1px solid #dce5df;border-radius:4px;background:#fff;color:#59685f;text-align:left;cursor:pointer}.asset-dimension-card:hover{border-color:#9fc5ac}.asset-dimension-card.active{border-color:#238052;background:#f2f8f4;box-shadow:inset 3px 0 #238052}.asset-dimension-card span,.asset-dimension-card small{display:block;font-size:12px}.asset-dimension-card b{display:block;margin:5px 0 3px;color:#245f41;font-size:22px;line-height:1}.asset-dimension-card small{color:#8a968e}.asset-dimension-card i{position:absolute;right:14px;bottom:12px;color:#237b4e;font-size:12px;font-style:normal}.asset-closed-results{border:1px solid #dce5df;background:#fff}.asset-closed-toolbar{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 12px;border-bottom:1px solid #e5ebe7}.asset-closed-toolbar>div{display:flex;align-items:center;gap:9px}.asset-closed-toolbar b{color:#35463b;font-size:14px}.asset-closed-toolbar>div span{color:#8a958e;font-size:12px}.asset-closed-toolbar label{display:flex;align-items:center;gap:7px;color:#68766d;font-size:12px}.asset-closed-toolbar .input{width:290px;height:32px}.asset-closed-toolbar .btn{height:32px;border-radius:4px}.asset-closed-table-wrap{overflow:auto}.asset-closed-table{width:100%;min-width:1180px;border-collapse:collapse;table-layout:fixed}.asset-closed-table th{height:38px;padding:0 9px;background:#f2f5f3;color:#4c5951;text-align:left;font-size:12px;font-weight:600}.asset-closed-table td{height:48px;padding:0 9px;border-bottom:1px solid #e9eeeb;color:#56645c;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-closed-table tbody tr:hover{background:#f8fbf9}.asset-closed-table th:nth-child(1){width:68px}.asset-closed-table th:nth-child(2){width:125px}.asset-closed-table th:nth-child(3){width:190px}.asset-closed-table th:nth-child(4){width:185px}.asset-closed-table th:nth-child(5){width:220px}.asset-closed-table th:nth-child(6){width:125px}.asset-closed-table th:nth-child(7){width:165px}.asset-closed-table th:nth-child(8){width:205px}.asset-type-tag{display:inline-block;padding:3px 7px;border-radius:3px;background:#eef6f0;color:#28764d}.asset-standard-link,.asset-closed-actions button{padding:0;border:0;background:transparent;color:#24794d;cursor:pointer;font-size:12px}.asset-standard-link:hover,.asset-closed-actions button:hover{text-decoration:underline}.asset-standard-empty{color:#a3aca6}.asset-closed-actions{overflow:visible!important}.asset-closed-actions>button{margin-right:9px}.asset-more-wrap{position:relative}.asset-more-menu{position:absolute;z-index:8;right:0;top:20px;width:92px;padding:4px;border:1px solid #d9e3dc;background:#fff;box-shadow:0 5px 14px rgba(42,70,51,.12)}.asset-more-menu button{display:block;width:100%;padding:7px;text-align:left}.asset-no-result{height:160px!important;text-align:center;color:#939d97!important}.asset-closed-pager{display:flex;align-items:center;justify-content:flex-end;gap:5px;height:42px;padding:0 10px;color:#7b8880;font-size:12px}.asset-closed-pager button{width:28px;height:27px;border:1px solid #dce4df;background:#fff;color:#65736a}.asset-closed-pager button.active{border-color:#2b8155;background:#edf7f0;color:#23764b}.semantic-viewer-modal.asset-located-viewer .semantic-building{transform:skewY(-8deg) rotateX(9deg) scale(1.08)}.semantic-viewer-modal.asset-located-viewer .semantic-stage-hint{padding:6px 10px;border:1px solid #d9e6dc;background:rgba(255,255,255,.92)}.semantic-viewer-modal.asset-located-viewer .semantic-stage-hint b{color:#23784b}.asset-obv-tree .located{background:#eaf5ed!important;color:#1e764a!important;font-weight:600}.semantic-property-panel.property-open{background:#f7fbf8}.semantic-property-panel.property-open h4{color:#23784b}.semantic-viewer-layout{grid-template-columns:210px 240px minmax(0,1fr) 240px!important}.semantic-viewer-original-tree{width:auto!important;box-sizing:border-box}.file-classification-panel{display:block!important}.semantic-viewer-bar [data-toggle-file-tree]{margin-left:auto}.semantic-viewer-bar label+[data-toggle-file-tree]{margin-left:10px}@media(max-width:1250px){.asset-closed-toolbar{height:auto;min-height:48px;flex-wrap:wrap;padding:7px 10px}.semantic-viewer-layout{grid-template-columns:180px 210px minmax(420px,1fr) 220px!important}.semantic-viewer-modal{overflow:auto}.asset-dimension-card i{display:none}}
+      `;
+      document.head.appendChild(style);
+      const compactFix = document.createElement('style');
+      compactFix.textContent = '.asset-closed-table th:nth-child(1){width:72px}.asset-closed-table th:first-child,.asset-closed-table td:first-child{text-align:center}.asset-type-tag{min-width:34px;padding:3px 5px!important;text-align:center;white-space:nowrap}';
+      document.head.appendChild(compactFix);
+    })();
+  </script>
 </body>
 </html>
