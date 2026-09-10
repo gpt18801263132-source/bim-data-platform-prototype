@@ -534,48 +534,43 @@
       border-color: var(--green);
     }
 
-    .info-card {
-      background: #fff;
-      border-radius: 3px;
-      margin-bottom: 12px;
-      border: 1px solid #edf0ed;
-    }
-
-    .project-title {
-      height: 42px;
-      display: flex;
+    .info-card { background: #fff; border-radius: 3px; margin-bottom: 8px; border: 1px solid #e5ebe7; }
+    .compact-project-summary { min-height: 72px; padding: 0 14px; box-sizing: border-box; }
+    .project-summary-top { display: flex; align-items: center; min-height: 39px; gap: 14px; }
+    .project-summary-back { padding: 0; border: 0; background: transparent; color: #263d31; cursor: pointer; font-size: 16px; font-weight: 700; white-space: nowrap; }
+    .project-summary-back:hover { color: var(--green); }
+    .project-summary-meta { display: flex; align-items: center; gap: 0; color: #69766e; font-size: 12px; white-space: nowrap; }
+    .project-summary-meta span + span::before { content: "·"; margin: 0 9px; color: #a4ada7; }
+    .project-summary-standard { display: inline-flex; align-items: center; gap: 4px; max-width: 310px; padding: 0; border: 0; background: transparent; color: #65756b; cursor: pointer; font-size: 12px; white-space: nowrap; }
+    .project-summary-standard b { overflow: hidden; color: #28734c; font-size: 12px; font-weight: 600; text-overflow: ellipsis; }
+    .project-summary-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .project-summary-link { height: 28px; padding: 0 4px; border: 0; background: transparent; color: #26764d; cursor: pointer; font-size: 12px; }
+    .project-summary-actions .btn { height: 29px; padding: 0 8px; border-radius: 4px; font-size: 12px; }
+    .project-status-summary { display: flex; align-items: center; min-height: 32px; border-top: 1px solid #edf1ee; color: #637168; font-size: 12px; white-space: nowrap; }
+    .project-status-item { display: inline-flex; align-items: center; gap: 6px; }
+    .project-status-item + .project-status-item::before { content: "|"; margin: 0 13px 0 7px; color: #d8dfda; }
+    .project-status-item strong { color: #3b4a41; font-weight: 600; }
+    .project-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #29915a; }
+    .project-status-dot.wait { background: #d19a40; }
+    .project-qc-result {
+      display: inline-flex;
       align-items: center;
-      padding: 0 18px;
-      border-bottom: 1px solid #eee;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .project-title[data-page-to] {
+      justify-content: center;
+      height: 30px;
+      margin-left: 3px;
+      padding: 0 12px;
+      border: 1px solid #b9dcc7;
+      border-radius: 4px;
+      background: #edf7f0;
+      color: #176b43;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 28px;
       cursor: pointer;
     }
-
-    .project-title[data-page-to]:hover {
-      color: var(--green);
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 30px 64px;
-      padding: 24px 18px 22px;
-      position: relative;
-    }
-
-    .info-line {
-      font-weight: 700;
-      color: #202326;
-    }
-
-    .info-line span {
-      font-weight: 500;
-      color: #222;
-    }
+    .project-qc-result:hover { border-color: #83bf99; background: #e1f2e6; color: #0f5c37; }
+    .project-qc-result:focus-visible { outline: 2px solid rgba(38, 129, 80, .22); outline-offset: 1px; }
+    .project-status-summary .status-recheck { margin-left: auto; padding: 0 2px; color: #26764d; }
 
     .section-title {
       margin: 0 0 18px;
@@ -595,12 +590,13 @@
     }
 
     .project-data {
-      min-height: calc(100vh - 260px);
-      padding: 18px;
+      min-height: calc(100vh - 155px);
+      padding: 12px 14px 14px;
       display: grid;
       grid-template-columns: 280px 1fr;
-      gap: 18px;
+      gap: 14px;
     }
+    #projectPage .section-title { margin-bottom: 9px; }
 
     .tree {
       border: 1px solid #e6e6e6;
@@ -625,24 +621,151 @@
       min-width: 0;
     }
 
-    .data-actions {
+    .project-achievement-status { display: inline-flex; align-items: center; gap: 6px; color: #69776e; font-size: 12px; }
+    .project-achievement-status[hidden] { display: none; }
+    .project-achievement-status strong { color: #394a40; font-weight: 600; }
+    .project-achievement-status i { width: 6px; height: 6px; border-radius: 50%; background: #aeb8b1; }
+    .project-achievement-status.has-result i { background: #2a925b; }
+    .project-achievement-status.has-result [data-achievement-state] { color: #2b7650; }
+    .project-achievement-link { padding: 0; border: 0; background: transparent; color: #1e774b; cursor: pointer; font-size: 12px; }
+    .project-achievement-link[hidden] { display: none; }
+    .project-file-nav {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 10px;
+      min-height: 42px;
+      border-bottom: 1px solid #dde6e0;
     }
-
-    .status-box {
-      border: 1px solid #e7e9ef;
+    .project-file-title { display: flex; align-items: center; margin: 0; color: #2f4237; font-size: 15px; font-weight: 650; }
+    .project-file-title::before { content: ""; width: 3px; height: 15px; margin-right: 8px; background: #177147; }
+    .project-file-actions { display: flex; align-items: center; gap: 8px; }
+    .project-file-actions .btn { height: 34px; padding: 0 13px; border-radius: 5px; white-space: nowrap; }
+    .project-file-actions .btn.primary { box-shadow: none; }
+    .project-dropdown { position: relative; }
+    .project-dropdown-menu {
+      display: none;
+      position: absolute;
+      z-index: 30;
+      top: calc(100% + 5px);
+      right: 0;
+      min-width: 150px;
+      padding: 5px 0;
+      border: 1px solid #dfe7e1;
+      border-radius: 4px;
       background: #fff;
-      padding: 7px 12px;
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      color: #4c5156;
+      box-shadow: 0 4px 12px rgba(31, 61, 44, .1);
     }
-
-    .status-box strong { color: #222; }
+    .project-dropdown.open .project-dropdown-menu { display: block; }
+    .project-dropdown-menu button { display: block; width: 100%; padding: 9px 13px; border: 0; background: #fff; color: #46564c; text-align: left; cursor: pointer; font-size: 13px; }
+    .project-dropdown-menu button:hover { background: #f1f7f3; color: #176b45; }
+    .project-upload-task { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 9px; border: 0; border-radius: 4px; background: #f1f7f3; color: #367657; cursor: pointer; font-size: 12px; }
+    .project-upload-task b { display: grid; place-items: center; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: #2b8a59; color: #fff; font-size: 10px; }
+    .project-file-panel { max-width: 100%; padding-top: 14px; }
+    .project-file-panel[data-project-file-panel="files"] { overflow-x: auto; }
+    .project-page-toast { position: fixed; z-index: 150; top: 78px; left: 50%; transform: translateX(-50%); padding: 9px 14px; border-radius: 4px; background: #244b37; color: #fff; font-size: 13px; }
+    .project-directory-panel { min-width: 0; border-right: 1px solid #e6ece8; padding-right: 14px; }
+    .project-business-tree { min-height: 0; border-color: #e1e8e3; }
+    .project-business-tree .tree-row { width: 100%; height: 34px; border: 0; border-bottom: 1px solid #eef2ef; background: #fff; color: #4a5b51; cursor: pointer; font-size: 13px; font-weight: 500; text-align: left; }
+    .project-business-tree .tree-row:hover { background: #f4f8f5; color: #176b43; }
+    .project-business-tree .tree-row.active { background: #e8f3eb; color: #176b43; font-weight: 650; }
+    .project-overview-node { color: #29493a !important; font-weight: 650 !important; }
+    .project-tree-group-label { height: 30px; padding: 0 12px; display: flex; align-items: center; border-bottom: 1px solid #e5ebe7; background: #f5f7f6; color: #78867d; font-size: 12px; }
+    .project-unit-node span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .project-unit-node i { display: inline-block; width: 12px; color: #78887e; font-style: normal; }
+    .project-tree-children { border-bottom: 1px solid #e8eeea; }
+    .project-tree-unit:not(.is-open) .project-tree-children { display: none; }
+    .project-profession-node { padding-left: 34px !important; color: #5b6a61 !important; }
+    .tree-status { flex: none; width: 8px; height: 8px; border-radius: 50%; font-size: 0; }
+    .tree-status.pass { background: #2b925a; }
+    .tree-status.empty { box-sizing: border-box; border: 1px solid #abb5ae; background: #fff; }
+    .tree-status.issue { display: grid; place-items: center; width: 17px; height: 17px; background: #d95b55; color: #fff; font-size: 10px; line-height: 17px; }
+    .project-work-view { min-height: 500px; }
+    .project-work-view[hidden] { display: none; }
+    .project-work-head { display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding-bottom: 10px; border-bottom: 1px solid #e4eae6; }
+    .project-work-head h3 { margin: 0; color: #30463a; font-size: 16px; }
+    .project-work-head p { margin: 4px 0 0; color: #7a8780; font-size: 12px; }
+    .project-current-task { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 12px 0; padding: 13px 15px; border-left: 3px solid #277b50; background: #f3f8f5; }
+    .project-current-task span { color: #718078; font-size: 12px; }
+    .project-current-task h4 { margin: 3px 0; color: #30473a; font-size: 15px; }
+    .project-current-task p { margin: 0; color: #69776f; font-size: 12px; }
+    .project-current-task .btn { flex: none; height: 34px; border-radius: 4px; }
+    .project-issue-section,.project-flow-list { margin-top: 12px; border: 1px solid #e4eae6; }
+    .project-section-head { display: flex; align-items: center; justify-content: space-between; min-height: 39px; padding: 0 13px; border-bottom: 1px solid #e8edea; background: #fafbfa; }
+    .project-section-head h4 { margin: 0; color: #43554a; font-size: 13px; }
+    .project-section-head .project-qc-result { height: 28px; padding: 0 10px; font-size: 12px; }
+    .project-issue-list > div { display: flex; align-items: center; justify-content: space-between; min-height: 49px; padding: 0 13px; border-bottom: 1px solid #edf1ee; }
+    .project-issue-list > div:last-child { border-bottom: 0; }
+    .project-issue-list b,.project-issue-list small { display: block; }
+    .project-issue-list b { color: #44554b; font-size: 13px; }
+    .project-issue-list small { margin-top: 3px; color: #89938d; font-size: 11px; }
+    .project-issue-list button { border: 0; background: transparent; color: #1d7549; cursor: pointer; font-size: 12px; }
+    .project-flow-list table,.project-unit-table { width: 100%; border-collapse: collapse; }
+    .project-flow-list th,.project-flow-list td,.project-unit-table th,.project-unit-table td { height: 38px; padding: 0 12px; border-bottom: 1px solid #edf1ee; color: #536158; text-align: left; font-size: 12px; }
+    .project-flow-list th,.project-unit-table th { background: #f6f8f7; color: #68756d; font-weight: 600; }
+    .project-flow-list .link + .link { margin-left: 10px; }
+    .project-flow-list button:disabled { color: #a8b1ab; cursor: not-allowed; }
+    .project-inline-status.pass { color: #238252; }
+    .project-inline-status.issue { color: #d05c55; }
+    .project-inline-status.muted { color: #89938d; }
+    .project-professional-state { display: flex; align-items: center; gap: 9px; margin: 4px 0 0 11px; color: #78867e; font-size: 12px; }
+    .project-professional-state .issue { color: #cc554f; }
+    .project-professional-state button { padding: 0; border: 0; background: transparent; color: #21784c; cursor: pointer; font-size: 12px; }
+    .project-file-filter { display: flex; align-items: center; gap: 8px; margin: 8px 0 9px; min-height: 34px; }
+    .project-file-filter .select { width: 145px; height: 34px; }
+    .project-file-filter > .input:not(.project-file-date) { width: 180px; height: 34px; }
+    .project-file-date-label { margin-left: 2px; color: #58685f; font-size: 12px; white-space: nowrap; }
+    .project-file-filter .project-file-date { width: 132px; height: 34px; box-sizing: border-box; }
+    .project-file-date-separator { color: #89958e; font-size: 12px; }
+    .project-file-filter .btn { height: 34px; padding: 0 12px; border-radius: 4px; }
+    .project-problem-file { background: #fff7f6; box-shadow: inset 3px 0 0 #d95b55; }
+    .project-problem-file td:first-child::after { content: "存在质检问题"; display: inline-block; margin-left: 8px; padding: 2px 5px; border-radius: 3px; background: #fde9e7; color: #c84f49; font-size: 10px; }
+    .project-recheck-file td:nth-child(7) .status-tag { background: #fff0d9; color: #ad6b17; }
+    .project-status-dot.issue { background: #d95b55; }
+    .project-status-dot.muted-dot { background: #aeb7b1; }
+    @media (max-width: 1250px) { .project-file-filter { flex-wrap: wrap; } }
+    .project-prototype-drawer .drawer { width: 520px; }
+    .project-detail-drawer .drawer { width: 520px; }
+    #uploadDrawer .drawer,
+    .project-detail-drawer .drawer { display: flex; flex-direction: column; }
+    .project-detail-list { display: grid; grid-template-columns: 120px 1fr; row-gap: 0; min-height: 0; padding: 12px 20px 24px; overflow-y: auto; }
+    .project-detail-list dt,.project-detail-list dd { min-height: 43px; margin: 0; padding: 12px 0; box-sizing: border-box; border-bottom: 1px solid #edf1ee; font-size: 13px; }
+    .project-detail-list dt { color: #7b8780; }
+    .project-detail-list dd { color: #35463c; }
+    .drawer-close-foot { display: flex; flex: 0 0 auto; justify-content: flex-end; padding: 12px 16px; border-top: 1px solid #e7ece8; background: #fafbfa; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid #e8ecea; background: #fafbfa; }
+    .integrity-result-modal { width: min(1500px, calc(100vw - 80px)); max-width: none; max-height: calc(100vh - 90px); display: flex; flex-direction: column; }
+    .integrity-result-body { min-height: 0; padding: 14px 18px; overflow: auto; }
+    .integrity-result-summary { display: flex; gap: 28px; padding: 10px 12px; margin-bottom: 12px; background: #f3f8f4; color: #52675a; font-size: 12px; }
+    .integrity-result-summary i { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: #2a925b; }
+    .project-result-locations { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; padding: 9px 12px; border: 1px solid #e1e9e3; background: #fbfcfb; color: #59685f; font-size: 12px; }
+    .project-result-locations strong { color: #374b3f; white-space: nowrap; }
+    .project-result-locations span { padding-left: 14px; border-left: 1px solid #dfe6e1; white-space: nowrap; }
+    .project-result-locations button { padding: 0; border: 0; background: transparent; color: #1f764a; cursor: pointer; font-size: 12px; }
+    .qc-problem-locations { margin: 0 0 12px; overflow-x: auto; }
+    .integrity-result-table-wrap { overflow: auto; }
+    .integrity-result-table { width: 100%; min-width: 1380px; border-collapse: collapse; table-layout: fixed; }
+    .integrity-result-table th { padding: 11px 10px; background: #f0f3f1; color: #5f6d64; text-align: left; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .integrity-result-table td { height: 66px; padding: 10px; border-bottom: 1px solid #e7ece8; color: #4d5c52; font-size: 12px; line-height: 1.55; vertical-align: middle; }
+    .integrity-result-table th:nth-child(1) { width: 72px; }
+    .integrity-result-table th:nth-child(2) { width: 120px; }
+    .integrity-result-table th:nth-child(3) { width: 220px; }
+    .integrity-result-table th:nth-child(4) { width: 180px; }
+    .integrity-result-table th:nth-child(5),
+    .integrity-result-table th:nth-child(6) { width: 82px; }
+    .integrity-result-table th:nth-child(7) { width: 105px; }
+    .integrity-result-table th:nth-child(8),
+    .integrity-result-table th:nth-child(9) { width: 90px; }
+    .integrity-result-table th:nth-child(10) { width: 115px; }
+    .integrity-result-table th:nth-child(11) { width: 150px; }
+    .integrity-result-table .select { width: 105px; }
+    .integrity-machine.pass { color: #208252; }
+    .integrity-machine.fail { color: #d75d55; }
+    .integrity-add-row { display: flex; justify-content: center; padding: 18px 0 4px; }
+    .project-prototype-copy { padding: 18px 20px; color: #56665c; font-size: 13px; line-height: 1.75; }
+    .project-prototype-copy section { padding: 14px 0; border-bottom: 1px solid #e8eeea; }
+    .project-prototype-copy section:first-child { padding-top: 0; }
+    .project-prototype-copy h4 { margin: 0 0 7px; color: #2e4939; font-size: 14px; }
 
     .work-grid {
       display: grid;
@@ -2528,11 +2651,11 @@
             <table>
               <thead><tr><th>序号</th><th>项目名称</th><th>项目编号</th><th>项目阶段</th><th>入库状态</th><th>创建时间</th><th>操作</th></tr></thead>
               <tbody>
-                <tr><td>1</td><td>李琦测试00125696</td><td>A852</td><td>BIM4</td><td><span class="status-tag wait">待审批</span></td><td>2026-05-12 13:45:18</td><td><button class="link" data-page-to="projectPage">查看</button><button class="link">项目信息</button><button class="link">删除</button><button class="link">更多</button></td></tr>
-                <tr><td>2</td><td>king-20260509</td><td>xmbh20260509</td><td>竣工阶段</td><td><span class="status-tag pass">已入库</span></td><td>2026-05-09 15:26:14</td><td><button class="link" data-page-to="projectPage">查看</button><button class="link">项目信息</button><button class="link">删除</button><button class="link">更多</button></td></tr>
-                <tr><td>3</td><td>空间合理性检查</td><td>sdffwqerqrwe</td><td>竣工阶段</td><td><span class="status-tag reject">已驳回</span></td><td>2026-05-07 15:34:21</td><td><button class="link" data-page-to="projectPage">查看</button><button class="link">项目信息</button><button class="link">删除</button><button class="link">更多</button></td></tr>
-                <tr><td>4</td><td>合标测试</td><td>2323</td><td>BIM5</td><td><span class="status-tag wait">待审批</span></td><td>2026-05-07 14:33:44</td><td><button class="link" data-page-to="projectPage">查看</button><button class="link">项目信息</button><button class="link">删除</button><button class="link">更多</button></td></tr>
-                <tr><td>5</td><td>宝安区工人文化宫建设工程项目</td><td>116161</td><td>BIM5</td><td><span class="status-tag wait">待审批</span></td><td>2026-05-07 10:16:15</td><td><button class="link" data-page-to="projectPage">查看</button><button class="link">项目信息</button><button class="link">删除</button><button class="link">更多</button></td></tr>
+                <tr><td>1</td><td><button class="link" type="button" data-page-to="projectPage">李琦测试00125696</button></td><td>A852</td><td>BIM4</td><td><span class="status-tag wait">待审批</span></td><td>2026-05-12 13:45:18</td><td><button class="link" data-page-to="projectPage">查看</button><button class="link">项目信息</button><button class="link">删除</button><button class="link">更多</button></td></tr>
+                <tr><td>2</td><td><button class="link" type="button" data-page-to="projectPage">king-20260509</button></td><td>xmbh20260509</td><td>竣工阶段</td><td><span class="status-tag pass">已入库</span></td><td>2026-05-09 15:26:14</td><td><button class="link" data-page-to="projectPage">查看</button><button class="link">项目信息</button><button class="link">删除</button><button class="link">更多</button></td></tr>
+                <tr><td>3</td><td><button class="link" type="button" data-page-to="projectPage">空间合理性检查</button></td><td>sdffwqerqrwe</td><td>竣工阶段</td><td><span class="status-tag reject">已驳回</span></td><td>2026-05-07 15:34:21</td><td><button class="link" data-page-to="projectPage">查看</button><button class="link">项目信息</button><button class="link">删除</button><button class="link">更多</button></td></tr>
+                <tr><td>4</td><td><button class="link" type="button" data-page-to="projectPage">合标测试</button></td><td>2323</td><td>BIM5</td><td><span class="status-tag wait">待审批</span></td><td>2026-05-07 14:33:44</td><td><button class="link" data-page-to="projectPage">查看</button><button class="link">项目信息</button><button class="link">删除</button><button class="link">更多</button></td></tr>
+                <tr><td>5</td><td><button class="link" type="button" data-page-to="projectPage">宝安区工人文化宫建设工程项目</button></td><td>116161</td><td>BIM5</td><td><span class="status-tag wait">待审批</span></td><td>2026-05-07 10:16:15</td><td><button class="link" data-page-to="projectPage">查看</button><button class="link">项目信息</button><button class="link">删除</button><button class="link">更多</button></td></tr>
               </tbody>
             </table>
             <div class="pager"><span class="pagebox muted">‹</span><span class="pagebox active">1</span><span class="pagebox">2</span><span class="pagebox">3</span><span class="pagebox">4</span><span class="pagebox">5</span><span class="pagebox">6</span><span class="pagebox">...</span><span class="pagebox">10</span><span class="pagebox">›</span></div>
@@ -2540,68 +2663,100 @@
         </section>
 
         <section class="page" id="projectPage">
-          <div class="info-card">
-      <div class="project-title" data-page-to="dataListPage" title="返回上一页">‹ 白玉兰测试20260203</div>
-            <div class="info-grid">
+          <div class="info-card restored-project-info">
+            <div class="restored-project-summary-row">
+              <div class="project-title" data-page-to="dataListPage" title="返回项目列表">‹ 白玉兰测试20260203</div>
+              <button class="link restored-info-more" type="button" aria-expanded="false">更多详情⌄</button>
+            </div>
+            <div class="info-grid" data-project-detail-fields hidden>
               <div class="info-line">项目名称: <span>白玉兰测试20260203</span></div>
               <div class="info-line">合同编号: <span>1223</span></div>
               <div class="info-line">项目编号: <span>122113</span></div>
-              <div class="info-line">项目类型: <span>设计类</span></div>
-              <div class="info-line">业务类型: <span>工程设计</span></div>
-              <div class="info-line">项目来源: <span>项目管理系统</span></div>
-              <div class="info-line">项目总建筑面积: <span>1000平方米</span></div>
               <div class="info-line">项目阶段: <span>设计阶段</span></div>
-              <button class="link" style="position:absolute;right:18px;bottom:22px;">更多⌄</button>
+              <div class="info-line">项目地址: <span>--</span></div>
+              <div class="info-line">详细地址: <span>--</span></div>
+              <div class="info-line">工程类别: <span>--</span></div>
+              <div class="info-line">当前标准: <button class="link restored-standard-link" type="button" data-change-project-standard><span data-current-project-standard>合肥院 BIM 数据标准 V1.0</span></button></div>
             </div>
           </div>
-          <div class="card project-data">
-            <div>
-              <h3 class="section-title">项目数据</h3>
-              <div class="tree">
-                <div class="tree-row active"><span>⌄　总图</span></div>
-                <div class="tree-row active"><span>　　电气专业</span><span class="plus">⊕</span></div>
-                <div class="tree-row"><span>›　车间</span></div>
-                <div class="tree-row"><span>›　原辅料周转库</span></div>
-                <div class="tree-row"><span>›　滤棒周转库</span></div>
-                <div class="tree-row"><span>›　生产管理用房</span></div>
-                <div class="tree-row"><span>›　后勤保障用房</span></div>
-                <div class="tree-row"><span>›　北门卫房</span></div>
-                <div class="tree-row"><span>›　南门卫房</span></div>
-                <div class="tree-row"><span>›　地下车库</span></div>
+          <div class="card project-data restored-project-data">
+            <aside class="restored-project-tree">
+              <div class="tree" data-project-tree>
+                <div class="tree-row restored-project-root" data-project-root role="button" tabindex="0" aria-expanded="true"><span data-project-root-label>⌄　通天道人</span></div>
+                <button class="tree-row restored-profession-node active" type="button" data-project-profession="土建专业"><span>　　土建专业</span></button>
+                <button class="tree-row restored-profession-node" type="button" data-project-profession="机电专业"><span>　　机电专业</span></button>
               </div>
-            </div>
-            <div class="data-main">
-              <div class="requirement-note"><strong>需求说明：</strong>项目详情页不再提供单独“质检结果推送”按钮；质检结果生成后，在“数据质检结果”中勾选需要推送的记录，再推送至对应设计师。入库操作统一使用“审批入库”，提交后按钮变为“已提交审批入库”，再次点击仅查看等待审批状态。</div>
-              <div class="requirement-note"><strong>文件管理需求：</strong>上传列表改为右上角悬浮进度面板，上传过程中可常驻查看且不遮挡“文件上传/重新上传”按钮；文件列表新增“标签类别”字段，多标签仅展示前两个，其余以“+N”收起；操作中的“更多”可修改文件标签。</div>
-              <div class="data-actions">
-                <div class="status-box"><strong>完整性检查状态:</strong><span class="green">人工审核通过</span><strong>入库状态:</strong><span class="green">待审批</span><button class="link">重新检查</button></div>
-                <div style="display:flex;gap:8px;">
-                  <button class="btn primary">完整性检查</button>
-                  <button class="btn primary">发起数据质检</button>
-                  <button class="btn primary" data-page-to="drawingModelResultPage">图模一致校核</button>
-                  <button class="btn primary" data-open="qcModal">数据质检结果</button>
-                  <button class="btn primary" data-open="entryApprovalModal" id="entryApprovalButton">审批入库</button>
-                  <button class="btn primary" data-open="fileUploadModal">文件上传</button>
-                  <button class="btn light" data-open="uploadDrawer">☁ 上传列表<span class="red-dot-mark"></span></button>
+            </aside>
+            <div class="data-main restored-project-main">
+              <section class="restored-project-view" data-restored-project-view="project">
+                <div class="restored-view-title">项目数据</div>
+                <div class="restored-project-toolbar">
+                  <div class="restored-status-row">
+                    <div class="restored-integrity-state"><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>人工审核通过</strong></div>
+                  </div>
+                  <div class="restored-operation-row">
+                    <div class="restored-flow-sequence" aria-label="项目数据处理顺序">
+                      <div class="restored-flow-node restored-flow-complete">
+                        <span class="restored-flow-title">完整性检查</span>
+                        <div class="restored-flow-node-actions">
+                          <button class="restored-flow-state" type="button" data-open="integrityResultModal">✓ 已通过</button>
+                          <button class="btn light restored-integrity-rerun" type="button" id="projectRecheckButton">重新发起</button>
+                        </div>
+                      </div>
+                      <span class="restored-flow-arrow" aria-hidden="true">→</span>
+                      <div class="restored-flow-node" data-quality-flow-node>
+                        <span class="restored-flow-title">发起数据质检</span>
+                        <button class="btn primary restored-flow-control" type="button" id="startDataQualityCheck">发起数据质检</button>
+                      </div>
+                      <span class="restored-flow-arrow" aria-hidden="true">→</span>
+                      <div class="restored-flow-node" data-result-flow-node>
+                        <span class="restored-flow-title">数据质检结果</span>
+                        <button class="restored-flow-state restored-qc-result-button" type="button" data-open="qcModal" disabled>暂不可查看</button>
+                      </div>
+                      <span class="restored-flow-arrow" aria-hidden="true">→</span>
+                      <div class="restored-flow-node" data-entry-flow-node>
+                        <span class="restored-flow-title">审批入库</span>
+                        <button class="restored-flow-state restored-flow-control" type="button" id="entryApprovalButton" data-open="entryApprovalModal" disabled title="请先完成数据质检">未满足条件</button>
+                      </div>
+                    </div>
+                    <div class="restored-aux-actions">
+                      <button class="btn light" type="button" id="achievementExportButton">成果</button>
+                      <button class="btn light" type="button" data-open="uploadDrawer">进度列表</button>
+                      <button class="btn light" type="button" id="achievementSampleButton">报告示例</button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="batch-toolbar is-hidden" id="batchToolbar">
-                <label><input type="checkbox" id="pageSelectAll"> 本页全选</label>
-                <span class="batch-actions" id="batchActions">
-                  <span class="batch-count" id="batchSelectedCount">已选择 0 个模型</span>
-                  <button class="btn light" type="button">批量删除</button>
-                  <button class="btn light" type="button" data-open="moveFileModal">移动至</button>
-                </span>
-                <span class="muted">需求：默认隐藏批量删除/移动至；选中模型后显示批量操作。“移动至”通过弹框选择目标单体和目标专业后迁移模型。</span>
-              </div>
-              <table class="table-tight">
-                <thead><tr><th>文件名称</th><th>文件类型</th><th>标签类别</th><th>文件大小</th><th>版本</th><th>上传时间</th><th>关联任务状态</th><th>操作</th></tr></thead>
-                <tbody>
-                  <tr><td>📁 电气专业</td><td></td><td><div class="tag-cluster" title="机电、专业"><span class="tag-category">机电</span><span class="tag-more">+1</span></div></td><td></td><td></td><td></td><td></td><td></td></tr>
-                  <tr class="file-row"><td><input class="file-check file-select" type="checkbox" aria-label="选择联合工房-总图-机电专业模型">联合工房-总图-机电专业（插件...</td><td>ifc</td><td><div class="tag-cluster" title="机电、土建、工艺"><span class="tag-category">机电</span><span class="tag-category">土建</span><span class="tag-more">+1</span></div></td><td>11.79 MB</td><td><span class="blue">V2.0　版本管理</span></td><td>2026-02-03 14:39:32</td><td><span class="status-tag pass">解析完成</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button">标签治理</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
-                  <tr class="file-row"><td><input class="file-check file-select" type="checkbox" aria-label="选择1F图纸文件">1F.pdf</td><td>pdf</td><td><div class="tag-cluster" title="图纸、咨询项目"><span class="tag-category">图纸</span><span class="tag-category">咨询项目</span></div></td><td>726.25 KB</td><td><span class="blue">V1.0</span></td><td>2026-04-23 14:07:16</td><td><span class="status-tag wait">解析中</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button">标签治理</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
-                </tbody>
-              </table>
+                <span id="projectEntryStatusText" class="restored-entry-status">待审批</span>
+              </section>
+
+              <section class="restored-project-view restored-professional-view" data-restored-project-view="professional">
+                <div class="restored-professional-toolbar">
+                  <h3 data-restored-profession-title>土建专业</h3>
+                  <div class="restored-file-filter">
+                    <select class="select" data-project-file-type><option value="">请选择文件类型</option><option value="ifc">IFC</option><option value="pdf">PDF</option><option value="rvt">RVT</option><option value="xlsx">XLSX</option></select>
+                    <input class="input" data-project-file-name placeholder="请输入文件名称">
+                    <input class="input restored-file-date" type="date" data-project-file-date-start aria-label="上传开始日期">
+                    <span>至</span>
+                    <input class="input restored-file-date" type="date" data-project-file-date-end aria-label="上传结束日期">
+                    <button class="btn light restored-query-button" type="button" data-run-project-file-filter>查询</button>
+                    <button class="btn light" type="button" data-reset-project-file-filter>重置</button>
+                  </div>
+                  <div class="restored-file-actions">
+                    <button class="btn primary" type="button" data-open="fileUploadModal">文件上传</button>
+                    <button class="btn light" type="button" data-open="uploadDrawer">进度列表</button>
+                  </div>
+                </div>
+                <table class="table-tight restored-file-table">
+                  <thead><tr><th>文件名称</th><th>文件类型</th><th>标签类别</th><th>文件大小</th><th>版本</th><th>上传时间</th><th>关联任务状态</th><th>操作</th></tr></thead>
+                  <tbody>
+                    <tr class="file-row"><td>联合工房-土建专业模型.ifc</td><td>ifc</td><td><div class="tag-cluster"><span class="tag-category">土建</span><span class="tag-category">模型</span></div></td><td>21.46 MB</td><td><span class="blue">V2.0　版本管理</span></td><td>2026-04-23 14:39:32</td><td><span class="status-tag pass">解析完成</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
+                    <tr class="file-row"><td>1F建筑平面图.pdf</td><td>pdf</td><td><div class="tag-cluster"><span class="tag-category">土建</span><span class="tag-category">图纸</span></div></td><td>1.86 MB</td><td><span class="blue">V1.0</span></td><td>2026-04-22 16:35:08</td><td><span class="status-tag pass">解析完成</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
+                    <tr class="file-row"><td>联合工房-机电专业模型.ifc</td><td>ifc</td><td><div class="tag-cluster"><span class="tag-category">机电</span><span class="tag-category">模型</span></div></td><td>18.42 MB</td><td><span class="blue">V1.2　版本管理</span></td><td>2026-04-21 10:18:42</td><td><span class="status-tag pass">解析完成</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
+                    <tr class="file-row"><td>电气系统图.pdf</td><td>pdf</td><td><div class="tag-cluster"><span class="tag-category">机电</span><span class="tag-category">图纸</span></div></td><td>726.25 KB</td><td><span class="blue">V1.0</span></td><td>2026-04-20 09:26:15</td><td><span class="status-tag wait">解析中</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
+                    <tr class="file-row"><td>设备明细.xlsx</td><td>xlsx</td><td><div class="tag-cluster"><span class="tag-category">机电</span><span class="tag-category">文档</span></div></td><td>348.6 KB</td><td><span class="blue">V1.1</span></td><td>2026-04-19 11:08:20</td><td><span class="status-tag pass">已上传</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
+                  </tbody>
+                </table>
+              </section>
             </div>
           </div>
         </section>
@@ -2991,6 +3146,28 @@
         <div class="muted" style="margin-top:6px;">86%</div>
       </div>
       <div class="requirement-note" style="margin:16px;"><strong>需求说明：</strong>上传进度以右上角悬浮面板常驻展示，不遮挡“文件上传/重新上传”按钮；支持连续上传时持续查看进度，解析中状态用醒目颜色展示，解析完成后变为绿色。</div>
+      <div class="drawer-close-foot"><button class="btn light" type="button" data-close>关闭</button></div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="integrityResultModal">
+    <div class="modal integrity-result-modal">
+      <div class="modal-head">完整性检查结果<button class="modal-close" type="button" data-close>×</button></div>
+      <div class="integrity-result-body">
+        <div class="integrity-result-summary"><span><i></i>检查状态：人工审核通过</span><span>检查时间：2026-09-09 10:28</span><span>检查项：3 项</span></div>
+        <div class="integrity-result-table-wrap">
+          <table class="integrity-result-table">
+            <thead><tr><th>检查分项</th><th>检查内容</th><th>判断规则</th><th>问题描述</th><th>问题截图</th><th>操作</th><th>审查结果</th><th>正确率要求</th><th>通过百分比</th><th>人工复核</th><th>备注</th></tr></thead>
+            <tbody>
+              <tr><td>1.1.1</td><td>项目主要信息</td><td>项目名称、合同编号、项目编号完整</td><td>—</td><td><button class="link" type="button" data-integrity-preview="项目主要信息">查看</button></td><td><button class="link" type="button">查看详情</button></td><td><span class="integrity-machine pass">机审通过</span></td><td>100%</td><td>100%</td><td><select class="select"><option>通过</option><option>不通过</option></select></td><td>信息完整</td></tr>
+              <tr><td>1.1.2</td><td>项目次要信息</td><td>详细地址、工程类别、业务类型完整</td><td>项目详细地址待补充确认</td><td><button class="link" type="button" data-integrity-preview="项目次要信息">查看</button></td><td><button class="link" type="button">查看详情</button></td><td><span class="integrity-machine fail">机审未通过</span></td><td>100%</td><td>0%</td><td><select class="select"><option>请选择</option><option>通过</option><option>不通过</option></select></td><td>请复核地址信息</td></tr>
+              <tr><td>1.2.2</td><td>模型完整性</td><td>各单体、各专业、楼层模型齐全</td><td>—</td><td><button class="link" type="button" data-integrity-preview="模型完整性">查看</button></td><td><button class="link" type="button">查看详情</button></td><td><span class="integrity-machine pass">机审通过</span></td><td>100%</td><td>100%</td><td><select class="select"><option>通过</option><option>不通过</option></select></td><td>模型文件完整</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="integrity-add-row"><button class="btn primary" type="button" data-add-integrity-check>＋ 添加检查</button></div>
+      </div>
+      <div class="modal-foot"><button class="btn light" type="button" data-close>关闭</button><button class="btn primary" type="button" data-close>确定</button></div>
     </div>
   </div>
 
@@ -2998,6 +3175,11 @@
     <div class="modal large">
       <div class="modal-head">数据质检结果<button class="modal-close" data-close>×</button></div>
       <div class="modal-body">
+        <div class="project-result-locations qc-problem-locations">
+          <strong>问题定位</strong>
+          <span>1#生产车间 / 机电专业 / 联合工房-总图-机电专业.ifc · 2项问题</span>
+          <span>动力中心 / 土建专业 / 动力中心-土建专业.ifc · 1项问题</span>
+        </div>
         <div class="requirement-note qc-manage-note"><strong>需求说明：</strong>质检结果中“合标性检查”和“空间合理性检查”先按单体+专业匹配设计师，但不自动全量推送；质检人员勾选需要推送的结果后点击“推送”，才生成对应设计师待办。质检报告导出仅支持“合标性检查报告”，不导出项目汇总、空间合理性、楼层合理性或地理信息合理性报告。已推送未反馈的结果支持撤回，已反馈结果不可撤回；重新发起数据质检并完成后，系统按本次质检结果重新生成记录，旧质检结果及对应推送、撤回、反馈记录不再保留，新结果需重新选择后推送。</div>
         <div class="requirement-note qc-designer-note"><strong>需求说明：</strong>设计师从质检中心查看结果时，仅展示已推送给本人负责单体和专业范围内的质检结果，不展示未推送记录和其他设计师的结果。</div>
         <div class="qc-layout">
@@ -3822,9 +4004,11 @@
       entryApprovalSubmitted = true;
       const entryApproval = { name: '白玉兰测试20260203项目入库审批', category: '数据入库', priority: document.getElementById('entryApprovalPriority')?.value || '普通', user: 'admin', dept: '项目管理部', time: new Date().toLocaleString('zh-CN', { hour12: false }), status: '待审批' }; window.approvalPriorities = { ...(window.approvalPriorities || {}), [entryApproval.name]: entryApproval.priority }; document.dispatchEvent(new CustomEvent('approval-submitted', { detail: entryApproval }));
       const button = document.getElementById("entryApprovalButton");
-      button.textContent = "已提交审批入库";
+      button.disabled = false;
+      button.textContent = "查看审批流";
       button.classList.remove("primary");
       button.classList.add("light");
+      document.getElementById("projectEntryStatusText").textContent = "审批中";
       syncEntryApprovalModal();
     });
 
@@ -4369,11 +4553,6 @@
       const style = document.createElement('style');
       style.textContent = '.position-admin-page{padding:0}.position-page-head{margin-bottom:16px}.position-page-head h2{margin:0 0 6px;font-size:20px;color:#303133}.position-page-head p{margin:0;color:#909399;font-size:13px}.position-list-card{background:#fff;border:1px solid #e7ebf0}.position-list-tools{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid #edf0f3}.position-list-tools .select{width:190px;height:34px}.position-list-tools .input{width:230px;height:34px;margin-left:auto}.position-list-title{padding:15px 16px 6px;color:#303133;font-size:15px;font-weight:600}.position-list-title span{margin-left:8px;color:#909399;font-size:12px;font-weight:400}.position-table{width:calc(100% - 24px);margin:0 12px 12px;border-collapse:collapse;table-layout:fixed}.position-table th{background:#f5f7fa;color:#606266;text-align:left;padding:12px;font-size:13px;font-weight:500;white-space:nowrap}.position-table td{padding:15px 12px;color:#4a4f57;border-bottom:1px solid #edf0f3;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.position-table th:nth-child(1){width:6%}.position-table th:nth-child(2){width:12%}.position-table th:nth-child(3){width:16%}.position-table th:nth-child(4){width:21%}.position-table th:nth-child(5){width:21%}.position-table th:nth-child(6){width:8%}.position-table th:nth-child(7){width:7%}.position-table th:nth-child(8){width:9%}.position-center{text-align:center}.position-status{padding:3px 8px;border-radius:3px;font-size:12px}.position-status.enabled{color:#16834f;background:#e5f4eb}.position-status.disabled{color:#89958e;background:#f0f3f1}.position-action button+button{margin-left:12px}.position-delete{border:0;background:transparent;color:#e45b5b;cursor:pointer}.position-tip{margin:10px 12px 14px;padding:10px 12px;background:#fff8ed;border-left:3px solid #e4b35b;color:#8d6b32;font-size:12px}.position-empty{text-align:center!important;height:160px;color:#909399}.position-notice{display:none;margin:0 0 14px;padding:10px 13px;border:1px solid #cce8d5;background:#eaf7ee;color:#187343;border-radius:3px}.position-notice.show{display:block}.position-form-modal{width:620px}.position-form-modal .field{display:grid;grid-template-columns:115px 1fr;align-items:start;margin:0 0 14px}.position-form-modal .label{text-align:right;padding:9px 14px 0 0}.position-form-modal .input,.position-form-modal .select{box-sizing:border-box;width:100%;height:36px}.position-form-modal .position-textarea{height:70px;padding:8px;resize:vertical;line-height:1.45}.position-form-error{min-height:18px;margin-left:115px;color:#e45b5b;font-size:12px}.position-form-actions{display:flex;justify-content:flex-end;gap:10px;margin:15px 0 0 115px}.position-delete-modal{width:460px}.position-delete-message{display:flex;gap:13px;padding:12px 0 8px}.position-delete-message>b{display:grid;place-items:center;width:27px;height:27px;border-radius:50%;background:#fff2e2;color:#db8a1a;font-size:17px}.position-delete-message strong{color:#303133}.position-delete-message p{margin:8px 0 0;color:#7e8790;line-height:1.55;font-size:13px}.btn.danger{background:#e45b5b;color:#fff}.btn.danger:disabled{background:#e6e9e7;color:#9da5a0;cursor:not-allowed}';
       document.head.appendChild(style);
-      const referenceStyle = document.createElement('style');
-      referenceStyle.textContent = `
-        .asset-storage-statistics-page{min-height:calc(100vh - 130px);padding:0!important;background:linear-gradient(140deg,#d9ebff 0%,#eef6ff 46%,#f7fbff 100%);overflow:hidden}.asset-stat-page-shell{position:relative;min-height:790px;padding:18px 32px 56px;background:radial-gradient(ellipse at 89% 32%,rgba(255,255,255,.9) 0 4%,transparent 23%),radial-gradient(ellipse at 11% 82%,rgba(255,255,255,.64) 0 5%,transparent 28%)}.asset-stat-page-shell:before,.asset-stat-page-shell:after{position:absolute;z-index:0;border:1px solid rgba(255,255,255,.6);border-radius:50%;content:""}.asset-stat-page-shell:before{right:-100px;top:42px;width:420px;height:580px;transform:rotate(-29deg)}.asset-stat-page-shell:after{left:-140px;bottom:-360px;width:660px;height:520px;transform:rotate(21deg)}.asset-stats-head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;width:min(1080px,100%);margin:0 auto 8px!important}.asset-stats-head>div:first-child span{display:block;color:#7d8a96;font-size:12px}.asset-stats-head p{margin:6px 0 0!important;color:#6c7d8b!important;font-size:12px!important}.asset-stats-head>div:last-child{display:flex;align-items:center;gap:13px}.asset-stats-head .btn{height:34px}.asset-stat-mode-tabs{display:flex;gap:4px;padding:3px;border:1px solid #c9dcec;background:rgba(255,255,255,.82);border-radius:4px}.asset-stat-mode-tabs button{min-width:83px;padding:6px 11px;border:0;border-radius:2px;background:transparent;color:#5c7182;cursor:pointer;font-size:12px}.asset-stat-mode-tabs button.active{background:#1976df;color:#fff;box-shadow:0 2px 6px rgba(26,110,213,.25)}.asset-stat-hero{position:relative;z-index:1;width:min(900px,100%);margin:19px auto 0}.asset-stat-hero-title{display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 33px}.asset-stat-hero-title h2{margin:0;color:#162b3e;font-size:27px;letter-spacing:1px}.asset-stat-cube,.asset-stat-space-icon{display:grid;place-items:center;width:27px;height:27px;color:#fff;background:linear-gradient(135deg,#78b8ff,#176fe0);font-size:13px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.asset-stat-space-icon{clip-path:none;border-radius:2px;font-size:20px;background:linear-gradient(135deg,#7fc6ff,#1a74e6)}.asset-stat-component-board{display:grid;grid-template-columns:280px minmax(0,1fr);gap:19px}.asset-stat-metric-card,.asset-ranking-card,.asset-stat-query-card{background:rgba(255,255,255,.96);box-shadow:0 7px 18px rgba(77,120,163,.12)}.asset-stat-metric-card{position:relative;min-height:216px;padding:27px 25px;overflow:hidden}.asset-stat-metric-card>div{position:relative;z-index:2;margin-bottom:31px}.asset-stat-metric-card span,.asset-stat-space-summary span{display:block;margin-bottom:12px;color:#303944;font-size:13px}.asset-stat-metric-card b,.asset-stat-space-summary b{display:block;color:#080d13;font-size:29px;line-height:1}.asset-stat-metric-card small,.asset-stat-space-summary small{font-size:16px;font-weight:500}.asset-stat-building{position:absolute;right:18px;bottom:-2px;width:100px;height:125px;opacity:.26;background:repeating-linear-gradient(90deg,rgba(50,138,230,.6) 0 7px,transparent 7px 11px),linear-gradient(90deg,#96cbfb 0 23%,transparent 23% 32%,#bfe0fb 32% 57%,transparent 57% 66%,#91c7f4 66%);clip-path:polygon(0 100%,0 43%,15% 43%,15% 12%,29% 12%,29% 56%,45% 56%,45% 25%,58% 25%,58% 0,71% 0,71% 66%,88% 66%,88% 36%,100% 36%,100% 100%)}.asset-ranking-card{min-height:216px;padding:18px 22px}.asset-ranking-card h3{margin:0 0 15px;padding-left:9px;border-left:4px solid #1a75dd;color:#1a2a39;font-size:14px}.asset-ranking-card h3 span{margin-left:4px;color:#1671dc}.asset-ranking-unit{margin-bottom:11px;color:#667789;font-size:12px}.asset-ranking-list{margin:0;padding:0;list-style:none}.asset-ranking-list li{display:grid;grid-template-columns:34px minmax(76px,1fr) minmax(80px,250px) 90px;gap:10px;align-items:center;margin:13px 0;color:#364351;font-size:13px}.asset-ranking-number{display:grid;place-items:center;width:25px;height:18px;background:#e9f1f8;color:#17466f}.asset-ranking-list li:nth-child(1) .asset-ranking-number{background:#e5edf5}.asset-ranking-list b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}.asset-ranking-list i{display:block;height:11px;background:transparent}.asset-ranking-list i em{display:block;height:11px;background:linear-gradient(90deg,#3a91eb,#2d7cd5)}.asset-ranking-list strong{color:#11171e;font-size:12px}.asset-stat-query-card{position:relative;z-index:1;width:min(820px,calc(100% - 80px));margin:162px auto 0;padding:13px 17px}.asset-stat-query-row{display:flex;align-items:center;gap:12px;margin-bottom:13px}.asset-stat-query-row:last-of-type{margin-bottom:0}.asset-stat-query-row .select{width:225px;height:32px}.asset-stat-query-row .input{height:34px;box-sizing:border-box}.asset-stat-query-wide{gap:0;background:#f5f6f8}.asset-stat-query-wide label{min-width:200px;padding:0 13px;border-right:1px solid #d7dbe0;color:#52606c;font-size:13px}.asset-stat-query-wide .input{flex:1;border:0;background:transparent}.asset-stat-query-wide .btn{height:34px;margin-left:10px}.asset-stat-query-wide .btn:last-child{margin-left:10px}.asset-stat-query-result{min-height:16px;margin:7px 0 0;color:#2072c9;font-size:12px}.asset-stat-space-hero{width:min(810px,100%)}.asset-stat-space-hero .asset-stat-hero-title{margin-bottom:22px}.asset-stat-space-summary{position:relative;display:flex;align-items:center;gap:29px;width:520px;margin:0 0 24px 13px}.asset-stat-space-summary>div{min-width:175px}.asset-stat-space-summary>i{display:block;width:1px;height:51px;background:#71b0e6}.asset-stat-space-art{position:absolute;left:635px;bottom:-6px;display:grid;place-items:center;width:110px;height:110px;border:6px solid #4498ed;border-radius:24px 24px 38px 38px;color:#338cea;font-size:61px;font-style:normal;line-height:1;transform:rotate(-9deg);box-shadow:14px 18px 0 -7px rgba(60,155,237,.2)}.asset-stat-space-board{display:grid;grid-template-columns:1fr 1fr;gap:20px}.asset-stat-space-board .asset-ranking-card{min-height:210px}.asset-stat-space-board .asset-ranking-list li{grid-template-columns:34px minmax(60px,1fr) minmax(65px,180px) 56px;gap:7px}.asset-space-query{width:min(810px,calc(100% - 80px));margin-top:92px}.asset-space-query .asset-stat-query-row:first-child{gap:0}.asset-space-query .asset-stat-query-row:first-child .select{width:210px;margin-right:18px}.asset-space-query .asset-stat-query-row:first-child .input{width:190px;border:0;border-bottom:1px solid #d7dce2;background:transparent}.asset-space-query .asset-stat-query-row:first-child b{padding:0 15px;color:#2d3540;font-size:13px}.asset-space-query .asset-stat-query-wide .input{padding-left:13px}.asset-space-query .asset-stat-query-wide .btn{min-width:90px;margin-right:2px}@media(max-width:1000px){.asset-stat-component-board{grid-template-columns:1fr}.asset-stat-metric-card{min-height:170px}.asset-stat-query-card{margin-top:50px}.asset-stat-space-art{display:none}.asset-stat-space-summary{width:auto}.asset-stat-space-board{grid-template-columns:1fr}.asset-stats-head{align-items:flex-start}.asset-stats-head>div:last-child{flex-direction:column;align-items:flex-end}.asset-stat-page-shell{padding-left:18px;padding-right:18px}}
-      `;
-      document.head.appendChild(referenceStyle);
     })();
   </script>
   <script>
@@ -4453,8 +4632,7 @@
     (() => {
       const projectPage = document.getElementById('projectPage');
       if (!projectPage) return;
-      const actions = projectPage.querySelector('.data-actions');
-      actions.insertAdjacentHTML('beforeend', '<button class="btn light" type="button" id="openSubmodelVersionManager">子模型版本管理</button>');
+      if (!projectPage.querySelector('#openSubmodelVersionManager')) return;
       const submodels = [
         {id:'north',name:'北门卫房-建筑子模型.ifc',source:'联合工房-北门卫-土建专业.ifc',scope:'北门卫房 / 建筑专业',versions:[{version:'V1.2',time:'2026-08-25 15:10',user:'陈设计师',note:'更新门窗参数及墙体属性',current:true},{version:'V1.1',time:'2026-08-18 10:30',user:'陈设计师',note:'首次从总模型提取'}]},
         {id:'electrical',name:'车间-电气子模型.ifc',source:'联合工房-总图-机电专业.ifc',scope:'车间 / 电气专业',versions:[{version:'V1.3',time:'2026-08-24 16:25',user:'钱电气',note:'更新桥架路径与设备编码',current:true},{version:'V1.2',time:'2026-08-20 11:40',user:'钱电气',note:'补充配电箱设备参数'},{version:'V1.1',time:'2026-08-15 09:15',user:'钱电气',note:'首次从总模型提取'}]}
@@ -4580,7 +4758,7 @@
       const newProjectPage = document.getElementById('newProjectPage');
       if (!newProjectPage) return;
       const qualificationRow = document.getElementById('enterpriseQualificationValue')?.closest('.form-row');
-      qualificationRow.insertAdjacentHTML('afterend', '<div class="form-row participant-map-row"><label>参建方关系</label><div><button class="btn light" type="button" id="openParticipantMap">展示参建方关系图</button><span class="muted participant-map-hint">明确各方项目角色、职责及协同关系</span></div></div>');
+      qualificationRow?.insertAdjacentHTML('afterend', '<div class="form-row participant-map-row"><label>参建方关系</label><div><button class="btn light" type="button" id="openParticipantMap">展示参建方关系图</button><span class="muted participant-map-hint">明确各方项目角色、职责及协同关系</span></div></div>');
       const mapModal = document.createElement('div');
       mapModal.className = 'modal-mask'; mapModal.id = 'participantMapModal';
       mapModal.innerHTML = `<div class="modal participant-map-modal"><div class="modal-head"><span>参建方关系图</span><button class="modal-close" type="button" data-close-participant-map>×</button></div><div class="modal-body"><div class="participant-map-note"><strong>协同说明：</strong>以建设单位为项目统筹方，统一协调参建方；各方按职责提交成果、问题与进度信息。</div><div class="participant-map"><svg class="participant-map-lines" viewBox="0 0 920 510" preserveAspectRatio="none" aria-hidden="true"><line x1="460" y1="255" x2="460" y2="92"/><line x1="460" y1="255" x2="160" y2="180"/><line x1="460" y1="255" x2="760" y2="180"/><line x1="460" y1="255" x2="160" y2="385"/><line x1="460" y1="255" x2="760" y2="385"/><circle cx="460" cy="255" r="5"/></svg><div class="participant-node owner"><span class="node-type">项目统筹</span><b>建设单位</b><p>目标决策、资金统筹、重大事项协调</p></div><div class="participant-node survey"><span class="node-type">勘察方</span><b>勘察单位</b><p>地勘资料、现场勘察成果提交</p></div><div class="participant-node design"><span class="node-type">设计方</span><b>设计单位</b><p>方案设计、图纸模型、设计变更</p></div><div class="participant-node contractor"><span class="node-type">施工方</span><b>施工单位</b><p>施工组织、现场进度、质量安全</p></div><div class="participant-node supervision"><span class="node-type">监理方</span><b>监理单位</b><p>质量监督、进度控制、验收签认</p></div></div><div class="participant-map-legend"><span><i class="owner-dot"></i>统筹与决策</span><span><i class="collab-dot"></i>成果 / 进度 / 问题协同</span></div><div class="participant-map-actions"><button class="btn primary" type="button" data-close-participant-map>我知道了</button></div></div></div>`;
@@ -4698,7 +4876,7 @@
       style.textContent = '.asset-tag-requirement{margin:0 0 12px;padding:8px 10px;border-left:3px solid #2fac67;background:#f6faf7;color:#5f6b62;font-size:12px;line-height:1.6}.asset-tag-requirement strong{color:#207244}';
       document.head.appendChild(style);
       const meetingSimplifyStyle = document.createElement('style');
-      meetingSimplifyStyle.textContent = '.asset-stat-query-card .asset-stat-query-row:first-child,[data-export-asset-stats],.standard-flow-list,.standard-flow-tip,.project-standard-history{display:none!important}';
+      meetingSimplifyStyle.textContent = '.standard-flow-list,.standard-flow-tip,.project-standard-history{display:none!important}';
       document.head.appendChild(meetingSimplifyStyle);
     })();
   </script>
@@ -4873,22 +5051,13 @@
     /* 项目成果：快照与批注一键导出 PDF */
     (() => {
       const approvalButton = document.getElementById('entryApprovalButton');
-      if (!approvalButton || document.getElementById('achievementExportButton')) return;
-      const actions = approvalButton.parentElement;
-      actions.insertAdjacentHTML('beforeend', '<button class="btn primary" type="button" id="achievementExportButton">成果</button><button class="btn light achievement-sample-button" type="button" id="achievementSampleButton">报告示例</button>');
-      const fileUploadButton = actions.querySelector('[data-open="fileUploadModal"]');
-      const uploadListButton = actions.querySelector('[data-open="uploadDrawer"]');
+      if (!approvalButton || !document.getElementById('achievementSampleButton')) return;
       const achievementButton = document.getElementById('achievementExportButton');
       const achievementSampleButton = document.getElementById('achievementSampleButton');
-      if (fileUploadButton && uploadListButton && achievementButton && achievementSampleButton) {
-        fileUploadButton.insertAdjacentElement('afterend', achievementButton);
-        achievementButton.insertAdjacentElement('afterend', uploadListButton);
-        uploadListButton.insertAdjacentElement('afterend', achievementSampleButton);
-      }
 
       const sampleReport = document.createElement('div');
       sampleReport.className = 'modal-mask'; sampleReport.id = 'achievementSampleModal';
-      sampleReport.innerHTML = '<div class="modal achievement-sample-modal"><div class="modal-head">项目成果导出报告示例<button type="button" class="modal-close" data-close-achievement-sample>×</button></div><div class="modal-body"><div class="achievement-paper"><div class="achievement-report-title">BIM 项目成果导出报告</div><div class="achievement-report-subtitle">白玉兰测试20260203　·　项目数据治理</div><div class="achievement-meta"><span>导出时间：2026-09-01 10:30</span><span>导出范围：本项目全部快照、全部批注</span></div><div class="achievement-section"><h4>一、导出概览</h4><div class="achievement-summary"><span>模型快照 <b>2</b> 项</span><span>协同批注 <b>3</b> 项</span><span>导出规则 <b>全部导出</b></span></div></div><div class="achievement-section"><h4>二、模型快照</h4><table><thead><tr><th>序号</th><th>快照名称</th><th>关联模型 / 视图</th><th>创建时间</th></tr></thead><tbody><tr><td>1</td><td>总图机电综合视图</td><td>联合工房-总图-机电专业</td><td>2026-08-30 14:28</td></tr><tr><td>2</td><td>配电间设备布置</td><td>电气专业 / 1F 配电间</td><td>2026-08-30 15:06</td></tr></tbody></table></div><div class="achievement-section"><h4>三、协同批注</h4><table><thead><tr><th>序号</th><th>批注内容</th><th>发起人</th><th>状态</th></tr></thead><tbody><tr><td>1</td><td>建议复核桥架与风管交叉处净高</td><td>张伟</td><td>待处理</td></tr><tr><td>2</td><td>设备编码与图纸编号保持一致</td><td>李敏</td><td>已处理</td></tr></tbody></table></div><div class="achievement-footer">说明：本报告为系统自动汇总生成，不支持选择单项导出；如项目无快照或批注，报告对应章节仅展示“暂无内容”。</div></div><div class="achievement-sample-actions"><button type="button" class="btn light" data-close-achievement-sample>关闭</button></div></div></div>';
+      sampleReport.innerHTML = '<div class="modal achievement-sample-modal"><div class="modal-head">项目成果导出报告示例<button type="button" class="modal-close" data-close-achievement-sample>×</button></div><div class="modal-body"><div class="achievement-paper"><div class="achievement-report-title">BIM 项目成果导出报告</div><div class="achievement-report-subtitle">白玉兰测试20260203　·　项目数据治理</div><div class="achievement-meta"><span>导出时间：2026-09-01 10:30</span><span>导出范围：本项目全部快照、全部批注</span></div><div class="achievement-section"><h4>一、导出概览</h4><div class="achievement-summary"><span>模型快照 <b>2</b> 项</span><span>协同批注 <b>3</b> 项</span><span>导出规则 <b>全部导出</b></span></div></div><div class="achievement-section"><h4>二、模型快照</h4><table><thead><tr><th>序号</th><th>快照名称</th><th>关联模型 / 视图</th><th>创建时间</th></tr></thead><tbody><tr><td>1</td><td>总图机电综合视图</td><td>联合工房-总图-机电专业</td><td>2026-08-30 14:28</td></tr><tr><td>2</td><td>配电间设备布置</td><td>电气专业 / 1F 配电间</td><td>2026-08-30 15:06</td></tr></tbody></table></div><div class="achievement-section"><h4>三、协同批注</h4><table><thead><tr><th>序号</th><th>批注内容</th><th>发起人</th><th>状态</th></tr></thead><tbody><tr><td>1</td><td>建议复核桥架与风管交叉处净高</td><td>张伟</td><td>待处理</td></tr><tr><td>2</td><td>设备编码与图纸编号保持一致</td><td>李敏</td><td>已处理</td></tr></tbody></table></div><div class="achievement-footer">说明：本报告为系统自动汇总生成，不支持选择单项导出；如项目无快照或批注，报告对应章节仅展示“暂无内容”。</div></div><div class="achievement-sample-actions"><button type="button" class="btn light" data-close-achievement-sample>关闭</button><button type="button" class="btn primary" data-download-achievement-pdf>下载 PDF</button></div></div></div>';
       document.body.appendChild(sampleReport);
 
       const getData = () => {
@@ -4902,10 +5071,19 @@
           })));
           return { snapshots, annotations };
         }
-        return { snapshots: Array.isArray(data.snapshots) ? data.snapshots : [], annotations: Array.isArray(data.annotations) ? data.annotations : [] };
+        const snapshots = Array.isArray(data.snapshots) ? data.snapshots : [];
+        const annotations = Array.isArray(data.annotations) ? data.annotations : [];
+        if (snapshots.length || annotations.length) return { snapshots, annotations };
+        const demoSnapshots = []; const demoAnnotations = [];
+        ['单体 A', '单体 B', '单体 C', '单体 D'].forEach(unit => ['模型 1', '模型 2', '模型 3', '模型 4'].forEach(model => [1, 2, 3].forEach(number => {
+          const path = `${unit} / ${model} / 快照 ${number}`;
+          demoSnapshots.push({ name: path, view: `${model} / 视图 ${number}`, time: `2026-09-0${number} 10:30` });
+          demoAnnotations.push({ content: `${path}：${number === 1 ? '复核模型整体视图及构件显示状态。' : number === 2 ? '建议关注设备与管线交叉位置。' : '确认本视图可作为阶段成果留档。'}`, author: 'admin' });
+        })));
+        return { snapshots: demoSnapshots, annotations: demoAnnotations };
       };
       const safe = value => String(value || '').replace(/[\\()]/g, '\\$&');
-      const makePdf = async (data) => {
+      const makePdf = data => {
         const page = document.createElement('canvas'); page.width = 1240; page.height = 1754;
         const ctx = page.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, page.width, page.height);
         ctx.fillStyle = '#0d4c38'; ctx.fillRect(0, 0, page.width, 18);
@@ -4926,14 +5104,28 @@
         obj(1, '<< /Type /Catalog /Pages 2 0 R >>'); obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>'); obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>'); obj(4, '<< /Length 32 >>\nstream\nq\n595 0 0 842 0 0 cm\n/Im0 Do\nQ\nendstream'); offsets[5] = size; put(`5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${page.width} /Height ${page.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${image.length} >>\nstream\n`); put(image); put('\nendstream\nendobj\n'); const start = size; put('xref\n0 6\n0000000000 65535 f \n'); for (let i = 1; i <= 5; i++) put(`${String(offsets[i]).padStart(10, '0')} 00000 n \n`); put(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${start}\n%%EOF`);
         return new Blob(parts, { type: 'application/pdf' });
       };
-      document.getElementById('achievementExportButton').addEventListener('click', async () => {
-        const button = document.getElementById('achievementExportButton'); const original = button.textContent; button.disabled = true; button.textContent = '正在导出…';
-        try { const file = await makePdf(getData()); const link = document.createElement('a'); link.href = URL.createObjectURL(file); link.download = '白玉兰测试20260203-项目成果导出报告.pdf'; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(link.href), 1000); } finally { button.disabled = false; button.textContent = original; }
-      });
+      const downloadAchievementPdf = button => {
+        const original = button.textContent; button.disabled = true; button.textContent = '正在生成…';
+        try {
+          const file = makePdf(getData());
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(file);
+          link.download = '白玉兰测试20260203-项目成果导出报告.pdf';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          button.dataset.downloadTriggered = 'true';
+          document.querySelectorAll('.project-page-toast').forEach(item => item.remove());
+          const toast = document.createElement('div'); toast.className = 'project-page-toast'; toast.textContent = 'PDF 已生成，正在下载'; document.body.appendChild(toast); setTimeout(() => toast.remove(), 1800);
+          setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        } finally { button.disabled = false; button.textContent = original; }
+      };
+      achievementButton?.addEventListener('click', () => downloadAchievementPdf(achievementButton));
+      sampleReport.querySelector('[data-download-achievement-pdf]')?.addEventListener('click', event => downloadAchievementPdf(event.currentTarget));
       document.getElementById('achievementSampleButton').addEventListener('click', () => sampleReport.classList.add('open'));
       sampleReport.addEventListener('click', event => { if (event.target.closest('[data-close-achievement-sample]')) sampleReport.classList.remove('open'); });
       const style = document.createElement('style');
-      style.textContent = '.achievement-sample-button{margin-left:0}.achievement-sample-modal{width:940px}.achievement-paper{border:1px solid #e2e8e4;background:#fff;padding:28px 34px;max-height:610px;overflow:auto;color:#34463d}.achievement-report-title{text-align:center;font-size:24px;font-weight:700;color:#124b38;letter-spacing:2px}.achievement-report-subtitle{text-align:center;margin-top:10px;color:#5f746a}.achievement-meta{display:flex;justify-content:space-between;margin-top:22px;padding:10px 12px;background:#f4f8f5;color:#6d7f76;font-size:12px}.achievement-section{margin-top:22px}.achievement-section h4{margin:0 0 10px;padding-left:9px;border-left:4px solid #126143;color:#274239}.achievement-summary{display:flex;gap:12px}.achievement-summary span{flex:1;padding:12px;background:#f6faf7;color:#5d7168}.achievement-summary b{color:#126143}.achievement-paper table{width:100%;border-collapse:collapse;font-size:12px}.achievement-paper th{padding:9px;background:#f2f6f3;text-align:left;color:#597066}.achievement-paper td{padding:9px;border-bottom:1px solid #e6ece8}.achievement-footer{margin-top:20px;padding:10px 12px;background:#fff8ec;border-left:3px solid #e2ad56;color:#8c6c35;font-size:12px;line-height:1.6}.achievement-sample-actions{margin-top:16px;display:flex;justify-content:flex-end}.data-actions .btn:disabled{opacity:.7;cursor:wait}';
+      style.textContent = '.achievement-sample-button{margin-left:0}.achievement-sample-modal{width:940px}.achievement-paper{border:1px solid #e2e8e4;background:#fff;padding:28px 34px;max-height:610px;overflow:auto;color:#34463d}.achievement-report-title{text-align:center;font-size:24px;font-weight:700;color:#124b38;letter-spacing:2px}.achievement-report-subtitle{text-align:center;margin-top:10px;color:#5f746a}.achievement-meta{display:flex;justify-content:space-between;margin-top:22px;padding:10px 12px;background:#f4f8f5;color:#6d7f76;font-size:12px}.achievement-section{margin-top:22px}.achievement-section h4{margin:0 0 10px;padding-left:9px;border-left:4px solid #126143;color:#274239}.achievement-summary{display:flex;gap:12px}.achievement-summary span{flex:1;padding:12px;background:#f6faf7;color:#5d7168}.achievement-summary b{color:#126143}.achievement-paper table{width:100%;border-collapse:collapse;font-size:12px}.achievement-paper th{padding:9px;background:#f2f6f3;text-align:left;color:#597066}.achievement-paper td{padding:9px;border-bottom:1px solid #e6ece8}.achievement-footer{margin-top:20px;padding:10px 12px;background:#fff8ec;border-left:3px solid #e2ad56;color:#8c6c35;font-size:12px;line-height:1.6}.achievement-sample-actions{margin-top:16px;display:flex;justify-content:flex-end}.project-file-actions .btn:disabled{opacity:.7;cursor:wait}';
       document.head.appendChild(style);
     })();
   </script>
@@ -5509,9 +5701,7 @@
       if (firstProjectDivider) firstProjectDivider.insertAdjacentElement('beforebegin', standardRow);
 
       const projectInfoCard = projectPage.querySelector('.info-card');
-      projectInfoCard?.insertAdjacentHTML('beforeend', `<button class="current-project-standard" type="button" data-change-project-standard title="查看并更换模型解析标准"><span>当前标准</span><b data-current-project-standard>${state.standard}</b><i>⌄</i></button>`);
-      const actions = projectPage.querySelector('.data-actions > div:last-child');
-      if (actions && !actions.querySelector('[data-open-model-stats]')) actions.insertAdjacentHTML('afterbegin', '<button class="btn light" type="button" data-open-model-stats>入库数据统计</button>');
+      if (projectInfoCard && !projectInfoCard.querySelector('[data-change-project-standard]')) projectInfoCard.insertAdjacentHTML('beforeend', `<button class="current-project-standard" type="button" data-change-project-standard title="查看并更换模型解析标准"><span>当前标准</span><b data-current-project-standard>${state.standard}</b><i>⌄</i></button>`);
       projectPage.querySelectorAll('.file-row').forEach(row => {
         if (row.cells[1]?.textContent.trim().toLowerCase() !== 'ifc') return;
         row.dataset.fileParseStandard = state.standard;
@@ -5637,32 +5827,18 @@
       statisticsPage.id = 'assetStorageStatisticsPage';
       content.appendChild(statisticsPage);
 
-      const componentRows = [
-        ['墙体', '建筑', '1,163', '5,328.6 m²', '已入库'],
-        ['楼板', '结构', '863', '12,468.2 m²', '已入库'],
-        ['梁柱', '结构', '734', '1,087.4 m³', '已入库'],
-        ['门窗', '建筑', '378', '2,203.8 m²', '已入库'],
-        ['风管', '暖通', '586', '4,762.0 m', '已入库'],
-        ['桥架', '电气', '321', '2,618.0 m', '已入库']
-      ];
-      const spaceRows = [
-        ['F1', '8', '8,325.0 m²', '生产区、辅助区', '已入库'],
-        ['F2', '10', '7,916.4 m²', '生产区、办公区', '已入库'],
-        ['F3', '10', '7,916.4 m²', '办公区、设备区', '已入库'],
-        ['F4', '9', '7,201.6 m²', '办公区、会议区', '已入库'],
-        ['B1', '12', '9,304.2 m²', '车库、设备用房', '已入库']
-      ];
       let activeTab = 'component';
+      const escapeAttribute = value => String(value || '').replace(/[&<>"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
       const renderStatistics = () => {
         const isComponent = activeTab === 'component';
-        const bars = (rows, unit) => `<div class="asset-ranking-unit">单位：${unit}</div><ol class="asset-ranking-list">${rows.map((row, index) => `<li><span class="asset-ranking-number">${index + 1}</span><b title="${row[0]}">${row[0]}</b><i><em style="width:${row[2]}%"></em></i><strong>${row[1]}</strong></li>`).join('')}</ol>`;
-        const componentRank = bars([['建筑内墙','12731228',100],['弯头','12151603',95],['热浸镀锌钢管','10733494',84],['水管道','10419128',82],['幕墙竖梃','6302597',50]], '个');
-        const spaceCountRank = bars([['卫生间','143278',100],['阳台','104509',73],['主卧','90727',63],['卧室','85144',59],['起居室','83519',58]], '个');
-        const spaceAreaRank = bars([['防火分区','9255.2',100],['其他建筑空间','1832.78',20],['宿舍','1425.48',15],['阅览室','784.36',8],['普通教室','617.41',7]], '面积（万㎡）');
-        const tabs = `<div class="asset-stat-mode-tabs"><button class="${isComponent ? 'active' : ''}" type="button" data-asset-stats-tab="component">构件统计</button><button class="${!isComponent ? 'active' : ''}" type="button" data-asset-stats-tab="space">空间统计</button></div>`;
-        const componentHero = `<div class="asset-stat-hero"><div class="asset-stat-hero-title"><span class="asset-stat-cube">◆</span><h2>构件统计</h2></div><div class="asset-stat-component-board"><section class="asset-stat-metric-card"><div><span>入库构件数量</span><b>150,496,764<small> 个</small></b></div><div><span>入库构件类型</span><b>2,300<small> 种</small></b></div><i class="asset-stat-building" aria-hidden="true"></i></section><section class="asset-ranking-card"><h3>构件数量排名 <span>↗</span></h3>${componentRank}</section></div></div><section class="asset-stat-query-card"><div class="asset-stat-query-row"><select class="select"><option>请选择行政区划</option><option>合肥市</option></select><select class="select"><option>请选择专业</option><option>建筑专业</option><option>结构专业</option><option>机电专业</option></select></div><div class="asset-stat-query-row asset-stat-query-wide"><label>构件标识</label><input class="input" data-asset-stat-keyword placeholder="搜索构件标识"><button class="btn primary" type="button" data-run-asset-query>⌕ 检索</button><button class="btn light" type="button">高级检索</button></div><p class="asset-stat-query-result" data-asset-stat-result></p></section>`;
-        const spaceHero = `<div class="asset-stat-hero asset-stat-space-hero"><div class="asset-stat-hero-title"><span class="asset-stat-space-icon">⌂</span><h2>空间统计</h2></div><div class="asset-stat-space-summary"><div><span>入库空间数量</span><b>2,488,587<small> 个</small></b></div><i></i><div><span>入库空间面积</span><b>2.18<small> 万㎡</small></b></div><em class="asset-stat-space-art" aria-hidden="true">⌂</em></div><div class="asset-stat-space-board"><section class="asset-ranking-card"><h3>空间数量排名 <span>↗</span></h3>${spaceCountRank}</section><section class="asset-ranking-card"><h3>空间面积排名 <span>↗</span></h3>${spaceAreaRank}</section></div></div><section class="asset-stat-query-card asset-space-query"><div class="asset-stat-query-row"><select class="select"><option>请选择行政区划</option><option>合肥市</option></select><input class="input" placeholder="填写面积范围"><b>至</b><input class="input" placeholder="填写面积范围"></div><div class="asset-stat-query-row asset-stat-query-wide"><input class="input" data-asset-stat-keyword placeholder="请输入搜索名称"><button class="btn primary" type="button" data-run-asset-query>查询</button></div><p class="asset-stat-query-result" data-asset-stat-result></p></section>`;
-        statisticsPage.innerHTML = `<div class="asset-stat-page-shell"><div class="asset-stats-head"><div><span>数据资产全览 / 入库数据统计</span><p>统计范围：项目数据管理 → 数据入库中的已入库项目</p></div><div><button class="btn light" type="button" data-export-asset-stats>导出统计</button>${tabs}</div></div><details class="asset-stat-requirement" open><summary>需求说明（研发口径）</summary><ol><li><b>数据来源：</b>统计项目仅来源于「项目数据管理 → 数据入库」列表，不读取数据治理、数据发布或数据资产目录中的项目。</li><li><b>纳入条件：</b>仅统计数据入库状态为“已入库”且解析成功的项目模型；待审批、审批中、已驳回、解析失败、已删除的项目及模型均不纳入。</li><li><b>统计对象：</b>按项目最新成功入库的 BIM 模型版本汇总构件和空间数据；同一项目的历史入库版本不重复累计。</li><li><b>刷新规则：</b>项目完成入库后自动进入统计范围；状态撤回或入库版本失效后应同步扣减，并支持页面刷新获取最新汇总。</li><li><b>筛选与空态：</b>构件标识/空间名称均在上述项目范围内筛选；无匹配结果时显示“暂无符合条件的已入库数据”。</li></ol></details>${isComponent ? componentHero : spaceHero}</div>`;
+        const savedKeyword = window.assetStorageSearchState?.[activeTab]?.keyword || '';
+        const items = isComponent
+          ? [['墙体','12,731,228'],['弯头','12,151,603'],['热浸镀锌钢管','10,733,494'],['水管道','10,419,128'],['幕墙竖梃','6,302,597']]
+          : [['卫生间','143,278'],['阳台','104,509'],['主卧','90,727'],['卧室','85,144'],['起居室','83,519']];
+        const search = isComponent
+          ? `<div class="simple-stats-search"><label>构件分类 / 构件标识</label><input class="input" data-stats-field="keyword" value="${escapeAttribute(savedKeyword)}" placeholder="请输入构件分类或构件标识"><button class="btn primary" type="button" data-open-search-result="component">检索</button></div>`
+          : `<div class="simple-stats-search"><label>空间名称</label><input class="input" data-stats-field="keyword" value="${escapeAttribute(savedKeyword)}" placeholder="请输入空间名称"><button class="btn primary" type="button" data-open-search-result="space">检索</button></div>`;
+        statisticsPage.innerHTML = `<div class="simple-storage-stats"><div class="simple-stats-head"><h2>入库数据统计</h2><div class="simple-stats-tabs" aria-label="统计类型"><button class="${isComponent ? 'active' : ''}" type="button" data-asset-stats-tab="component">构件统计</button><button class="${isComponent ? '' : 'active'}" type="button" data-asset-stats-tab="space">空间统计</button></div></div><section class="simple-stats-overview"><article><span>${isComponent ? '入库构件总数' : '入库空间总数'}</span><b>${isComponent ? '150,496,764' : '2,488,587'}</b><small>数据来源：成功解析的 IFC / 模型文件</small></article><article><span>${isComponent ? '构件类型数量' : '空间类型数量'}</span><b>${isComponent ? '2,300' : '128'}</b><small>按解析结果 / output JSON 汇总</small></article></section><section class="simple-stats-ranking"><div class="simple-stats-ranking-head"><h3>${isComponent ? '构件数量 TOP5' : '空间数量 TOP5'}</h3>${search}</div><ol>${items.map((item, index) => `<li><b title="${item[0]}">${item[0]}</b><div class="simple-rank-track"><em style="width:${100 - index * 12}%"></em></div><strong>${item[1]}</strong></li>`).join('')}</ol></section></div>`;
       };
       const setAssetSecondary = active => {
         document.getElementById('secondarySide').innerHTML = `<button class="sub-btn ${active === 'catalog' ? 'active' : ''}" type="button" data-open-asset-catalog>◩ 数据资产目录</button><button class="sub-btn ${active === 'statistics' ? 'active' : ''}" type="button" data-open-asset-stats-page>◩ 入库数据统计</button><button class="sub-btn" type="button">◩ 数据可视化统计</button><button class="sub-btn" type="button">◩ 资产全览图</button>`;
@@ -5690,38 +5866,26 @@
         if (event.target.closest('[data-open-asset-catalog]')) { showCatalog(); return; }
         const tab = event.target.closest('[data-asset-stats-tab]');
         if (tab) { activeTab = tab.dataset.assetStatsTab; renderStatistics(); }
-        if (event.target.closest('[data-run-asset-query]')) {
-          const keyword = statisticsPage.querySelector('[data-asset-stat-keyword]')?.value.trim();
-          const result = statisticsPage.querySelector('[data-asset-stat-result]');
-          if (result) result.textContent = keyword ? `已按“${keyword}”完成检索，可在高级检索中查看匹配明细。` : '请填写检索条件后再查询。';
-        }
-        if (event.target.closest('[data-export-asset-stats]')) {
-          const text = activeTab === 'component' ? '构件统计：墙体、楼板、梁柱、门窗、风管、桥架' : '空间统计：F1、F2、F3、F4、B1';
-          const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([text], {type:'text/plain'})); link.download = `入库数据${activeTab === 'component' ? '构件' : '空间'}统计.txt`; link.click(); window.setTimeout(() => URL.revokeObjectURL(link.href), 0);
-        }
       });
       const style = document.createElement('style');
-      style.textContent = '.asset-storage-statistics-page{padding:0}.asset-stats-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}.asset-stats-head h2{margin:0 0 7px;font-size:22px;color:#303b33}.asset-stats-head p{margin:0;color:#7f8b83;font-size:13px}.asset-stats-filter{display:flex;align-items:center;gap:8px;color:#657269;font-size:13px}.asset-stats-filter .select{width:190px}.asset-stats-note{margin-bottom:15px;padding:10px 13px;border-left:3px solid #2d8b5b;background:#f4faf6;color:#5a7161;font-size:12px;line-height:1.6}.asset-stats-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:15px}.asset-stats-overview article{padding:17px 19px;border:1px solid #dfe8e2;background:#fff}.asset-stats-overview span,.asset-stats-overview small{display:block;color:#849087;font-size:12px}.asset-stats-overview b{display:block;margin:7px 0;color:#246f4a;font-size:27px}.asset-stats-card{border:1px solid #dfe8e2;background:#fff}.asset-stats-tabs{display:flex;gap:25px;padding:0 18px;border-bottom:1px solid #e8eeea}.asset-stats-tabs button{padding:13px 3px;border:0;border-bottom:2px solid transparent;background:transparent;color:#718077;cursor:pointer}.asset-stats-tabs button.active{border-color:#278756;color:#227649;font-weight:600}.asset-stats-content{padding:16px 18px}.asset-stats-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;color:#47574d}.asset-stats-title span{color:#849087;font-size:12px}.asset-stats-content table{width:100%;border-collapse:collapse;table-layout:fixed}.asset-stats-content th{padding:12px;background:#f4f7f5;color:#5f6d64;text-align:left;font-size:12px;font-weight:500}.asset-stats-content td{padding:14px 12px;border-bottom:1px solid #edf1ee;color:#4a5a50;font-size:13px}';
+      style.textContent = `
+        .asset-storage-statistics-page{min-height:0!important;height:auto!important;padding:0!important;background:#f5f7f6!important;overflow:visible!important}
+        .simple-storage-stats{max-width:none;margin:0;padding:16px 20px 24px;box-sizing:border-box}
+        .simple-stats-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+        .simple-stats-head h2{margin:0;color:#2f4639;font-size:20px;font-weight:650;line-height:32px}
+        .simple-stats-tabs{display:flex;align-items:center}.simple-stats-tabs button{height:32px;padding:0 16px;border:1px solid #cddbd1;background:#fff;color:#586b60;cursor:pointer;font-size:12px}
+        .simple-stats-tabs button:first-child{border-radius:4px 0 0 4px}.simple-stats-tabs button:last-child{margin-left:-1px;border-radius:0 4px 4px 0}.simple-stats-tabs button.active{position:relative;z-index:1;border-color:#176d46;background:#176d46;color:#fff}
+        .simple-stats-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.simple-stats-overview article{height:98px;padding:14px 18px;box-sizing:border-box;border:1px solid #dfe7e1;border-radius:4px;background:#fff}
+        .simple-stats-overview span,.simple-stats-overview small{display:block;color:#74827a;font-size:12px}.simple-stats-overview span{color:#4d5f54;font-size:13px}.simple-stats-overview b{display:block;margin:6px 0 7px;color:#176b44;font-size:28px;font-weight:650;line-height:1}
+        .simple-stats-ranking{margin-top:14px;padding:16px 18px 18px;border:1px solid #dfe7e1;border-radius:4px;background:#fff}.simple-stats-ranking-head{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:34px;margin-bottom:8px}.simple-stats-ranking h3{margin:0;color:#354e40;font-size:15px;font-weight:650;white-space:nowrap}
+        .simple-stats-search{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:0}.simple-stats-search label{color:#455c4e;font-size:12px;font-weight:600;white-space:nowrap}.simple-stats-search .input{width:260px;height:32px;box-sizing:border-box}.simple-stats-search .btn{height:32px;min-width:62px;padding:0 14px;border-radius:4px}
+        .simple-stats-ranking ol{width:min(100%,1000px);margin:0;padding:0;list-style:none}.simple-stats-ranking li{display:grid;grid-template-columns:140px minmax(240px,1fr) 110px;gap:14px;align-items:center;min-height:44px;border-top:1px solid #edf1ee;color:#495a50;font-size:13px}.simple-stats-ranking li:first-child{border-top:0}.simple-stats-ranking li b{overflow:hidden;color:#43574b;font-weight:500;text-overflow:ellipsis;white-space:nowrap}
+        .simple-rank-track{height:10px;overflow:hidden;border-radius:2px;background:#edf3ef}.simple-rank-track em{display:block;height:100%;border-radius:2px;background:#176d46}.simple-stats-ranking li:nth-child(2) em{background:#35825d}.simple-stats-ranking li:nth-child(3) em{background:#5a9875}.simple-stats-ranking li:nth-child(4) em{background:#7eaf91}.simple-stats-ranking li:nth-child(5) em{background:#a2c5ae}.simple-stats-ranking li strong{text-align:right;color:#45584c;font-size:12px;font-weight:500;font-variant-numeric:tabular-nums}
+        @media(max-width:1100px){.simple-stats-ranking-head{align-items:flex-start;flex-direction:column;gap:10px}.simple-stats-search{width:100%;justify-content:flex-start}.simple-stats-ranking li{grid-template-columns:120px minmax(180px,1fr) 100px}}
+      `;
       document.head.appendChild(style);
     })();
   </script>
-  <style id="asset-stat-green-theme">
-    .asset-storage-statistics-page{background:linear-gradient(140deg,#d8efe0 0%,#edf8f0 48%,#f8fcf8 100%)!important}
-    .asset-stat-page-shell{background:radial-gradient(ellipse at 89% 32%,rgba(255,255,255,.9) 0 4%,transparent 23%),radial-gradient(ellipse at 11% 82%,rgba(255,255,255,.68) 0 5%,transparent 28%)!important}
-    .asset-stat-page-shell:before,.asset-stat-page-shell:after{border-color:rgba(255,255,255,.72)!important}
-    .asset-stats-head>div:first-child span,.asset-stats-head p{color:#668174!important}
-    .asset-stat-mode-tabs{border-color:#bddbc7!important;background:rgba(255,255,255,.88)!important}
-    .asset-stat-mode-tabs button{color:#527462!important}.asset-stat-mode-tabs button.active{background:#087a4c!important;box-shadow:0 2px 6px rgba(8,122,76,.24)!important}
-    .asset-stat-hero-title h2{color:#173d2a!important}.asset-stat-cube,.asset-stat-space-icon{background:linear-gradient(135deg,#67bc88,#067346)!important}
-    .asset-stat-metric-card,.asset-ranking-card,.asset-stat-query-card{box-shadow:0 7px 18px rgba(73,129,92,.13)!important}
-    .asset-stat-building{background:repeating-linear-gradient(90deg,rgba(38,145,85,.6) 0 7px,transparent 7px 11px),linear-gradient(90deg,#96d1ab 0 23%,transparent 23% 32%,#c4ead0 32% 57%,transparent 57% 66%,#91caa5 66%)!important}
-    .asset-ranking-card h3{border-left-color:#087a4c!important;color:#173d2a!important}.asset-ranking-card h3 span{color:#087a4c!important}
-    .asset-ranking-number,.asset-ranking-list li:nth-child(1) .asset-ranking-number{background:#e5f2e9!important;color:#276448!important}
-    .asset-ranking-list i em{background:linear-gradient(90deg,#47b778,#087a4c)!important}
-    .asset-stat-query-result{color:#087a4c!important}.asset-stat-space-summary>i{background:#76bd91!important}
-    .asset-stat-space-art{border-color:#3ca66b!important;color:#238b54!important;box-shadow:14px 18px 0 -7px rgba(53,157,97,.18)!important}
-    .asset-stat-requirement{position:relative;z-index:1;width:min(1080px,100%);margin:0 auto 14px;padding:8px 12px;border-left:3px solid #0a7b4d;background:rgba(247,253,249,.82);color:#526d5d;font-size:12px;line-height:1.55;box-sizing:border-box}.asset-stat-requirement summary{color:#176440;font-weight:600;cursor:pointer;list-style:none}.asset-stat-requirement summary::-webkit-details-marker{display:none}.asset-stat-requirement summary:before{display:inline-block;margin-right:6px;color:#168152;content:'▾'}.asset-stat-requirement:not([open]) summary:before{content:'▸'}.asset-stat-requirement ol{margin:7px 0 0;padding-left:18px}.asset-stat-requirement li{margin:2px 0}.asset-stat-requirement b{color:#245c3e}
-  </style>
   <script>
     /* 稳定菜单路由：高层导航仅由一个入口处理，杜绝多个历史监听互相覆盖。 */
     (() => {
@@ -5751,6 +5915,7 @@
         const primary = event.target.closest('#primarySide .primary-item');
         if (primary?.matches('[data-workbench-primary]')) return takeOver(event, () => window.openEnterpriseWorkbench?.());
         if (primary?.matches('[data-console-primary]')) return takeOver(event, () => window.openPersonalConsole?.());
+        if (primary?.textContent.includes('项目数据')) return takeOver(event, () => showPage('dataListPage', 'data'));
         if (primary?.textContent.includes('数据资产')) return takeOver(event, () => window.openAssetCatalog?.());
 
         const secondary = event.target.closest('#secondarySide .sub-btn');
@@ -5905,7 +6070,7 @@
         if (list) list.innerHTML = '<li><b>备注：</b><strong class="deferred-note">本次暂不做</strong>，以下规则作为后续迭代开发与验收口径。</li><li><b>分类维护：</b>用户可新建、编辑、删除个人分类，用于业务类型、审批紧急程度等维度；分类名称最多 6 个字且不可重复；重复保存时提示“分类名称已存在”。</li><li><b>分类展示：</b>待我审批、已审批、审批抄送三类列表均支持筛选，并可在单条事项中调整分类。</li><li><b>删除策略：</b>删除分类只将原事项归为“未分类”，不得删除审批事项及历史记录。</li>';
       }
       const achievementSection = sections[3];
-      achievementSection?.querySelector('ul')?.insertAdjacentHTML('beforeend', '<li><b>操作顺序：</b>项目详情操作区固定为“审批入库 → 文件上传 → 成果 → 报告示例 → 上传列表”；成果导出与上传列表功能互不影响。</li>');
+      achievementSection?.querySelector('ul')?.insertAdjacentHTML('beforeend', '<li><b>页面入口：</b>项目详情以“状态、内容页签、主要操作”分层展示；文件、质检结果、成果通过页签切换，上传任务独立查看，低频能力收纳至“更多”。</li>');
       const apiSection = document.createElement('section');
       apiSection.className = 'weekly-requirement-section';
       apiSection.innerHTML = '<div class="weekly-requirement-section-head"><div><em>08</em><h3>用户 API Key 配置</h3></div></div><ul><li><b>入口：</b>后台管理 / 权限管理 / 用户管理中，每个用户仅保留一个“API Key 配置”操作入口，不展示重复的编辑或 API Key 管理按钮。</li><li><b>配置方式：</b>点击后直接弹出该用户的 API Key 配置窗口，可维护调用频率上限、每日下载流量及 IP 白名单/黑名单；不提供单文件下载上限配置。保存后回到用户管理列表。</li><li><b>IP 校验：</b>名单仅接收 IPv4 地址，禁止输入域名；白名单优先于黑名单，非法 IP 地址不得保存。</li><li><b>下载监控：</b>流量控制按累计流量和下载次数统计/排序；下载次数以一次成功或中断的文件下载任务计数，不使用“请求数”口径。</li><li><b>展示边界：</b>下载管理、下载明细等页面不展示 API Key、最近使用时间或复制操作；API Key 仅作为用户开放服务调用的配置项。</li></ul>';
@@ -5946,13 +6111,6 @@
         projectList?.querySelectorAll('table tbody tr').forEach(row => { row.hidden = select.value !== '全部标准' && row.dataset.currentStandard !== select.value; });
       });
 
-      if (projectPage && !projectPage.querySelector('.standardized-project-tree')) {
-        const treePanel = projectPage.querySelector('.project-data > div:first-child');
-        treePanel?.querySelector('.section-title')?.replaceChildren(document.createTextNode('项目数据目录'));
-        const originalTree = treePanel?.querySelector('.tree'); if (originalTree) originalTree.insertAdjacentHTML('beforebegin', '<div class="project-tree-caption">原始模型目录</div>');
-        originalTree?.insertAdjacentHTML('afterend', '<div class="project-tree-caption standardized-caption">标准化分类目录</div><div class="tree standardized-project-tree"><button type="button" class="tree-row active"><span>⌄　构件分类</span></button><button type="button" class="tree-row"><span>　　墙体（1,163）</span></button><button type="button" class="tree-row"><span>　　楼板（863）</span></button><button type="button" class="tree-row"><span>　　桥架（321）</span></button><button type="button" class="tree-row active"><span>⌄　空间分类</span></button><button type="button" class="tree-row"><span>　　生产区（8）</span></button><button type="button" class="tree-row"><span>　　办公区（10）</span></button></div>');
-      }
-
       const standardModal = document.getElementById('modelStandardModal');
       // 本期不保留项目标准版本记录或变更人等留痕信息。
 
@@ -5960,7 +6118,8 @@
       if (qcModal && !qcModal.querySelector('.qc-standard-used')) qcModal.querySelector('.modal-body')?.insertAdjacentHTML('afterbegin', '<div class="qc-standard-used">本次质检使用标准：<b>合肥院 BIM 数据标准 V1.0</b><span>（继承项目绑定标准，发起质检时不可另选）</span></div>');
       const qualityPage = document.getElementById('qualityResultsPage');
       if (qualityPage && !qualityPage.querySelector('.quality-standard-used')) qualityPage.insertAdjacentHTML('afterbegin', '<div class="quality-standard-used">质检记录标准：<b>合肥院 BIM 数据标准 V1.0</b>　<span>用于识别本次结果的解析与质检口径。</span></div>');
-      projectPage?.querySelectorAll('.btn').forEach(button => { if (button.textContent.trim() === '发起数据质检') button.title = '使用当前项目绑定标准发起质检'; });
+      const qualityButton = projectPage?.querySelector('#startDataQualityCheck');
+      if (qualityButton) qualityButton.title = '使用当前项目绑定标准发起质检';
 
       const weeklyBody = document.querySelector('#weeklyRequirementModal .modal-body');
       const assetStatisticsRequirement = [...(weeklyBody?.querySelectorAll('.weekly-requirement-section') || [])].find(section => section.querySelector('h3')?.textContent.includes('入库数据统计'));
@@ -6023,34 +6182,6 @@
     })();
   </script>
   <script>
-    /* 项目文件：上传时间范围筛选 */
-    (() => {
-      const page = document.getElementById('projectPage');
-      const dataMain = page?.querySelector('.data-main');
-      const table = dataMain?.querySelector('.table-tight');
-      if (!dataMain || !table || dataMain.querySelector('[data-file-filter-bar]')) return;
-      table.insertAdjacentHTML('beforebegin', '<div class="project-file-filter" data-file-filter-bar><select class="select" data-project-file-type><option value="">全部文件类型</option><option value="ifc">IFC</option><option value="pdf">PDF</option><option value="rvt">RVT</option></select><input class="input" data-project-file-name placeholder="请输入文件名称"><span class="project-file-date-label">上传时间</span><input class="input project-file-date" type="date" data-project-file-date-start aria-label="上传开始日期"><span class="project-file-date-separator">至</span><input class="input project-file-date" type="date" data-project-file-date-end aria-label="上传结束日期"><button class="btn primary" type="button" data-run-project-file-filter>查询</button><button class="btn light" type="button" data-reset-project-file-filter>重置</button></div>');
-      const filterRows = () => {
-        const type = dataMain.querySelector('[data-project-file-type]')?.value.toLowerCase();
-        const keyword = dataMain.querySelector('[data-project-file-name]')?.value.trim().toLowerCase();
-        const start = dataMain.querySelector('[data-project-file-date-start]')?.value;
-        const end = dataMain.querySelector('[data-project-file-date-end]')?.value;
-        table.querySelectorAll('tbody .file-row').forEach(row => {
-          const cells = row.cells; const fileName = cells[0]?.textContent.toLowerCase() || ''; const fileType = cells[1]?.textContent.trim().toLowerCase() || ''; const uploaded = (cells[5]?.textContent.match(/\d{4}-\d{2}-\d{2}/) || [''])[0];
-          row.hidden = Boolean((type && fileType !== type) || (keyword && !fileName.includes(keyword)) || (start && uploaded < start) || (end && uploaded > end));
-        });
-      };
-      dataMain.addEventListener('click', event => {
-        if (event.target.closest('[data-run-project-file-filter]')) filterRows();
-        if (event.target.closest('[data-reset-project-file-filter]')) { dataMain.querySelector('[data-project-file-type]').value = ''; dataMain.querySelector('[data-project-file-name]').value = ''; dataMain.querySelector('[data-project-file-date-start]').value = ''; dataMain.querySelector('[data-project-file-date-end]').value = ''; filterRows(); }
-      });
-      dataMain.addEventListener('keydown', event => { if (event.key === 'Enter' && event.target.closest('[data-project-file-name]')) filterRows(); });
-      const style = document.createElement('style');
-      style.textContent = '.project-file-filter{display:flex;align-items:center;gap:10px;margin:14px 0 12px}.project-file-filter .select{width:170px}.project-file-filter>.input:not(.project-file-date){width:190px}.project-file-date-label{margin-left:4px;color:#58685f;font-size:13px;white-space:nowrap}.project-file-filter .project-file-date{width:143px;height:34px;box-sizing:border-box}.project-file-date-separator{color:#89958e;font-size:12px}@media(max-width:1250px){.project-file-filter{flex-wrap:wrap}}';
-      document.head.appendChild(style);
-    })();
-  </script>
-  <script>
     /* 待审批流程：实时列表与优先级提示 */
     (() => {
       const page = document.getElementById('pendingApprovalPage');
@@ -6088,7 +6219,6 @@
         const time = board.querySelector('[data-pending-update-time]'); if (time && !time.textContent) time.textContent = now();
       };
       const refresh = () => { decorate(); const time = page.querySelector('[data-pending-update-time]'); if (time) time.textContent = now(); };
-      new MutationObserver(decorate).observe(page, { childList: true, subtree: true });
       document.addEventListener('click', event => { if (event.target.closest('[data-refresh-pending-processes]')) refresh(); });
       decorate();
 
@@ -6167,37 +6297,163 @@
         });
       };
       normalizeApprovalPages();
-      new MutationObserver(normalizeApprovalPages).observe(document.body, { childList: true, subtree: true });
 
-      const addApprovalCategory = () => {
-        return;
-        const categoryOptions = '<option value="">请选择审批分类</option><option value="数据入库">数据入库</option><option value="数据发布">数据发布</option><option value="BIM公共服务">BIM公共服务</option><option value="质检整改">质检整改</option><option value="其他">其他</option>';
-        const entry = document.getElementById('entryApprovalModal');
-        if (entry && !entry.querySelector('[data-entry-approval-category]')) entry.querySelector('.entry-confirm-block')?.insertAdjacentHTML('beforebegin', `<div class="entry-section-title">审批分类</div><select class="select approval-submit-category" data-entry-approval-category>${categoryOptions.replace('value="数据入库"', 'value="数据入库" selected')}</select>`);
-        const subscription = document.getElementById('subscriptionApplyModal');
-        if (subscription && !subscription.querySelector('[data-subscription-approval-category]')) subscription.querySelector('.subscription-form-row')?.insertAdjacentHTML('beforebegin', `<div class="subscription-form-row"><label class="required">审批分类</label><select class="select approval-submit-category" data-subscription-approval-category>${categoryOptions.replace('value="BIM公共服务"', 'value="BIM公共服务" selected')}</select></div>`);
+      const statisticsPage = document.getElementById('assetStorageStatisticsPage');
+      const pageHost = statisticsPage?.parentElement;
+      const searchPages = {};
+      const searchState = {
+        component: { district: '', profession: '', keyword: '', project: '', componentName: '', componentId: '', modelProfession: '', advanced: false, treeQuery: '', selected: new Set(), expanded: new Set(['给排水专业（2029）']), page: 1, pageSize: 10 },
+        space: { district: '', areaMin: '', areaMax: '', keyword: '', treeQuery: '', selected: new Set(), expanded: new Set(['总图专业', '建筑专业（278875）']), page: 1, pageSize: 10 }
       };
-      addApprovalCategory();
-      new MutationObserver(addApprovalCategory).observe(document.body, { childList: true, subtree: true });
-
-      const originalOpenStats = window.openAssetStatistics;
-      const renderSimpleStats = (tab = 'component') => {
-        const page = document.getElementById('assetStorageStatisticsPage'); if (!page?.classList.contains('active')) return;
-        const component = tab === 'component';
-        const items = component ? [['墙体','12,731,228'],['弯头','12,151,603'],['热浸镀锌钢管','10,733,494'],['水管道','10,419,128'],['幕墙竖梃','6,302,597']] : [['卫生间','143,278'],['阳台','104,509'],['主卧','90,727'],['卧室','85,144'],['起居室','83,519']];
-        page.innerHTML = `<div class="simple-storage-stats"><div class="simple-stats-head"><div><h2>入库数据统计</h2><p>统计范围：平台内已完成解析的模型数据</p></div><div class="simple-stats-tabs"><button class="${component ? 'active' : ''}" type="button" data-simple-stats="component">构件统计</button><button class="${component ? '' : 'active'}" type="button" data-simple-stats="space">空间统计</button></div></div><section class="simple-stats-overview"><article><span>${component ? '入库构件总数' : '入库空间总数'}</span><b>${component ? '150,496,764' : '2,488,587'}</b><small>数据来源：成功解析的 IFC / 模型文件</small></article><article><span>${component ? '构件类型数量' : '空间类型数量'}</span><b>${component ? '2,300' : '128'}</b><small>按解析结果 / output JSON 汇总</small></article></section><section class="simple-stats-ranking"><h3>${component ? '构件数量 TOP5' : '空间数量 TOP5'}</h3><ol>${items.map((item, index) => `<li><span>${index + 1}</span><b>${item[0]}</b><em style="width:${100 - index * 12}%"></em><strong>${item[1]}</strong></li>`).join('')}</ol></section><section class="simple-stats-search"><label>${component ? '构件分类 / 构件标识' : '空间名称 / 空间分类'}</label><input class="input" data-simple-stats-keyword placeholder="请输入${component ? '构件分类或构件标识' : '空间名称或空间分类'}"><button class="btn primary" type="button" data-simple-stats-search="${component ? 'component' : 'space'}">检索</button></section></div>`;
+      window.assetStorageSearchState = searchState;
+      const componentSeed = [
+        ['立式水泵-立式水泵-4139197','立式污水泵','019A9pSszDmuoIfS8qduwg','盐田变电站综合改造项目','盐田区'],
+        ['立式水泵-立式水泵-4139196','立式污水泵','019A9pSszDmuoIfS8qduwh','盐田变电站综合改造项目','盐田区'],
+        ['立式水泵-立式水泵-4139195','立式污水泵','019A9pSszDmuoIfS8qduwi','盐田变电站综合改造项目','盐田区'],
+        ['立式水泵-立式水泵-4139194','立式污水泵','019A9pSszDmuoIfS8qduwj','盐田变电站综合改造项目','盐田区'],
+        ['污水泵-垂直排放2.20 LPS - 60 kPa 压头-12303255','立式污水泵','01Dx7h37rBEeHsSogyM$$2','风格城事花园（03-02地块）','南山区'],
+        ['污水泵-垂直排放2.20 LPS - 60 kPa 压头-12303256','立式污水泵','01Dx7h37rBEeHsSogyM$$D','风格城事花园（03-02地块）','南山区'],
+        ['污水泵-垂直排放2.20 LPS - 60 kPa 压头-12303757','立式污水泵','01Dx7h37rBEeHsSogyM$dO','风格城事花园（03-02地块）','南山区'],
+        ['污水泵-垂直排放2.20 LPS - 60 kPa 压头-12303758','立式污水泵','01Dx7h37rBEeHsSogyM$dR','风格城事花园（03-02地块）','南山区'],
+        ['污水泵-垂直排放2.20 LPS - 60 kPa 压头-12302500','立式污水泵','01Dx7h37rBEeHsSogyM$pn','风格城事花园（03-02地块）','南山区'],
+        ['污水泵-垂直排放2.20 LPS - 60 kPa 压头-12302499','立式污水泵','01Dx7h37rBEeHsSogyM$ps','风格城事花园（03-02地块）','南山区']
+      ];
+      const spaceSeed = [
+        ['1201:无障碍卫生间','8.21','1vNmql8Z58ug5Tv2fP2Sda','住宅空间','观城时尚花园（二期）主体工程','龙华区','龙华区住房和建设局'],
+        ['1326:女卫生间','19.83','3wNxLzCuL8shPvsFR_iS9L','住宅空间','观城时尚花园（二期）主体工程','龙华区','龙华区住房和建设局'],
+        ['1327:男卫生间','17.66','3wNxLzCuL8shPvsFR_iS9T','住宅空间','观城时尚花园（二期）主体工程','龙华区','龙华区住房和建设局'],
+        ['627:卫生间','11.15','1JCqiys0PC48CuewV5nCVX','住宅空间','观城时尚花园（二期）主体工程','龙华区','龙华区住房和建设局'],
+        ['679:男卫生间','29.01','1CNFGrIx16LRU2HNy5bzRi','住宅空间','观城时尚花园（二期）主体工程','龙华区','龙华区住房和建设局'],
+        ['680:无障碍卫生间','5.75','1CNFGrIx16LRU2HNy5bzRc','住宅空间','观城时尚花园（二期）主体工程','龙华区','龙华区住房和建设局'],
+        ['681:女卫生间','23.63','1CNFGrIx16LRU2HNy5bzRU','住宅空间','观城时尚花园（二期）主体工程','龙华区','龙华区住房和建设局'],
+        ['706:无障碍卫生间','10.11','1CNFGrIx16LRU2HNy5bydh','住宅空间','观城时尚花园（二期）主体工程','龙华区','龙华区住房和建设局'],
+        ['853:无障碍卫生间','14.06','2P1dkgS5DDgAgU8T4O9Qjs','住宅空间','观城时尚花园（二期）主体工程','龙华区','龙华区住房和建设局'],
+        ['912:女卫生间','0','2P1dkgS5DDgAgU8T4O9QSw','住宅空间','观城时尚花园（二期）主体工程','龙华区','龙华区住房和建设局']
+      ];
+      const escapeText = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const highlight = (value, keyword) => {
+        const text = String(value ?? ''); const word = String(keyword ?? '').trim();
+        if (!word) return escapeText(text);
+        const index = text.toLowerCase().indexOf(word.toLowerCase());
+        return index < 0 ? escapeText(text) : `${escapeText(text.slice(0,index))}<mark>${escapeText(text.slice(index,index + word.length))}</mark>${escapeText(text.slice(index + word.length))}`;
       };
-      if (originalOpenStats) window.openAssetStatistics = () => { originalOpenStats(); setTimeout(() => renderSimpleStats(), 0); };
+      const makeRows = type => {
+        const state = searchState[type]; const seed = type === 'component' ? componentSeed : spaceSeed;
+        return Array.from({length: state.pageSize}, (_, index) => {
+          const base = [...seed[index % seed.length]]; const absolute = (state.page - 1) * state.pageSize + index;
+          if (absolute >= seed.length) {
+            if (type === 'component') { base[0] = `${base[0]}-${absolute + 1}`; base[2] = `${base[2]}${absolute + 1}`; }
+            else { base[0] = `${base[0]}-${absolute + 1}`; base[2] = `${base[2]}${absolute + 1}`; }
+          }
+          return base;
+        });
+      };
+      const treeTemplate = type => {
+        const state = searchState[type];
+        const groups = type === 'component'
+          ? [['总图专业',[]],['建筑专业',[]],['结构专业',[]],['给排水专业（2029）',['给水','排水','消防','水泵','管道','阀门']],['暖通专业',[]],['电气专业',[]]]
+          : [['总图专业',['休闲娱乐空间','后勤服务空间','交通空间','停车场空间','室外场地空间','楼栋','建筑区域']],['建筑专业（278875）',['政府空间（2）']]];
+        return groups.map(([name, children]) => {
+          const expanded = state.expanded.has(name); const hasChildren = children.length > 0;
+          return `<li class="asset-tree-group" data-tree-label="${escapeText(name)}"><div><button type="button" class="asset-tree-arrow" data-tree-toggle="${escapeText(name)}" ${hasChildren ? '' : 'disabled'}>${hasChildren ? (expanded ? '−' : '+') : '·'}</button><label><input type="checkbox" data-tree-check="${escapeText(name)}" ${state.selected.has(name) ? 'checked' : ''}>${escapeText(name)}</label></div>${hasChildren && expanded ? `<ul>${children.map(child => `<li data-tree-label="${escapeText(child)}"><span></span><label><input type="checkbox" data-tree-check="${escapeText(child)}" ${state.selected.has(child) ? 'checked' : ''}>${escapeText(child)}</label></li>`).join('')}</ul>` : ''}</li>`;
+        }).join('');
+      };
+      const pagerTemplate = type => {
+        const state = searchState[type]; const last = type === 'component' ? 203 : 27888; const total = type === 'component' ? '2029' : '278875';
+        const pages = [1,2,3,4,5];
+        return `<div class="asset-result-pager"><span>共 ${total} 条记录</span><button type="button" data-page-move="prev" ${state.page === 1 ? 'disabled' : ''}>‹</button>${pages.map(page => `<button type="button" data-page-number="${page}" class="${state.page === page ? 'active' : ''}">${page}</button>`).join('')}<i>…</i><button type="button" data-page-number="${last}" class="${state.page === last ? 'active' : ''}">${last}</button><button type="button" data-page-move="next" ${state.page === last ? 'disabled' : ''}>›</button><select data-page-size><option value="10" ${state.pageSize === 10 ? 'selected' : ''}>10条/页</option><option value="20" ${state.pageSize === 20 ? 'selected' : ''}>20条/页</option><option value="50" ${state.pageSize === 50 ? 'selected' : ''}>50条/页</option></select><label>跳至 <input data-page-jump inputmode="numeric"> 页</label><button type="button" data-page-jump-run>确定</button></div>`;
+      };
+      const renderResultPage = type => {
+        const page = searchPages[type]; if (!page) return; const state = searchState[type]; const component = type === 'component';
+        const topFilter = component
+          ? `<select class="select" data-result-field="district"><option value="">请选择行政区划</option><option ${state.district === '盐田区' ? 'selected' : ''}>盐田区</option><option ${state.district === '南山区' ? 'selected' : ''}>南山区</option></select><select class="select" data-result-field="profession"><option value="">请选择专业</option><option ${state.profession === '给排水专业' ? 'selected' : ''}>给排水专业</option><option ${state.profession === '建筑专业' ? 'selected' : ''}>建筑专业</option></select><label class="asset-inline-field"><span>构件标识</span><input class="input" data-result-field="keyword" value="${escapeText(state.keyword)}"></label><button class="btn light" type="button" data-advanced-toggle>${state.advanced ? '收起高级搜索' : '高级搜索⌄'}</button><button class="btn primary" type="button" data-result-query>搜索</button>`
+          : `<select class="select" data-result-field="district"><option value="">请选择行政区划</option><option ${state.district === '龙华区' ? 'selected' : ''}>龙华区</option></select><label class="asset-inline-field area"><span>面积范围</span><input class="input" data-result-field="areaMin" value="${escapeText(state.areaMin)}" placeholder="填写面积范围"><b>至</b><input class="input" data-result-field="areaMax" value="${escapeText(state.areaMax)}" placeholder="填写面积范围"></label><input class="input asset-keyword" data-result-field="keyword" value="${escapeText(state.keyword)}" placeholder="空间名称 / 关键字"><button class="btn primary" type="button" data-result-query>查询</button>`;
+        const advanced = component && state.advanced ? `<div class="asset-advanced-fields"><input class="input" data-result-field="project" value="${escapeText(state.project)}" placeholder="工程名称"><input class="input" data-result-field="componentName" value="${escapeText(state.componentName)}" placeholder="构件名称"><input class="input" data-result-field="componentId" value="${escapeText(state.componentId)}" placeholder="构件ID"><input class="input" data-result-field="modelProfession" value="${escapeText(state.modelProfession)}" placeholder="模型专业"></div>` : '';
+        const rows = makeRows(type);
+        const head = component ? '<th>序号</th><th>实例名称</th><th>构件标识</th><th>实例id</th><th>工程名称</th><th>行政区划</th><th>操作</th>' : '<th>序号</th><th>实例名称</th><th>面积</th><th>实例id</th><th>空间标识</th><th>工程名称</th><th>行政区划</th><th>主管部门</th><th>操作</th>';
+        const body = rows.map((row,index) => {
+          const number = (state.page - 1) * state.pageSize + index + 1; const encoded = encodeURIComponent(JSON.stringify(row));
+          return component
+            ? `<tr><td>${number}</td><td>${highlight(row[0], state.keyword)}</td><td>${highlight(row[1], state.keyword)}</td><td title="${escapeText(row[2])}">${escapeText(row[2])}</td><td>${escapeText(row[3])}</td><td>${escapeText(row[4])}</td><td class="asset-row-actions"><button data-result-action="构件" data-row="${encoded}">构件</button><button data-result-action="属性" data-row="${encoded}">属性</button><button data-result-action="单体" data-row="${encoded}">单体</button><button data-result-action="项目" data-row="${encoded}">项目</button></td></tr>`
+            : `<tr><td>${number}</td><td>${highlight(row[0], state.keyword)}</td><td>${escapeText(row[1])}</td><td title="${escapeText(row[2])}">${escapeText(row[2])}</td><td>${escapeText(row[3])}</td><td>${escapeText(row[4])}</td><td>${escapeText(row[5])}</td><td>${escapeText(row[6])}</td><td class="asset-row-actions"><button data-result-action="查看空间" data-row="${encoded}">查看空间</button><button data-result-action="查看单体" data-row="${encoded}">查看单体</button></td></tr>`;
+        }).join('');
+        page.innerHTML = `<div class="asset-search-workbench" data-search-type="${type}"><div class="asset-search-page-head"><button type="button" data-return-statistics>‹ 返回入库数据统计</button><span>入库数据统计分析 &gt; ${component ? '构件检索' : '空间检索'}</span></div><section class="asset-result-filter"><div>${topFilter}</div>${advanced}</section><section class="asset-result-layout"><aside class="asset-result-tree"><input class="input" data-result-tree-search value="${escapeText(state.treeQuery)}" placeholder="请输入名称进行搜索"><ul>${treeTemplate(type)}</ul></aside><main class="asset-result-main"><div class="asset-result-summary"><b>${component ? '构件检索结果' : '空间检索结果'}</b><span>${state.selected.size ? `已筛选：${[...state.selected].map(escapeText).join('、')}` : '全部分类'}</span></div><div class="asset-result-table-scroll"><table class="asset-result-table ${component ? 'component' : 'space'}"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${pagerTemplate(type)}</main></section></div>`;
+        if (state.treeQuery) applyTreeQuery(page, state.treeQuery);
+      };
+      const applyTreeQuery = (page, value) => {
+        const query = String(value || '').trim().toLowerCase();
+        page.querySelectorAll('.asset-tree-group').forEach(group => {
+          const ownMatch = group.dataset.treeLabel.toLowerCase().includes(query);
+          const children = [...group.querySelectorAll('ul > [data-tree-label]')];
+          const hasMatchingChild = children.some(child => child.dataset.treeLabel.toLowerCase().includes(query));
+          group.hidden = !!query && !ownMatch && !hasMatchingChild;
+          children.forEach(child => { child.hidden = !!query && !ownMatch && !child.dataset.treeLabel.toLowerCase().includes(query); });
+        });
+      };
+      const showResultPage = type => {
+        document.querySelectorAll('.page').forEach(item => item.classList.remove('active'));
+        searchPages[type].classList.add('active');
+        renderMenu('data', searchPages[type].id);
+        const secondary = document.getElementById('secondarySide');
+        if (secondary) secondary.innerHTML = '<button class="sub-btn" type="button" data-open-asset-catalog>◩ 数据资产目录</button><button class="sub-btn active" type="button" data-open-asset-stats-page>◩ 入库数据统计</button><button class="sub-btn" type="button">◩ 数据可视化统计</button><button class="sub-btn" type="button">◩ 资产全览图</button>';
+        const breadcrumb = document.getElementById('breadcrumb'); if (breadcrumb) breadcrumb.textContent = `项目数据管理 / 数据资产全览 / 入库数据统计分析 / ${type === 'component' ? '构件检索' : '空间检索'}`;
+        renderResultPage(type);
+      };
+      if (pageHost) ['component','space'].forEach(type => {
+        const page = document.createElement('section'); page.className = 'page asset-search-result-page'; page.id = `${type}SearchResultPage`; pageHost.appendChild(page); searchPages[type] = page;
+      });
+      const detailDrawer = document.createElement('div'); detailDrawer.className = 'modal-mask drawer-mask asset-search-detail-drawer'; detailDrawer.id = 'assetSearchDetailDrawer'; detailDrawer.innerHTML = '<aside class="drawer"><div class="modal-head"><span data-search-detail-title>检索详情</span><button class="modal-close" type="button" data-close-search-detail>×</button></div><div class="drawer-body" data-search-detail-body></div></aside>'; document.body.appendChild(detailDrawer);
+      const openSearchDetail = (type, action, row) => {
+        const component = type === 'component'; const labels = component ? ['实例名称','构件标识','实例ID','工程名称','行政区划'] : ['实例名称','面积','实例ID','空间标识','工程名称','行政区划','主管部门'];
+        detailDrawer.querySelector('[data-search-detail-title]').textContent = action;
+        detailDrawer.querySelector('[data-search-detail-body]').innerHTML = `<div class="asset-detail-block"><h3>${escapeText(action)}信息</h3><dl>${labels.map((label,index) => `<div><dt>${label}</dt><dd>${escapeText(row[index])}</dd></div>`).join('')}</dl>${action === '属性' ? '<h3>构件属性</h3><dl><div><dt>尺寸参数</dt><dd>600 × 450 × 1250 mm</dd></div><div><dt>材料</dt><dd>铸铁 / 不锈钢组件</dd></div><div><dt>专业</dt><dd>给排水专业</dd></div><div><dt>所属模型</dt><dd>机电综合模型 V2.0</dd></div></dl>' : ''}</div>`;
+        detailDrawer.classList.add('open');
+      };
       document.addEventListener('click', event => {
-        const tab = event.target.closest('[data-simple-stats]');
-        if (tab) { event.preventDefault(); event.stopImmediatePropagation(); renderSimpleStats(tab.dataset.simpleStats); return; }
-        const search = event.target.closest('[data-simple-stats-search]');
-        if (search) { const keyword = document.querySelector('[data-simple-stats-keyword]')?.value.trim(); if (!keyword) { alert('请填写检索条件。'); return; } window.openAssetCatalog?.(); setTimeout(() => alert(`已跳转至${search.dataset.simpleStats === 'component' ? '构件' : '空间'}分类结果，检索关键词：${keyword}`), 0); }
+        const open = event.target.closest('[data-open-search-result]');
+        if (open) {
+          const type = open.dataset.openSearchResult; const state = searchState[type]; const root = statisticsPage;
+          let changed = false;
+          root.querySelectorAll('[data-stats-field]').forEach(field => { const value = field.value.trim(); if (state[field.dataset.statsField] !== value) changed = true; state[field.dataset.statsField] = value; });
+          if (changed) state.page = 1;
+          showResultPage(type); return;
+        }
+        const workbench = event.target.closest('[data-search-type]'); if (!workbench) {
+          if (event.target.closest('[data-close-search-detail]') || event.target === detailDrawer) detailDrawer.classList.remove('open');
+          return;
+        }
+        const type = workbench.dataset.searchType; const state = searchState[type];
+        if (event.target.closest('[data-return-statistics]')) { window.openAssetStatistics?.(); return; }
+        if (event.target.closest('[data-advanced-toggle]')) { state.advanced = !state.advanced; renderResultPage(type); return; }
+        if (event.target.closest('[data-result-query]')) { workbench.querySelectorAll('[data-result-field]').forEach(field => { state[field.dataset.resultField] = field.value.trim(); }); state.page = 1; renderResultPage(type); return; }
+        const toggle = event.target.closest('[data-tree-toggle]'); if (toggle) { const label = toggle.dataset.treeToggle; state.expanded.has(label) ? state.expanded.delete(label) : state.expanded.add(label); renderResultPage(type); return; }
+        const number = event.target.closest('[data-page-number]'); if (number) { state.page = Number(number.dataset.pageNumber); renderResultPage(type); return; }
+        const move = event.target.closest('[data-page-move]'); if (move) { const last = type === 'component' ? 203 : 27888; state.page = Math.max(1, Math.min(last, state.page + (move.dataset.pageMove === 'next' ? 1 : -1))); renderResultPage(type); return; }
+        if (event.target.closest('[data-page-jump-run]')) { const input = workbench.querySelector('[data-page-jump]'); const last = type === 'component' ? 203 : 27888; const target = Number(input?.value); if (target >= 1 && target <= last) { state.page = target; renderResultPage(type); } else { input?.focus(); } return; }
+        const action = event.target.closest('[data-result-action]'); if (action) { openSearchDetail(type, action.dataset.resultAction, JSON.parse(decodeURIComponent(action.dataset.row))); }
+      }, true);
+      document.addEventListener('change', event => {
+        const workbench = event.target.closest('[data-search-type]'); if (!workbench) return; const type = workbench.dataset.searchType; const state = searchState[type];
+        if (event.target.matches('[data-tree-check]')) { event.target.checked ? state.selected.add(event.target.dataset.treeCheck) : state.selected.delete(event.target.dataset.treeCheck); state.page = 1; renderResultPage(type); }
+        if (event.target.matches('[data-page-size]')) { state.pageSize = Number(event.target.value); state.page = 1; renderResultPage(type); }
+      }, true);
+      document.addEventListener('input', event => {
+        const input = event.target.closest('[data-result-tree-search]'); if (!input) return; const workbench = input.closest('[data-search-type]'); const state = searchState[workbench.dataset.searchType]; state.treeQuery = input.value; applyTreeQuery(workbench, input.value);
       }, true);
 
-      const removeStaticClassificationTree = () => document.querySelectorAll('.standardized-caption,.standardized-project-tree').forEach(item => item.remove());
-      removeStaticClassificationTree();
-      new MutationObserver(removeStaticClassificationTree).observe(document.getElementById('projectPage') || document.body, { childList: true, subtree: true });
+      const searchStyle = document.createElement('style');
+      searchStyle.textContent = `
+        .asset-search-entry{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.asset-search-entry .select{width:180px}.asset-search-entry .input{width:230px}.asset-search-entry .input.short{width:135px}.asset-search-entry .btn{height:34px;border-radius:4px}
+        .layout:has(.asset-search-result-page.active){width:100vw;max-width:100vw;grid-template-columns:54px 90px minmax(0,1fr);overflow:hidden}.layout:has(.asset-search-result-page.active)>main,.content:has(.asset-search-result-page.active){min-width:0;max-width:100%;overflow:hidden}.asset-search-result-page{max-width:100%;padding:0!important;overflow:hidden}.asset-search-workbench{height:calc(100vh - 80px);min-height:610px;background:#f5f7f5;overflow:hidden}.asset-search-page-head{display:flex;align-items:center;gap:13px;height:38px;padding:0 14px;border-bottom:1px solid #e3e9e5;background:#fff;color:#78857d;font-size:12px}.asset-search-page-head button{padding:0;border:0;background:transparent;color:#24764c;cursor:pointer;font-size:12px}
+        .asset-result-filter{margin:10px 14px;padding:12px 14px;border:1px solid #e0e8e2;background:#fff}.asset-result-filter>div{display:flex;align-items:center;gap:10px;min-height:34px}.asset-result-filter .select{width:190px;height:34px}.asset-result-filter .input{height:34px;box-sizing:border-box}.asset-inline-field{display:flex;align-items:center;width:min(390px,32vw);height:34px;border:1px solid #d7e1da;background:#fff}.asset-inline-field>span{min-width:86px;padding:0 11px;border-right:1px solid #dfe6e1;color:#59685f;font-size:12px}.asset-inline-field>.input{min-width:0;flex:1;border:0}.asset-inline-field.area{width:min(485px,40vw)}.asset-inline-field.area>.input{width:145px}.asset-inline-field.area>b{padding:0 8px;color:#56645c;font-size:12px}.asset-keyword{min-width:210px;flex:1}.asset-result-filter .btn{height:34px;border-radius:4px;white-space:nowrap}.asset-advanced-fields{display:grid!important;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px!important;margin-top:10px;padding-top:10px;border-top:1px dashed #e1e8e3}
+        .asset-result-layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:10px;height:calc(100% - 116px);padding:0 14px 12px;box-sizing:border-box}.asset-result-tree{min-height:0;padding:12px;border:1px solid #dde6df;background:#fff;overflow:auto}.asset-result-tree>.input{width:100%;height:34px;margin-bottom:10px;box-sizing:border-box}.asset-result-tree ul{margin:0;padding:0;list-style:none}.asset-tree-group>div,.asset-tree-group li{display:flex;align-items:center;min-height:34px;color:#526158;font-size:12px}.asset-tree-group>div:hover,.asset-tree-group li:hover{background:#f1f8f3}.asset-tree-group ul{padding-left:25px;border-left:1px solid #e5ebe7}.asset-tree-group label{display:flex;align-items:center;gap:7px;min-width:0;cursor:pointer}.asset-tree-group input{accent-color:#267c50}.asset-tree-arrow{width:24px;border:0;background:transparent;color:#498064;cursor:pointer}.asset-tree-arrow:disabled{cursor:default;color:#aeb8b1}.asset-tree-group li>span{width:24px}
+        .asset-result-main{display:flex;min-width:0;min-height:0;flex-direction:column;border:1px solid #dde6df;background:#fff}.asset-result-summary{display:flex;align-items:center;gap:12px;height:38px;padding:0 12px;border-bottom:1px solid #e2e8e4}.asset-result-summary b{color:#33453a;font-size:13px}.asset-result-summary span{color:#7b8980;font-size:12px}.asset-result-table-scroll{min-height:0;flex:1;overflow:auto}.asset-result-table{width:100%;min-width:1120px;border-collapse:collapse;table-layout:fixed}.asset-result-table.space{min-width:1380px}.asset-result-table th{position:sticky;z-index:2;top:0;height:40px;padding:0 10px;border-right:1px solid #e3e8e5;background:#f0f3f1;color:#3e4b43;text-align:left;font-size:12px;font-weight:650;white-space:nowrap}.asset-result-table td{height:46px;padding:0 10px;border-right:1px solid #edf0ee;border-bottom:1px solid #e7ece8;color:#5d6a62;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-result-table tbody tr:hover{background:#f7fbf8}.asset-result-table th:first-child,.asset-result-table td:first-child{width:50px;text-align:center}.asset-result-table.component th:nth-child(2),.asset-result-table.component td:nth-child(2){width:270px}.asset-result-table.component th:nth-child(3),.asset-result-table.component td:nth-child(3){width:120px}.asset-result-table.component th:nth-child(4),.asset-result-table.component td:nth-child(4){width:190px}.asset-result-table.component th:nth-child(5),.asset-result-table.component td:nth-child(5){width:230px}.asset-result-table.component th:nth-child(6),.asset-result-table.component td:nth-child(6){width:85px}.asset-result-table.component th:last-child,.asset-result-table.component td:last-child{width:185px}.asset-result-table.space th:nth-child(2),.asset-result-table.space td:nth-child(2){width:185px}.asset-result-table.space th:nth-child(3),.asset-result-table.space td:nth-child(3){width:65px}.asset-result-table.space th:nth-child(4),.asset-result-table.space td:nth-child(4){width:190px}.asset-result-table.space th:nth-child(5),.asset-result-table.space td:nth-child(5){width:105px}.asset-result-table.space th:nth-child(6),.asset-result-table.space td:nth-child(6){width:245px}.asset-result-table.space th:nth-child(7),.asset-result-table.space td:nth-child(7){width:85px}.asset-result-table.space th:nth-child(8),.asset-result-table.space td:nth-child(8){width:210px}.asset-result-table.space th:last-child,.asset-result-table.space td:last-child{width:150px}.asset-result-table mark{padding:0;background:transparent;color:#2a8456}.asset-row-actions{overflow:visible!important}.asset-row-actions button{padding:0 5px;border:0;background:transparent;color:#237b4e;cursor:pointer;font-size:12px}.asset-row-actions button:hover{text-decoration:underline}
+        .asset-result-pager{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-height:46px;padding:0 10px;border-top:1px solid #e4eae6;color:#6f7c74;font-size:12px;white-space:nowrap}.asset-result-pager>button{min-width:28px;height:28px;padding:0 7px;border:1px solid #dbe3dd;border-radius:3px;background:#fff;color:#5d6b62;cursor:pointer}.asset-result-pager>button.active{border-color:#278052;background:#eaf5ee;color:#1e7549}.asset-result-pager>button:disabled{color:#bdc5c0;cursor:not-allowed}.asset-result-pager i{font-style:normal}.asset-result-pager select{height:29px;border:1px solid #dbe3dd;color:#5d6b62}.asset-result-pager label{display:flex;align-items:center;gap:5px}.asset-result-pager input{width:42px;height:25px;border:1px solid #dbe3dd;text-align:center}
+        .asset-search-detail-drawer .drawer{width:440px}.asset-detail-block{padding:18px}.asset-detail-block h3{margin:0 0 12px;padding-left:9px;border-left:3px solid #2a8254;color:#364a3d;font-size:14px}.asset-detail-block h3:not(:first-child){margin-top:24px}.asset-detail-block dl{margin:0;border-top:1px solid #e2e9e4}.asset-detail-block dl>div{display:grid;grid-template-columns:105px 1fr;padding:11px 4px;border-bottom:1px solid #edf1ee}.asset-detail-block dt{color:#849088;font-size:12px}.asset-detail-block dd{margin:0;color:#46584d;font-size:12px;line-height:1.55;word-break:break-all}
+        @media(max-width:1200px){.asset-result-layout{grid-template-columns:230px minmax(0,1fr)}.asset-result-filter>div{flex-wrap:wrap}.asset-inline-field,.asset-inline-field.area{width:360px}.asset-search-workbench{overflow:auto}.asset-result-layout{height:calc(100% - 158px)}.asset-advanced-fields{grid-template-columns:repeat(2,minmax(150px,1fr))}}
+      `;
+      document.head.appendChild(searchStyle);
+
       const viewer = document.getElementById('semanticModelBrowserModal');
       if (viewer && !viewer.querySelector('[data-toggle-file-tree]')) {
         viewer.querySelector('.semantic-viewer-bar')?.insertAdjacentHTML('beforeend', '<button class="btn light" type="button" data-toggle-file-tree>分类树</button>');
@@ -6222,11 +6478,497 @@
         const title = table.closest('.flow-ranking-card')?.querySelector('.flow-ranking-head h3'); if (title) title.textContent = '用户下载统计';
       });
       removeDownloadDetail();
-      new MutationObserver(removeDownloadDetail).observe(document.body, { childList: true, subtree: true });
 
       const style = document.createElement('style');
-      style.textContent = '.approval-category-readonly{display:inline-block;padding:3px 8px;border-radius:3px;background:#eef7f1;color:#28764d;font-size:12px}.approval-submit-category{width:100%;height:36px;margin:0 0 16px}.simple-storage-stats{max-width:1080px;margin:0 auto;padding:6px 0 28px}.simple-stats-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}.simple-stats-head h2{margin:0 0 6px;color:#284638;font-size:22px}.simple-stats-head p{margin:0;color:#718279;font-size:13px}.simple-stats-tabs button{padding:8px 16px;border:1px solid #cfe0d4;background:#fff;color:#587064;cursor:pointer}.simple-stats-tabs button.active{border-color:#168452;background:#168452;color:#fff}.simple-stats-overview{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.simple-stats-overview article,.simple-stats-ranking,.simple-stats-search{margin-top:14px;padding:18px;border:1px solid #dce8df;background:#fff}.simple-stats-overview span,.simple-stats-overview small{display:block;color:#77877e;font-size:12px}.simple-stats-overview b{display:block;margin:8px 0;color:#176c44;font-size:28px}.simple-stats-ranking h3{margin:0 0 13px;color:#385648;font-size:15px}.simple-stats-ranking ol{margin:0;padding:0;list-style:none}.simple-stats-ranking li{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #edf2ee}.simple-stats-ranking li span{width:20px;color:#5a7d68}.simple-stats-ranking li b{width:155px}.simple-stats-ranking li em{height:9px;max-width:58%;background:#49a875}.simple-stats-ranking li strong{margin-left:auto;color:#4f6257}.simple-stats-search{display:flex;align-items:center;gap:10px}.simple-stats-search label{color:#435b4c;font-weight:650}.simple-stats-search .input{width:310px}.project-tree-caption{border-bottom:1px solid #e3ebe5}.semantic-viewer-original-tree{width:220px;padding:14px;border-right:1px solid #e3ebe6;background:#f8faf9}.semantic-viewer-original-tree b{display:block;margin-bottom:10px;color:#465d4e}.semantic-viewer-original-tree button{display:block;width:100%;padding:8px;border:0;background:transparent;color:#617369;text-align:left}.file-classification-panel{border-left:1px solid #e3ebe6}.semantic-viewer-bar .btn{margin-left:auto}';
+      style.textContent = `
+        .approval-category-readonly{display:inline-block;padding:3px 8px;border-radius:3px;background:#eef7f1;color:#28764d;font-size:12px}
+        .approval-submit-category{width:100%;height:36px;margin:0 0 16px}
+        .project-tree-caption{border-bottom:1px solid #e3ebe5}
+        .semantic-viewer-original-tree{width:220px;padding:14px;border-right:1px solid #e3ebe6;background:#f8faf9}
+        .semantic-viewer-original-tree b{display:block;margin-bottom:10px;color:#465d4e}
+        .semantic-viewer-original-tree button{display:block;width:100%;padding:8px;border:0;background:transparent;color:#617369;text-align:left}
+        .file-classification-panel{border-left:1px solid #e3ebe6}
+        .semantic-viewer-bar .btn{margin-left:auto}
+      `;
       document.head.appendChild(style);
+    })();
+  </script>
+  <script>
+    /* 项目详情：恢复原始项目级操作与专业文件管理的唯一实现 */
+    (() => {
+      const page = document.getElementById('projectPage');
+      if (!page) return;
+
+      let currentView = 'professional';
+      let qualityCheckPassed = false;
+      let pendingReuploadRow = null;
+
+      const showProjectToast = message => {
+        document.querySelector('.project-page-toast')?.remove();
+        const toast = document.createElement('div');
+        toast.className = 'project-page-toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        window.setTimeout(() => toast.remove(), 1800);
+      };
+
+      const activateTree = target => {
+        page.querySelectorAll('[data-project-profession]').forEach(item => item.classList.toggle('active', item === target));
+      };
+
+      const showRestoredView = (view, target, profession = '') => {
+        currentView = 'professional';
+        const projectView = page.querySelector('[data-restored-project-view="project"]');
+        const professionalView = page.querySelector('[data-restored-project-view="professional"]');
+        if (projectView) projectView.hidden = false;
+        if (professionalView) professionalView.hidden = false;
+        const selected = view === 'professional' && target ? target : page.querySelector('[data-project-profession].active') || page.querySelector('[data-project-profession]');
+        if (!selected) return;
+        activateTree(selected);
+        const title = page.querySelector('[data-restored-profession-title]');
+        if (title) title.textContent = profession || selected.dataset.projectProfession;
+      };
+
+      const syncApprovalState = () => {
+        const button = page.querySelector('#entryApprovalButton');
+        const startButton = page.querySelector('#startDataQualityCheck');
+        const resultButton = page.querySelector('.restored-qc-result-button');
+        if (!button || !startButton || !resultButton) return;
+        const submitted = window.entryApprovalSubmitted === true;
+
+        startButton.disabled = false;
+        startButton.textContent = qualityCheckPassed ? '重新发起数据质检' : '发起数据质检';
+        startButton.className = qualityCheckPassed ? 'btn light restored-flow-control restored-qc-rerun' : 'btn primary restored-flow-control';
+        startButton.title = qualityCheckPassed ? '再次使用当前项目绑定标准发起数据质检' : '使用当前项目绑定标准发起数据质检';
+
+        resultButton.disabled = !qualityCheckPassed;
+        resultButton.textContent = qualityCheckPassed ? '数据质检结果' : '暂不可查看';
+        resultButton.className = qualityCheckPassed ? 'btn restored-qc-result-button' : 'restored-flow-state restored-qc-result-button';
+
+        button.disabled = !qualityCheckPassed;
+        button.title = !qualityCheckPassed ? '请先完成数据质检' : submitted ? '查看已提交的审批流程' : '';
+        button.textContent = submitted ? '查看审批流' : qualityCheckPassed ? '审批入库' : '未满足条件';
+        button.className = qualityCheckPassed && !submitted
+          ? 'btn primary restored-flow-control restored-entry-ready'
+          : submitted
+            ? 'btn light restored-flow-control restored-approval-view'
+            : 'restored-flow-state restored-flow-control';
+      };
+
+      const runFileFilter = () => {
+        const workspace = page.querySelector('[data-restored-project-view="professional"]');
+        if (!workspace) return;
+        const type = workspace.querySelector('[data-project-file-type]')?.value.toLowerCase() || '';
+        const keyword = workspace.querySelector('[data-project-file-name]')?.value.trim().toLowerCase() || '';
+        const start = workspace.querySelector('[data-project-file-date-start]')?.value || '';
+        const end = workspace.querySelector('[data-project-file-date-end]')?.value || '';
+        workspace.querySelectorAll('tbody .file-row').forEach(row => {
+          const fileName = row.cells[0]?.textContent.toLowerCase() || '';
+          const fileType = row.cells[1]?.textContent.trim().toLowerCase() || '';
+          const uploaded = (row.cells[5]?.textContent.match(/\d{4}-\d{2}-\d{2}/) || [''])[0];
+          row.hidden = Boolean(
+            (type && fileType !== type) ||
+            (keyword && !fileName.includes(keyword)) ||
+            (start && uploaded < start) ||
+            (end && uploaded > end)
+          );
+        });
+      };
+
+      page.addEventListener('click', event => {
+        const detailToggle = event.target.closest('.restored-info-more');
+        if (detailToggle) {
+          const fields = page.querySelector('[data-project-detail-fields]');
+          if (!fields) return;
+          const expanded = detailToggle.getAttribute('aria-expanded') === 'true';
+          fields.hidden = expanded;
+          detailToggle.setAttribute('aria-expanded', String(!expanded));
+          detailToggle.textContent = expanded ? '更多详情⌄' : '收起详情⌃';
+          return;
+        }
+
+        const root = event.target.closest('[data-project-root]');
+        if (root) {
+          const expanded = root.getAttribute('aria-expanded') !== 'false';
+          root.setAttribute('aria-expanded', String(!expanded));
+          const label = root.querySelector('[data-project-root-label]');
+          if (label) label.textContent = `${expanded ? '›' : '⌄'}　通天道人`;
+          page.querySelectorAll('[data-project-profession]').forEach(item => { item.hidden = expanded; });
+          return;
+        }
+
+        const profession = event.target.closest('[data-project-profession]');
+        if (profession) {
+          showRestoredView('professional', profession, profession.dataset.projectProfession);
+          return;
+        }
+
+        if (event.target.closest('[data-run-project-file-filter]')) {
+          runFileFilter();
+          return;
+        }
+
+        if (event.target.closest('[data-reset-project-file-filter]')) {
+          page.querySelector('[data-project-file-type]').value = '';
+          page.querySelector('[data-project-file-name]').value = '';
+          page.querySelector('[data-project-file-date-start]').value = '';
+          page.querySelector('[data-project-file-date-end]').value = '';
+          runFileFilter();
+          return;
+        }
+
+        if (event.target.closest('#projectRecheckButton')) {
+          showProjectToast('已重新发起完整性检查');
+          return;
+        }
+
+        if (event.target.closest('#startDataQualityCheck')) {
+          const isRepeatedQualityCheck = qualityCheckPassed;
+          qualityCheckPassed = true;
+          syncApprovalState();
+          showProjectToast(isRepeatedQualityCheck ? '数据质检已重新发起，可查看最新数据质检结果' : '数据质检已完成，可查看数据质检结果');
+          return;
+        }
+
+        const fileAction = event.target.closest('.restored-file-table .file-row .link');
+        if (!fileAction) return;
+        const action = fileAction.textContent.trim();
+        if (action === '重新上传') {
+          pendingReuploadRow = fileAction.closest('.file-row');
+          return;
+        }
+        if (action === '删除') {
+          fileAction.closest('.file-row')?.remove();
+          showProjectToast('文件已删除');
+        }
+      });
+
+      page.addEventListener('keydown', event => {
+        if ((event.key === 'Enter' || event.key === ' ') && event.target.closest('[data-project-root]')) {
+          event.preventDefault();
+          event.target.closest('[data-project-root]').click();
+          return;
+        }
+        if (event.key === 'Enter' && event.target.closest('[data-project-file-name]')) runFileFilter();
+      });
+
+      document.addEventListener('click', event => {
+        if (event.target.closest('[data-page-to="projectPage"]')) {
+          const selected = page.querySelector('[data-project-profession].active') || page.querySelector('[data-project-profession]');
+          showRestoredView('professional', selected, selected?.dataset.projectProfession || '');
+        }
+        if (pendingReuploadRow && event.target.closest('#confirmReuploadWithChange')) {
+          const status = pendingReuploadRow.querySelector('td:nth-child(7) .status-tag');
+          if (status) {
+            status.textContent = '待重新质检';
+            status.className = 'status-tag wait';
+          }
+          qualityCheckPassed = false;
+          pendingReuploadRow = null;
+          syncApprovalState();
+          showProjectToast('重新上传成功，请再次发起数据质检');
+        }
+      });
+
+      document.addEventListener('approval-submitted', () => {
+        window.entryApprovalSubmitted = true;
+        syncApprovalState();
+        showProjectToast('审批已提交');
+      });
+
+      const style = document.createElement('style');
+      style.id = 'restored-project-page-style';
+      style.textContent = `
+        #projectPage .restored-project-info{padding:0 14px;margin-bottom:8px}
+        #projectPage .restored-project-summary-row{display:flex;height:56px;align-items:center;justify-content:space-between}
+        #projectPage .restored-project-info .project-title{margin:0;font-size:16px}
+        #projectPage .restored-project-info .info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 18px;padding:11px 0 13px;border-top:1px solid #edf1ee}
+        #projectPage .restored-project-info .info-grid[hidden]{display:none!important}
+        #projectPage .restored-project-info .info-line{color:#748078;font-size:12px}
+        #projectPage .restored-project-info .info-line span{color:#3f4f46}
+        #projectPage .restored-standard-link{padding:0;font-size:12px}
+        #projectPage .restored-info-more{position:static;padding:4px 0;color:#517261;font-size:12px}
+        #projectPage .restored-project-data{display:grid;grid-template-columns:184px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);min-height:0;padding:0}
+        #projectPage .restored-project-tree{grid-column:1;grid-row:2;padding:8px 8px;border-right:1px solid #edf1ee;background:#fbfcfb}
+        #projectPage .restored-project-tree .tree{min-height:0}
+        #projectPage .restored-project-tree .tree-row{display:flex;width:100%;min-height:34px;align-items:center;border:0;border-radius:4px;background:transparent;color:#4c5d53;text-align:left;cursor:pointer}
+        #projectPage .restored-project-tree .tree-row:hover{background:#f4f7f5;color:#176f46}
+        #projectPage .restored-project-tree .restored-profession-node.active{background:#eaf5ed;color:#176f46}
+        #projectPage .restored-project-tree [data-project-profession][hidden]{display:none!important}
+        #projectPage .restored-project-root{font-weight:600}
+        #projectPage .restored-profession-node{padding-left:14px}
+        #projectPage .restored-project-main{display:contents}
+        #projectPage .restored-project-view{padding-top:0}
+        #projectPage [data-restored-project-view="project"]{grid-column:1/-1;grid-row:1;padding:0 14px;border-bottom:1px solid #e2e9e4}
+        #projectPage .restored-professional-view{grid-column:2;grid-row:2;min-width:0;overflow-x:auto;padding:0 12px 10px}
+        #projectPage .restored-view-title{height:36px;border-bottom:1px solid #e7ece9;color:#34483c;font-size:15px;font-weight:650;line-height:36px}
+        #projectPage .restored-project-toolbar{display:block;min-height:84px}
+        #projectPage .restored-status-row{display:flex;height:30px;align-items:center;border-bottom:1px solid #f0f3f1}
+        #projectPage .restored-integrity-state{display:flex;align-items:center;gap:4px;white-space:nowrap;color:#66756c;font-size:12px}
+        #projectPage .restored-integrity-state>i{width:7px;height:7px;border-radius:50%;background:#27915b}
+        #projectPage .restored-integrity-state strong{color:#238051;font-weight:600}
+        #projectPage .restored-integrity-state .link{margin-left:8px;padding-left:9px;border-left:1px solid #dfe6e1}
+        #projectPage .restored-operation-row,#projectPage .restored-flow-sequence,#projectPage .restored-aux-actions{display:flex;align-items:center}
+        #projectPage .restored-operation-row{min-height:54px;gap:8px}
+        #projectPage .restored-flow-sequence{gap:7px;min-width:0}
+        #projectPage .restored-flow-node{display:flex;min-width:104px;flex-direction:column;align-items:flex-start;gap:3px}
+        #projectPage .restored-flow-complete{min-width:172px}
+        #projectPage .restored-flow-node-actions{display:flex;align-items:center;gap:6px}
+        #projectPage .restored-flow-title{color:#647269;font-size:11px;line-height:14px;white-space:nowrap}
+        #projectPage .restored-flow-arrow{color:#b5c0b9;font-size:16px}
+        #projectPage .restored-flow-state{height:28px;padding:0;border:0;background:transparent;color:#8b9690;font-size:12px;line-height:28px;text-align:left;cursor:default}
+        #projectPage button.restored-flow-state:not(:disabled){color:#277d53;cursor:pointer}
+        #projectPage button.restored-flow-state:not(:disabled):hover{color:#0f6541}
+        #projectPage .restored-flow-complete .restored-flow-state{color:#277d53}
+        #projectPage .restored-integrity-rerun{height:28px;padding:0 8px;border-color:#d5ded8;background:#fff;color:#52635a;font-size:12px;font-weight:400}
+        #projectPage .restored-integrity-rerun:hover{border-color:#abc5b5;background:#f5f9f6;color:#176f46}
+        #projectPage .restored-aux-actions{margin-left:auto;gap:2px;padding-left:9px;border-left:1px solid #e4eae6;white-space:nowrap}
+        #projectPage .restored-project-toolbar .btn,#projectPage .restored-professional-toolbar .btn{height:32px;padding:0 8px;border-radius:4px}
+        #projectPage .restored-flow-control,#projectPage .restored-qc-result-button{min-width:104px}
+        #projectPage .restored-qc-rerun{border-color:#d5ded8;background:#fff;color:#52635a;font-weight:400}
+        #projectPage .restored-qc-rerun:hover{border-color:#abc5b5;background:#f5f9f6;color:#176f46}
+        #projectPage .restored-qc-result-button:not(:disabled){border:1px solid #a9d5b8;background:#eaf6ee;color:#176f46;font-weight:600}
+        #projectPage .restored-qc-result-button:not(:disabled):hover{background:#dff0e5}
+        #projectPage .restored-entry-ready{border-color:#075c40;color:#fff}
+        #projectPage .restored-approval-view{border-color:#bfd4c7;background:#f5faf7;color:#28704b;font-weight:500}
+        #projectPage .restored-approval-view:hover{border-color:#8eb39d;background:#eaf5ee}
+        #projectPage .restored-aux-actions>.btn{height:28px;padding:0 7px;border-color:transparent;background:transparent;color:#5e6d64;font-size:12px;font-weight:400}
+        #projectPage .restored-aux-actions>.btn:hover{border-color:#d6e1da;background:#f5f8f6;color:#176f46}
+        #projectPage .restored-entry-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+        #projectPage .restored-professional-toolbar{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:46px;border-bottom:1px solid #e7ece9}
+        #projectPage .restored-professional-toolbar h3{margin:0;color:#34483c;font-size:15px}
+        #projectPage .restored-file-filter{display:flex;min-width:0;align-items:center;gap:5px;white-space:nowrap}
+        #projectPage .restored-file-filter .select{width:110px;height:32px}
+        #projectPage .restored-file-filter .input{width:160px;height:32px;box-sizing:border-box}
+        #projectPage .restored-file-filter .restored-file-date{width:116px}
+        #projectPage .restored-file-filter>span{color:#8a958e;font-size:12px}
+        #projectPage .restored-file-actions{display:flex;gap:5px;white-space:nowrap}
+        #projectPage .restored-query-button{border-color:#b7d2c1;color:#246f49}
+        #projectPage .restored-file-table{width:100%;min-width:920px;margin-top:6px;border:1px solid #e7ece9;table-layout:fixed}
+        #projectPage .restored-file-table th{background:#f3f6f4;color:#647169;font-weight:500}
+        #projectPage .restored-file-table th:nth-child(1),#projectPage .restored-file-table td:nth-child(1){width:24%}
+        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:7%}
+        #projectPage .restored-file-table th:nth-child(3),#projectPage .restored-file-table td:nth-child(3){width:9%}
+        #projectPage .restored-file-table th:nth-child(4),#projectPage .restored-file-table td:nth-child(4){width:8%}
+        #projectPage .restored-file-table th:nth-child(5),#projectPage .restored-file-table td:nth-child(5){width:10%}
+        #projectPage .restored-file-table th:nth-child(6),#projectPage .restored-file-table td:nth-child(6){width:15%}
+        #projectPage .restored-file-table th:nth-child(7),#projectPage .restored-file-table td:nth-child(7){width:11%}
+        #projectPage .restored-file-table th:nth-child(8),#projectPage .restored-file-table td:nth-child(8){width:16%}
+        #projectPage .restored-file-table td:nth-child(1){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+        #projectPage .restored-file-table td:nth-child(2),#projectPage .restored-file-table td:nth-child(4),#projectPage .restored-file-table td:nth-child(5),#projectPage .restored-file-table td:nth-child(6),#projectPage .restored-file-table td:nth-child(7),#projectPage .restored-file-table td:nth-child(8){white-space:nowrap}
+        #projectPage .restored-file-table .link+.link{margin-left:8px}
+        @media(max-width:1100px){
+          #projectPage .restored-operation-row{align-items:flex-start;flex-wrap:wrap;padding:10px 0}
+          #projectPage .restored-aux-actions{width:100%;margin-left:0}
+          #projectPage .restored-professional-toolbar{grid-template-columns:1fr auto;padding:10px 0}
+          #projectPage .restored-file-filter{grid-column:1/-1;grid-row:2;flex-wrap:wrap}
+        }
+      `;
+      document.head.appendChild(style);
+
+      const defaultProfession = page.querySelector('[data-project-profession].active') || page.querySelector('[data-project-profession]');
+      showRestoredView(currentView, defaultProfession, defaultProfession?.dataset.projectProfession || '');
+      syncApprovalState();
+    })();
+  </script>
+  <style id="prototype-annotation-style">
+    #prototypeAnnotationToolbar{position:fixed;right:18px;bottom:20px;z-index:2147483500;display:flex;align-items:center;gap:8px;padding:7px;background:#fff;border:1px solid #cfdad3;border-radius:6px;box-shadow:0 4px 14px rgba(0,49,34,.16);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif}
+    #prototypeAnnotationToolbar button{height:32px;padding:0 12px;border:1px solid #9ebcac;border-radius:4px;background:#fff;color:#175f42;cursor:pointer;font-size:13px}
+    #prototypeAnnotationToolbar button:hover{background:#eef7f1}
+    #prototypeAnnotationToolbar .annotation-toggle.active{border-color:#075c40;background:#075c40;color:#fff}
+    #prototypeAnnotationToolbar .annotation-count{min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#e7f3eb;color:#176846;font-size:12px;line-height:22px;text-align:center}
+    #prototypeAnnotationCanvas{position:fixed;inset:0;z-index:2147483400;pointer-events:none;cursor:crosshair}
+    body.prototype-annotation-active,body.prototype-annotation-active *{user-select:none!important;-webkit-user-select:none!important}
+    body.prototype-annotation-active #prototypeAnnotationCanvas{pointer-events:auto}
+    .prototype-annotation-draft{position:fixed;border:2px dashed #16835a;background:rgba(30,155,103,.12);pointer-events:none}
+    .prototype-annotation-mark{position:fixed;border:2px solid #e06b35;background:rgba(255,150,75,.12);pointer-events:auto;cursor:pointer}
+    .prototype-annotation-mark::before{content:attr(data-number);position:absolute;left:-11px;top:-11px;width:22px;height:22px;border-radius:50%;background:#d95721;color:#fff;font-weight:700;font-size:12px;line-height:22px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+    .prototype-annotation-mark:hover{background:rgba(255,150,75,.22)}
+    #prototypeAnnotationEditor,#prototypeAnnotationPanel{position:fixed;z-index:2147483600;background:#fff;border:1px solid #cad7cf;border-radius:6px;box-shadow:0 10px 30px rgba(0,40,28,.22);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif}
+    #prototypeAnnotationEditor{width:360px;left:50%;top:50%;transform:translate(-50%,-50%);padding:16px}
+    #prototypeAnnotationEditor[hidden],#prototypeAnnotationPanel[hidden]{display:none}
+    #prototypeAnnotationEditor h3,#prototypeAnnotationPanel h3{margin:0;color:#25332b;font-size:15px}
+    #prototypeAnnotationEditor p{margin:6px 0 12px;color:#77847c;font-size:12px}
+    #prototypeAnnotationText{display:block;width:100%;height:92px;resize:vertical;border:1px solid #cbd5cf;border-radius:4px;padding:9px;color:#26332c;font:13px/1.5 inherit;outline:none;user-select:text!important;-webkit-user-select:text!important}
+    #prototypeAnnotationText:focus{border-color:#23815a;box-shadow:0 0 0 2px rgba(35,129,90,.1)}
+    .prototype-annotation-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+    .prototype-annotation-actions button{height:32px;padding:0 14px;border-radius:4px;border:1px solid #bdc9c1;background:#fff;color:#4c5c53;cursor:pointer}
+    .prototype-annotation-actions .primary{border-color:#075c40;background:#075c40;color:#fff}
+    #prototypeAnnotationPanel{right:18px;bottom:68px;width:330px;max-height:460px;overflow:hidden}
+    .prototype-annotation-panel-head{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-bottom:1px solid #e6ece8}
+    .prototype-annotation-panel-head button{border:0;background:transparent;color:#758078;cursor:pointer;font-size:20px;line-height:1}
+    #prototypeAnnotationList{max-height:390px;overflow:auto;padding:8px}
+    .prototype-annotation-empty{padding:24px 12px;text-align:center;color:#8b968f;font-size:13px}
+    .prototype-annotation-item{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:8px;align-items:start;padding:9px 7px;border-bottom:1px solid #edf1ee;cursor:pointer}
+    .prototype-annotation-item:hover{background:#f3f8f5}
+    .prototype-annotation-index{width:22px;height:22px;border-radius:50%;background:#d95721;color:#fff;font-size:12px;line-height:22px;text-align:center}
+    .prototype-annotation-copy{min-width:0;color:#34433a;font-size:13px;line-height:1.45;word-break:break-word}
+    .prototype-annotation-copy small{display:block;margin-top:3px;color:#929c96;font-size:11px}
+    .prototype-annotation-delete{border:0;background:transparent;color:#a0614a;cursor:pointer;font-size:12px}
+    .prototype-annotation-hint{position:fixed;left:50%;top:58px;z-index:2147483500;transform:translateX(-50%);padding:7px 12px;border-radius:4px;background:rgba(0,55,39,.9);color:#fff;font:12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;pointer-events:none}
+  </style>
+  <div id="prototypeAnnotationCanvas" aria-hidden="true"></div>
+  <div id="prototypeAnnotationToolbar" aria-label="页面批注工具">
+    <button type="button" class="annotation-toggle" id="prototypeAnnotationToggle">页面批注</button>
+    <button type="button" id="prototypeAnnotationListButton">批注列表</button>
+    <span class="annotation-count" id="prototypeAnnotationCount">0</span>
+  </div>
+  <div id="prototypeAnnotationEditor" role="dialog" aria-modal="true" aria-labelledby="prototypeAnnotationEditorTitle" hidden>
+    <h3 id="prototypeAnnotationEditorTitle">添加页面批注</h3>
+    <p>说明这个区域需要如何修改</p>
+    <textarea id="prototypeAnnotationText" maxlength="500" placeholder="请输入批注内容"></textarea>
+    <div class="prototype-annotation-actions"><button type="button" id="prototypeAnnotationCancel">取消</button><button type="button" class="primary" id="prototypeAnnotationSave">保存批注</button></div>
+  </div>
+  <aside id="prototypeAnnotationPanel" aria-label="批注列表" hidden>
+    <div class="prototype-annotation-panel-head"><h3>页面批注</h3><button type="button" id="prototypeAnnotationPanelClose" aria-label="关闭">×</button></div>
+    <div id="prototypeAnnotationList"></div>
+  </aside>
+  <script>
+    (() => {
+      const storageKey = 'hf-bim-prototype-annotations-v1';
+      const canvas = document.getElementById('prototypeAnnotationCanvas');
+      const toolbar = document.getElementById('prototypeAnnotationToolbar');
+      const toggle = document.getElementById('prototypeAnnotationToggle');
+      const listButton = document.getElementById('prototypeAnnotationListButton');
+      const count = document.getElementById('prototypeAnnotationCount');
+      const editor = document.getElementById('prototypeAnnotationEditor');
+      const textarea = document.getElementById('prototypeAnnotationText');
+      const panel = document.getElementById('prototypeAnnotationPanel');
+      const list = document.getElementById('prototypeAnnotationList');
+      let active = false;
+      let start = null;
+      let draft = null;
+      let pendingRect = null;
+      let annotations = [];
+
+      try { annotations = JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch (_) { annotations = []; }
+
+      const currentPage = () => {
+        const page = document.querySelector('.page.active[id]');
+        return page ? page.id : 'default';
+      };
+      const saveState = () => localStorage.setItem(storageKey, JSON.stringify(annotations));
+      const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const visibleItems = () => annotations.filter(item => item.page === currentPage());
+
+      const positionMark = (mark, item) => {
+        mark.style.left = `${item.x - window.scrollX}px`;
+        mark.style.top = `${item.y - window.scrollY}px`;
+        mark.style.width = `${item.width}px`;
+        mark.style.height = `${item.height}px`;
+      };
+
+      const render = () => {
+        canvas.querySelectorAll('.prototype-annotation-mark').forEach(mark => mark.remove());
+        const items = visibleItems();
+        items.forEach((item, index) => {
+          const mark = document.createElement('button');
+          mark.type = 'button';
+          mark.className = 'prototype-annotation-mark';
+          mark.dataset.id = item.id;
+          mark.dataset.number = String(index + 1);
+          mark.title = item.text;
+          positionMark(mark, item);
+          canvas.appendChild(mark);
+        });
+        count.textContent = String(items.length);
+        list.innerHTML = items.length ? items.map((item, index) => `<div class="prototype-annotation-item" data-focus-annotation="${item.id}"><span class="prototype-annotation-index">${index + 1}</span><div class="prototype-annotation-copy">${escapeHtml(item.text)}<small>${escapeHtml(item.pageLabel || item.page)}</small></div><button type="button" class="prototype-annotation-delete" data-delete-annotation="${item.id}">删除</button></div>`).join('') : '<div class="prototype-annotation-empty">当前页面暂无批注</div>';
+      };
+
+      const setActive = value => {
+        active = value;
+        document.body.classList.toggle('prototype-annotation-active', active);
+        toggle.classList.toggle('active', active);
+        toggle.textContent = active ? '退出批注' : '页面批注';
+        if (active) {
+          window.getSelection()?.removeAllRanges();
+          let hint = document.querySelector('.prototype-annotation-hint');
+          if (!hint) { hint = document.createElement('div'); hint.className = 'prototype-annotation-hint'; document.body.appendChild(hint); }
+          hint.textContent = '按住鼠标拖拽框选需要批注的区域；按 Esc 可退出';
+        } else {
+          document.querySelector('.prototype-annotation-hint')?.remove();
+          draft?.remove(); draft = null; start = null;
+        }
+        render();
+      };
+
+      const openEditor = rect => {
+        pendingRect = rect;
+        editor.hidden = false;
+        textarea.value = '';
+        setTimeout(() => textarea.focus(), 0);
+      };
+      const closeEditor = () => {
+        editor.hidden = true;
+        pendingRect = null;
+        textarea.value = '';
+      };
+
+      toggle.addEventListener('click', event => { event.stopPropagation(); setActive(!active); });
+      listButton.addEventListener('click', event => { event.stopPropagation(); panel.hidden = !panel.hidden; render(); });
+      document.getElementById('prototypeAnnotationPanelClose').addEventListener('click', () => { panel.hidden = true; });
+      document.getElementById('prototypeAnnotationCancel').addEventListener('click', closeEditor);
+      document.getElementById('prototypeAnnotationSave').addEventListener('click', () => {
+        const text = textarea.value.trim();
+        if (!text || !pendingRect) { textarea.focus(); return; }
+        const heading = document.querySelector('.page.active h1,.page.active h2,.page.active .page-title,.page.active .project-title');
+        annotations.push({id:`a-${Date.now()}-${Math.random().toString(16).slice(2)}`,page:currentPage(),pageLabel:heading?.textContent?.trim().slice(0,40) || document.title,text,...pendingRect,createdAt:new Date().toISOString()});
+        saveState(); closeEditor(); render(); panel.hidden = false;
+      });
+
+      canvas.addEventListener('pointerdown', event => {
+        if (!active || event.button !== 0 || event.target.closest('.prototype-annotation-mark')) return;
+        event.preventDefault();
+        window.getSelection()?.removeAllRanges();
+        start = {x:event.clientX,y:event.clientY};
+        draft = document.createElement('div');
+        draft.className = 'prototype-annotation-draft';
+        draft.style.left = `${start.x}px`; draft.style.top = `${start.y}px`;
+        canvas.appendChild(draft);
+        canvas.setPointerCapture?.(event.pointerId);
+      });
+      canvas.addEventListener('pointermove', event => {
+        if (!start || !draft) return;
+        event.preventDefault();
+        const left = Math.min(start.x,event.clientX), top = Math.min(start.y,event.clientY);
+        draft.style.left = `${left}px`; draft.style.top = `${top}px`;
+        draft.style.width = `${Math.abs(event.clientX-start.x)}px`; draft.style.height = `${Math.abs(event.clientY-start.y)}px`;
+      });
+      canvas.addEventListener('pointerup', event => {
+        if (!start || !draft) return;
+        event.preventDefault();
+        const left = Math.min(start.x,event.clientX), top = Math.min(start.y,event.clientY);
+        const width = Math.abs(event.clientX-start.x), height = Math.abs(event.clientY-start.y);
+        draft.remove(); draft = null; start = null;
+        if (width < 10 || height < 10) return;
+        openEditor({x:left+window.scrollX,y:top+window.scrollY,width,height});
+      });
+      canvas.addEventListener('click', event => {
+        const mark = event.target.closest('.prototype-annotation-mark');
+        if (!mark) return;
+        event.stopPropagation(); panel.hidden = false; render();
+        list.querySelector(`[data-focus-annotation="${mark.dataset.id}"]`)?.scrollIntoView({block:'nearest'});
+      });
+      list.addEventListener('click', event => {
+        const remove = event.target.closest('[data-delete-annotation]');
+        if (remove) { event.stopPropagation(); annotations = annotations.filter(item => item.id !== remove.dataset.deleteAnnotation); saveState(); render(); return; }
+        const row = event.target.closest('[data-focus-annotation]');
+        if (!row) return;
+        const item = annotations.find(entry => entry.id === row.dataset.focusAnnotation);
+        if (!item) return;
+        window.scrollTo({left:item.x-Math.max(24,innerWidth/3),top:item.y-Math.max(70,innerHeight/3),behavior:'smooth'});
+      });
+      window.addEventListener('scroll', render, {passive:true});
+      window.addEventListener('resize', render);
+      document.addEventListener('keydown', event => {
+        if (event.key !== 'Escape') return;
+        if (!editor.hidden) closeEditor(); else if (!panel.hidden) panel.hidden = true; else if (active) setActive(false);
+      });
+      document.addEventListener('click', event => {
+        if (event.target.closest('#prototypeAnnotationToolbar,#prototypeAnnotationPanel,#prototypeAnnotationEditor,#prototypeAnnotationCanvas')) return;
+        setTimeout(render, 0);
+      }, true);
+      render();
     })();
   </script>
 </body>
