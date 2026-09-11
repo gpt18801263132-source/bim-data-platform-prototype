@@ -2692,21 +2692,20 @@
                 <div class="restored-view-title">项目数据</div>
                 <div class="restored-project-toolbar">
                   <div class="restored-status-row">
-                    <div class="restored-integrity-state"><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>人工审核通过</strong></div>
+                    <div class="restored-integrity-state" data-integrity-state><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>未发起</strong></div>
                   </div>
                   <div class="restored-operation-row">
                     <div class="restored-flow-sequence" aria-label="项目数据处理顺序">
-                      <div class="restored-flow-node restored-flow-complete">
+                      <div class="restored-flow-node" data-integrity-flow-node>
                         <span class="restored-flow-title">完整性检查</span>
                         <div class="restored-flow-node-actions">
-                          <button class="restored-flow-state" type="button" data-open="integrityResultModal">✓ 已通过</button>
-                          <button class="btn light restored-integrity-rerun" type="button" id="projectRecheckButton">重新发起</button>
+                          <button class="btn primary restored-flow-control" type="button" id="projectRecheckButton" data-open="integrityResultModal">完整性检查</button>
                         </div>
                       </div>
                       <span class="restored-flow-arrow" aria-hidden="true">→</span>
                       <div class="restored-flow-node" data-quality-flow-node>
                         <span class="restored-flow-title">发起数据质检</span>
-                        <button class="btn primary restored-flow-control" type="button" id="startDataQualityCheck">发起数据质检</button>
+                        <button class="restored-flow-state restored-flow-control" type="button" id="startDataQualityCheck" disabled>待完整性检查</button>
                       </div>
                       <span class="restored-flow-arrow" aria-hidden="true">→</span>
                       <div class="restored-flow-node" data-result-flow-node>
@@ -2746,8 +2745,14 @@
                     <button class="btn light" type="button" data-open="uploadDrawer">进度列表</button>
                   </div>
                 </div>
+                <div class="restored-file-batch" data-file-batch-toolbar>
+                  <label><input type="checkbox" data-file-select-page> 本页全选</label>
+                  <strong>已选择 <span data-file-selected-count>0</span> 个文件</strong>
+                  <button class="btn light" type="button" data-batch-delete disabled>批量删除</button>
+                  <button class="btn light" type="button" data-batch-move disabled>移动至</button>
+                </div>
                 <table class="table-tight restored-file-table">
-                  <thead><tr><th>文件名称</th><th>文件类型</th><th>标签类别</th><th>文件大小</th><th>版本</th><th>上传时间</th><th>关联任务状态</th><th>操作</th></tr></thead>
+                  <thead><tr><th><input type="checkbox" data-file-select-all aria-label="选择本页文件"></th><th>文件名称</th><th>文件类型</th><th>标签类别</th><th>文件大小</th><th>版本</th><th>上传时间</th><th>关联任务状态</th><th>操作</th></tr></thead>
                   <tbody>
                     <tr class="file-row"><td>联合工房-土建专业模型.ifc</td><td>ifc</td><td><div class="tag-cluster"><span class="tag-category">土建</span><span class="tag-category">模型</span></div></td><td>21.46 MB</td><td><span class="blue">V2.0　版本管理</span></td><td>2026-04-23 14:39:32</td><td><span class="status-tag pass">解析完成</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
                     <tr class="file-row"><td>1F建筑平面图.pdf</td><td>pdf</td><td><div class="tag-cluster"><span class="tag-category">土建</span><span class="tag-category">图纸</span></div></td><td>1.86 MB</td><td><span class="blue">V1.0</span></td><td>2026-04-22 16:35:08</td><td><span class="status-tag pass">解析完成</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
@@ -6500,8 +6505,10 @@
       if (!page) return;
 
       let currentView = 'professional';
+      let integrityPassed = false;
       let qualityCheckPassed = false;
       let pendingReuploadRow = null;
+      const selectedFileRows = () => [...page.querySelectorAll('.restored-file-table tbody .file-row')].filter(row => row.querySelector('[data-file-select]')?.checked);
 
       const showProjectToast = message => {
         document.querySelector('.project-page-toast')?.remove();
@@ -6533,13 +6540,22 @@
         const button = page.querySelector('#entryApprovalButton');
         const startButton = page.querySelector('#startDataQualityCheck');
         const resultButton = page.querySelector('.restored-qc-result-button');
-        if (!button || !startButton || !resultButton) return;
+        const integrityNode = page.querySelector('[data-integrity-flow-node]');
+        const integrityState = page.querySelector('[data-integrity-state]');
+        if (!button || !startButton || !resultButton || !integrityNode || !integrityState) return;
         const submitted = window.entryApprovalSubmitted === true;
 
-        startButton.disabled = false;
-        startButton.textContent = qualityCheckPassed ? '重新发起数据质检' : '发起数据质检';
-        startButton.className = qualityCheckPassed ? 'btn light restored-flow-control restored-qc-rerun' : 'btn primary restored-flow-control';
-        startButton.title = qualityCheckPassed ? '再次使用当前项目绑定标准发起数据质检' : '使用当前项目绑定标准发起数据质检';
+        integrityState.classList.toggle('pending', !integrityPassed);
+        integrityState.querySelector('strong').textContent = integrityPassed ? '人工审核通过' : '未发起';
+        integrityNode.classList.toggle('restored-flow-complete', integrityPassed);
+        integrityNode.querySelector('.restored-flow-node-actions').innerHTML = integrityPassed
+          ? '<button class="restored-flow-state" type="button" data-open="integrityResultModal">✓ 已通过</button><button class="btn light restored-integrity-rerun" type="button" id="projectRecheckButton" data-open="integrityResultModal">重新发起</button>'
+          : '<button class="btn primary restored-flow-control" type="button" id="projectRecheckButton" data-open="integrityResultModal">完整性检查</button>';
+
+        startButton.disabled = !integrityPassed;
+        startButton.textContent = !integrityPassed ? '待完整性检查' : qualityCheckPassed ? '重新发起数据质检' : '发起数据质检';
+        startButton.className = !integrityPassed ? 'restored-flow-state restored-flow-control' : qualityCheckPassed ? 'btn light restored-flow-control restored-qc-rerun' : 'btn primary restored-flow-control';
+        startButton.title = !integrityPassed ? '请先完成完整性检查' : qualityCheckPassed ? '再次使用当前项目绑定标准发起数据质检' : '使用当前项目绑定标准发起数据质检';
 
         resultButton.disabled = !qualityCheckPassed;
         resultButton.textContent = qualityCheckPassed ? '数据质检结果' : '暂不可查看';
@@ -6563,9 +6579,10 @@
         const start = workspace.querySelector('[data-project-file-date-start]')?.value || '';
         const end = workspace.querySelector('[data-project-file-date-end]')?.value || '';
         workspace.querySelectorAll('tbody .file-row').forEach(row => {
-          const fileName = row.cells[0]?.textContent.toLowerCase() || '';
-          const fileType = row.cells[1]?.textContent.trim().toLowerCase() || '';
-          const uploaded = (row.cells[5]?.textContent.match(/\d{4}-\d{2}-\d{2}/) || [''])[0];
+          const offset = row.querySelector('[data-file-select]') ? 1 : 0;
+          const fileName = row.cells[offset]?.textContent.toLowerCase() || '';
+          const fileType = row.cells[offset + 1]?.textContent.trim().toLowerCase() || '';
+          const uploaded = (row.cells[offset + 5]?.textContent.match(/\d{4}-\d{2}-\d{2}/) || [''])[0];
           row.hidden = Boolean(
             (type && fileType !== type) ||
             (keyword && !fileName.includes(keyword)) ||
@@ -6573,7 +6590,53 @@
             (end && uploaded > end)
           );
         });
+        updateBatchState();
       };
+
+      const updateBatchState = () => {
+        const rows = [...page.querySelectorAll('.restored-file-table tbody .file-row')];
+        const visibleRows = rows.filter(row => !row.hidden);
+        const selected = selectedFileRows();
+        page.querySelector('[data-file-selected-count]').textContent = String(selected.length);
+        page.querySelectorAll('[data-batch-delete],[data-batch-move]').forEach(button => { button.disabled = selected.length === 0; });
+        const checkedVisible = visibleRows.filter(row => row.querySelector('[data-file-select]')?.checked).length;
+        page.querySelectorAll('[data-file-select-page],[data-file-select-all]').forEach(control => {
+          control.checked = visibleRows.length > 0 && checkedVisible === visibleRows.length;
+          control.indeterminate = checkedVisible > 0 && checkedVisible < visibleRows.length;
+        });
+        rows.forEach(row => row.classList.toggle('selected', Boolean(row.querySelector('[data-file-select]')?.checked)));
+      };
+
+      const prepareBatchFiles = () => {
+        page.querySelectorAll('.restored-file-table tbody .file-row').forEach(row => {
+          if (row.querySelector('[data-file-select]')) return;
+          row.insertAdjacentHTML('afterbegin', '<td class="restored-file-select-cell"><input type="checkbox" data-file-select aria-label="选择文件"></td>');
+        });
+        const deleteModal = document.createElement('div');
+        deleteModal.className = 'modal-mask';
+        deleteModal.id = 'batchDeleteFileModal';
+        deleteModal.innerHTML = '<div class="modal modal-form restored-batch-modal"><div class="modal-head">批量删除文件<button class="modal-close" type="button" data-close-batch-delete>×</button></div><div class="modal-body"><p class="restored-batch-warning">确定删除已选择的 <b data-batch-delete-count>0</b> 个文件吗？删除后将从当前专业文件列表中移除。</p><div class="restored-batch-modal-actions"><button class="btn light" type="button" data-close-batch-delete>取消</button><button class="btn primary restored-danger-button" type="button" data-confirm-batch-delete>确认删除</button></div></div></div>';
+        document.body.appendChild(deleteModal);
+        const moveModal = document.getElementById('moveFileModal');
+        if (moveModal) {
+          const labels = moveModal.querySelectorAll('.field .label');
+          if (labels[0]) labels[0].textContent = '已选文件';
+          const note = moveModal.querySelector('.requirement-note');
+          if (note) note.innerHTML = '<strong>移动说明：</strong>将选中的文件移动到目标单体和目标专业，确认后文件从当前目录移出。';
+          const confirm = [...moveModal.querySelectorAll('.modal-body .btn.primary')].pop();
+          if (confirm) confirm.setAttribute('data-confirm-batch-move','');
+        }
+        updateBatchState();
+      };
+
+      page.addEventListener('change', event => {
+        if (event.target.matches('[data-file-select]')) { updateBatchState(); return; }
+        if (event.target.matches('[data-file-select-page],[data-file-select-all]')) {
+          const checked = event.target.checked;
+          page.querySelectorAll('.restored-file-table tbody .file-row').forEach(row => { if (!row.hidden) row.querySelector('[data-file-select]').checked = checked; });
+          updateBatchState();
+        }
+      });
 
       page.addEventListener('click', event => {
         const detailToggle = event.target.closest('.restored-info-more');
@@ -6618,7 +6681,30 @@
         }
 
         if (event.target.closest('#projectRecheckButton')) {
-          showProjectToast('已重新发起完整性检查');
+          const repeated = integrityPassed;
+          integrityPassed = true;
+          qualityCheckPassed = false;
+          window.entryApprovalSubmitted = false;
+          syncApprovalState();
+          showProjectToast(repeated ? '完整性检查已重新发起并完成' : '完整性检查已完成');
+          return;
+        }
+
+        if (event.target.closest('[data-batch-delete]')) {
+          const selected = selectedFileRows();
+          if (!selected.length) return;
+          document.querySelector('#batchDeleteFileModal [data-batch-delete-count]').textContent = String(selected.length);
+          document.getElementById('batchDeleteFileModal').classList.add('open');
+          return;
+        }
+
+        if (event.target.closest('[data-batch-move]')) {
+          const selected = selectedFileRows();
+          if (!selected.length) return;
+          const moveModal = document.getElementById('moveFileModal');
+          const current = moveModal?.querySelector('input[readonly]');
+          if (current) current.value = `已选择 ${selected.length} 个文件`;
+          moveModal?.classList.add('open');
           return;
         }
 
@@ -6653,12 +6739,32 @@
       });
 
       document.addEventListener('click', event => {
+        if (event.target.closest('[data-close-batch-delete]')) {
+          document.getElementById('batchDeleteFileModal')?.classList.remove('open');
+          return;
+        }
+        if (event.target.closest('[data-confirm-batch-delete]')) {
+          const count = selectedFileRows().length;
+          selectedFileRows().forEach(row => row.remove());
+          document.getElementById('batchDeleteFileModal')?.classList.remove('open');
+          updateBatchState();
+          showProjectToast(`已删除 ${count} 个文件`);
+          return;
+        }
+        if (event.target.closest('[data-confirm-batch-move]')) {
+          const count = selectedFileRows().length;
+          if (!count) return;
+          selectedFileRows().forEach(row => row.remove());
+          updateBatchState();
+          showProjectToast(`已移动 ${count} 个文件`);
+          return;
+        }
         if (event.target.closest('[data-page-to="projectPage"]')) {
           const selected = page.querySelector('[data-project-profession].active') || page.querySelector('[data-project-profession]');
           showRestoredView('professional', selected, selected?.dataset.projectProfession || '');
         }
         if (pendingReuploadRow && event.target.closest('#confirmReuploadWithChange')) {
-          const status = pendingReuploadRow.querySelector('td:nth-child(7) .status-tag');
+          const status = pendingReuploadRow.querySelector('.status-tag');
           if (status) {
             status.textContent = '待重新质检';
             status.className = 'status-tag wait';
@@ -6707,6 +6813,8 @@
         #projectPage .restored-integrity-state{display:flex;align-items:center;gap:4px;white-space:nowrap;color:#66756c;font-size:12px}
         #projectPage .restored-integrity-state>i{width:7px;height:7px;border-radius:50%;background:#27915b}
         #projectPage .restored-integrity-state strong{color:#238051;font-weight:600}
+        #projectPage .restored-integrity-state.pending>i{background:#aeb8b1}
+        #projectPage .restored-integrity-state.pending strong{color:#7d8982;font-weight:500}
         #projectPage .restored-integrity-state .link{margin-left:8px;padding-left:9px;border-left:1px solid #dfe6e1}
         #projectPage .restored-operation-row,#projectPage .restored-flow-sequence,#projectPage .restored-aux-actions{display:flex;align-items:center}
         #projectPage .restored-operation-row{min-height:54px;gap:8px}
@@ -6744,19 +6852,31 @@
         #projectPage .restored-file-filter>span{color:#8a958e;font-size:12px}
         #projectPage .restored-file-actions{display:flex;gap:5px;white-space:nowrap}
         #projectPage .restored-query-button{border-color:#b7d2c1;color:#246f49}
-        #projectPage .restored-file-table{width:100%;min-width:920px;margin-top:6px;border:1px solid #e7ece9;table-layout:fixed}
+        #projectPage .restored-file-batch{display:flex;align-items:center;gap:14px;height:40px;margin-top:6px;padding:0 10px;border:1px solid #e4e9e6;background:#f7f9f8;color:#58675e;font-size:12px}
+        #projectPage .restored-file-batch label{display:flex;align-items:center;gap:5px;color:#286f4b;cursor:pointer}
+        #projectPage .restored-file-batch input,#projectPage .restored-file-table input{accent-color:#287e54}
+        #projectPage .restored-file-batch strong{font-weight:500}
+        #projectPage .restored-file-batch .btn{height:28px;padding:0 10px;font-size:12px}
+        #projectPage .restored-file-table{width:100%;min-width:980px;margin-top:6px;border:1px solid #e7ece9;table-layout:fixed}
         #projectPage .restored-file-table th{background:#f3f6f4;color:#647169;font-weight:500}
-        #projectPage .restored-file-table th:nth-child(1),#projectPage .restored-file-table td:nth-child(1){width:24%}
-        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:7%}
-        #projectPage .restored-file-table th:nth-child(3),#projectPage .restored-file-table td:nth-child(3){width:9%}
-        #projectPage .restored-file-table th:nth-child(4),#projectPage .restored-file-table td:nth-child(4){width:8%}
-        #projectPage .restored-file-table th:nth-child(5),#projectPage .restored-file-table td:nth-child(5){width:10%}
-        #projectPage .restored-file-table th:nth-child(6),#projectPage .restored-file-table td:nth-child(6){width:15%}
-        #projectPage .restored-file-table th:nth-child(7),#projectPage .restored-file-table td:nth-child(7){width:11%}
-        #projectPage .restored-file-table th:nth-child(8),#projectPage .restored-file-table td:nth-child(8){width:16%}
-        #projectPage .restored-file-table td:nth-child(1){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
-        #projectPage .restored-file-table td:nth-child(2),#projectPage .restored-file-table td:nth-child(4),#projectPage .restored-file-table td:nth-child(5),#projectPage .restored-file-table td:nth-child(6),#projectPage .restored-file-table td:nth-child(7),#projectPage .restored-file-table td:nth-child(8){white-space:nowrap}
+        #projectPage .restored-file-table th:nth-child(1),#projectPage .restored-file-table td:nth-child(1){width:4%;text-align:center}
+        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:21%}
+        #projectPage .restored-file-table th:nth-child(3),#projectPage .restored-file-table td:nth-child(3){width:6%}
+        #projectPage .restored-file-table th:nth-child(4),#projectPage .restored-file-table td:nth-child(4){width:9%}
+        #projectPage .restored-file-table th:nth-child(5),#projectPage .restored-file-table td:nth-child(5){width:7%}
+        #projectPage .restored-file-table th:nth-child(6),#projectPage .restored-file-table td:nth-child(6){width:9%}
+        #projectPage .restored-file-table th:nth-child(7),#projectPage .restored-file-table td:nth-child(7){width:14%}
+        #projectPage .restored-file-table th:nth-child(8),#projectPage .restored-file-table td:nth-child(8){width:11%}
+        #projectPage .restored-file-table th:nth-child(9),#projectPage .restored-file-table td:nth-child(9){width:19%}
+        #projectPage .restored-file-table td:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+        #projectPage .restored-file-table td:nth-child(3),#projectPage .restored-file-table td:nth-child(5),#projectPage .restored-file-table td:nth-child(6),#projectPage .restored-file-table td:nth-child(7),#projectPage .restored-file-table td:nth-child(8),#projectPage .restored-file-table td:nth-child(9){white-space:nowrap}
+        #projectPage .restored-file-table .file-row.selected td{background:#f2f8f4}
         #projectPage .restored-file-table .link+.link{margin-left:8px}
+        .restored-batch-modal{width:480px}
+        .restored-batch-warning{margin:0;padding:14px;border-left:3px solid #d58a39;background:#fff9ef;color:#5f625e;font-size:13px;line-height:1.7}
+        .restored-batch-warning b{color:#b96924}
+        .restored-batch-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+        .restored-danger-button{border-color:#b95445!important;background:#b95445!important}
         @media(max-width:1100px){
           #projectPage .restored-operation-row{align-items:flex-start;flex-wrap:wrap;padding:10px 0}
           #projectPage .restored-aux-actions{width:100%;margin-left:0}
@@ -6767,6 +6887,7 @@
       document.head.appendChild(style);
 
       const defaultProfession = page.querySelector('[data-project-profession].active') || page.querySelector('[data-project-profession]');
+      prepareBatchFiles();
       showRestoredView(currentView, defaultProfession, defaultProfession?.dataset.projectProfession || '');
       syncApprovalState();
     })();
