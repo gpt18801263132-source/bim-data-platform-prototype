@@ -2692,21 +2692,20 @@
                 <div class="restored-view-title">项目数据</div>
                 <div class="restored-project-toolbar">
                   <div class="restored-status-row">
-                    <div class="restored-integrity-state"><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>人工审核通过</strong></div>
+                    <div class="restored-integrity-state" data-integrity-state><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>未发起</strong></div>
                   </div>
                   <div class="restored-operation-row">
                     <div class="restored-flow-sequence" aria-label="项目数据处理顺序">
-                      <div class="restored-flow-node restored-flow-complete">
+                      <div class="restored-flow-node" data-integrity-flow-node>
                         <span class="restored-flow-title">完整性检查</span>
                         <div class="restored-flow-node-actions">
-                          <button class="restored-flow-state" type="button" data-open="integrityResultModal">✓ 已通过</button>
-                          <button class="btn light restored-integrity-rerun" type="button" id="projectRecheckButton">重新发起</button>
+                          <button class="btn primary restored-flow-control" type="button" id="projectRecheckButton" data-open="integrityResultModal">完整性检查</button>
                         </div>
                       </div>
                       <span class="restored-flow-arrow" aria-hidden="true">→</span>
                       <div class="restored-flow-node" data-quality-flow-node>
                         <span class="restored-flow-title">发起数据质检</span>
-                        <button class="btn primary restored-flow-control" type="button" id="startDataQualityCheck">发起数据质检</button>
+                        <button class="restored-flow-state restored-flow-control" type="button" id="startDataQualityCheck" disabled>待完整性检查</button>
                       </div>
                       <span class="restored-flow-arrow" aria-hidden="true">→</span>
                       <div class="restored-flow-node" data-result-flow-node>
@@ -2746,8 +2745,14 @@
                     <button class="btn light" type="button" data-open="uploadDrawer">进度列表</button>
                   </div>
                 </div>
+                <div class="restored-file-batch" data-file-batch-toolbar>
+                  <label><input type="checkbox" data-file-select-page> 本页全选</label>
+                  <strong>已选择 <span data-file-selected-count>0</span> 个文件</strong>
+                  <button class="btn light" type="button" data-batch-delete disabled>批量删除</button>
+                  <button class="btn light" type="button" data-batch-move disabled>移动至</button>
+                </div>
                 <table class="table-tight restored-file-table">
-                  <thead><tr><th>文件名称</th><th>文件类型</th><th>标签类别</th><th>文件大小</th><th>版本</th><th>上传时间</th><th>关联任务状态</th><th>操作</th></tr></thead>
+                  <thead><tr><th><input type="checkbox" data-file-select-all aria-label="选择本页文件"></th><th>文件名称</th><th>文件类型</th><th>标签类别</th><th>文件大小</th><th>版本</th><th>上传时间</th><th>关联任务状态</th><th>操作</th></tr></thead>
                   <tbody>
                     <tr class="file-row"><td>联合工房-土建专业模型.ifc</td><td>ifc</td><td><div class="tag-cluster"><span class="tag-category">土建</span><span class="tag-category">模型</span></div></td><td>21.46 MB</td><td><span class="blue">V2.0　版本管理</span></td><td>2026-04-23 14:39:32</td><td><span class="status-tag pass">解析完成</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
                     <tr class="file-row"><td>1F建筑平面图.pdf</td><td>pdf</td><td><div class="tag-cluster"><span class="tag-category">土建</span><span class="tag-category">图纸</span></div></td><td>1.86 MB</td><td><span class="blue">V1.0</span></td><td>2026-04-22 16:35:08</td><td><span class="status-tag pass">解析完成</span></td><td><button class="link">浏览</button><button class="link">重新上传</button><button class="link">删除</button><span class="more-wrap"><button class="link" data-more-menu>更多</button><span class="file-more-menu"><button type="button">下载</button><button type="button">重命名</button><button type="button">重新转换</button><button type="button" data-open="tagEditModal">修改标签</button></span></span></td></tr>
@@ -6500,8 +6505,10 @@
       if (!page) return;
 
       let currentView = 'professional';
+      let integrityPassed = false;
       let qualityCheckPassed = false;
       let pendingReuploadRow = null;
+      const selectedFileRows = () => [...page.querySelectorAll('.restored-file-table tbody .file-row')].filter(row => row.querySelector('[data-file-select]')?.checked);
 
       const showProjectToast = message => {
         document.querySelector('.project-page-toast')?.remove();
@@ -6533,13 +6540,22 @@
         const button = page.querySelector('#entryApprovalButton');
         const startButton = page.querySelector('#startDataQualityCheck');
         const resultButton = page.querySelector('.restored-qc-result-button');
-        if (!button || !startButton || !resultButton) return;
+        const integrityNode = page.querySelector('[data-integrity-flow-node]');
+        const integrityState = page.querySelector('[data-integrity-state]');
+        if (!button || !startButton || !resultButton || !integrityNode || !integrityState) return;
         const submitted = window.entryApprovalSubmitted === true;
 
-        startButton.disabled = false;
-        startButton.textContent = qualityCheckPassed ? '重新发起数据质检' : '发起数据质检';
-        startButton.className = qualityCheckPassed ? 'btn light restored-flow-control restored-qc-rerun' : 'btn primary restored-flow-control';
-        startButton.title = qualityCheckPassed ? '再次使用当前项目绑定标准发起数据质检' : '使用当前项目绑定标准发起数据质检';
+        integrityState.classList.toggle('pending', !integrityPassed);
+        integrityState.querySelector('strong').textContent = integrityPassed ? '人工审核通过' : '未发起';
+        integrityNode.classList.toggle('restored-flow-complete', integrityPassed);
+        integrityNode.querySelector('.restored-flow-node-actions').innerHTML = integrityPassed
+          ? '<button class="restored-flow-state" type="button" data-open="integrityResultModal">✓ 已通过</button><button class="btn light restored-integrity-rerun" type="button" id="projectRecheckButton" data-open="integrityResultModal">重新发起</button>'
+          : '<button class="btn primary restored-flow-control" type="button" id="projectRecheckButton" data-open="integrityResultModal">完整性检查</button>';
+
+        startButton.disabled = !integrityPassed;
+        startButton.textContent = !integrityPassed ? '待完整性检查' : qualityCheckPassed ? '重新发起数据质检' : '发起数据质检';
+        startButton.className = !integrityPassed ? 'restored-flow-state restored-flow-control' : qualityCheckPassed ? 'btn light restored-flow-control restored-qc-rerun' : 'btn primary restored-flow-control';
+        startButton.title = !integrityPassed ? '请先完成完整性检查' : qualityCheckPassed ? '再次使用当前项目绑定标准发起数据质检' : '使用当前项目绑定标准发起数据质检';
 
         resultButton.disabled = !qualityCheckPassed;
         resultButton.textContent = qualityCheckPassed ? '数据质检结果' : '暂不可查看';
@@ -6563,9 +6579,10 @@
         const start = workspace.querySelector('[data-project-file-date-start]')?.value || '';
         const end = workspace.querySelector('[data-project-file-date-end]')?.value || '';
         workspace.querySelectorAll('tbody .file-row').forEach(row => {
-          const fileName = row.cells[0]?.textContent.toLowerCase() || '';
-          const fileType = row.cells[1]?.textContent.trim().toLowerCase() || '';
-          const uploaded = (row.cells[5]?.textContent.match(/\d{4}-\d{2}-\d{2}/) || [''])[0];
+          const offset = row.querySelector('[data-file-select]') ? 1 : 0;
+          const fileName = row.cells[offset]?.textContent.toLowerCase() || '';
+          const fileType = row.cells[offset + 1]?.textContent.trim().toLowerCase() || '';
+          const uploaded = (row.cells[offset + 5]?.textContent.match(/\d{4}-\d{2}-\d{2}/) || [''])[0];
           row.hidden = Boolean(
             (type && fileType !== type) ||
             (keyword && !fileName.includes(keyword)) ||
@@ -6573,7 +6590,54 @@
             (end && uploaded > end)
           );
         });
+        updateBatchState();
       };
+
+      const updateBatchState = () => {
+        const rows = [...page.querySelectorAll('.restored-file-table tbody .file-row')];
+        const visibleRows = rows.filter(row => !row.hidden);
+        const selected = selectedFileRows();
+        page.querySelector('[data-restored-project-view="professional"]')?.classList.toggle('batch-mode', selected.length > 0);
+        page.querySelector('[data-file-selected-count]').textContent = String(selected.length);
+        page.querySelectorAll('[data-batch-delete],[data-batch-move]').forEach(button => { button.disabled = selected.length === 0; });
+        const checkedVisible = visibleRows.filter(row => row.querySelector('[data-file-select]')?.checked).length;
+        page.querySelectorAll('[data-file-select-page],[data-file-select-all]').forEach(control => {
+          control.checked = visibleRows.length > 0 && checkedVisible === visibleRows.length;
+          control.indeterminate = checkedVisible > 0 && checkedVisible < visibleRows.length;
+        });
+        rows.forEach(row => row.classList.toggle('selected', Boolean(row.querySelector('[data-file-select]')?.checked)));
+      };
+
+      const prepareBatchFiles = () => {
+        page.querySelectorAll('.restored-file-table tbody .file-row').forEach(row => {
+          if (row.querySelector('[data-file-select]')) return;
+          row.insertAdjacentHTML('afterbegin', '<td class="restored-file-select-cell"><input type="checkbox" data-file-select aria-label="选择文件"></td>');
+        });
+        const deleteModal = document.createElement('div');
+        deleteModal.className = 'modal-mask';
+        deleteModal.id = 'batchDeleteFileModal';
+        deleteModal.innerHTML = '<div class="modal modal-form restored-batch-modal"><div class="modal-head">批量删除文件<button class="modal-close" type="button" data-close-batch-delete>×</button></div><div class="modal-body"><p class="restored-batch-warning">确定删除已选择的 <b data-batch-delete-count>0</b> 个文件吗？删除后将从当前专业文件列表中移除。</p><div class="restored-batch-modal-actions"><button class="btn light" type="button" data-close-batch-delete>取消</button><button class="btn primary restored-danger-button" type="button" data-confirm-batch-delete>确认删除</button></div></div></div>';
+        document.body.appendChild(deleteModal);
+        const moveModal = document.getElementById('moveFileModal');
+        if (moveModal) {
+          const labels = moveModal.querySelectorAll('.field .label');
+          if (labels[0]) labels[0].textContent = '已选文件';
+          const note = moveModal.querySelector('.requirement-note');
+          if (note) note.innerHTML = '<strong>移动说明：</strong>将选中的文件移动到目标单体和目标专业，确认后文件从当前目录移出。';
+          const confirm = [...moveModal.querySelectorAll('.modal-body .btn.primary')].pop();
+          if (confirm) confirm.setAttribute('data-confirm-batch-move','');
+        }
+        updateBatchState();
+      };
+
+      page.addEventListener('change', event => {
+        if (event.target.matches('[data-file-select]')) { updateBatchState(); return; }
+        if (event.target.matches('[data-file-select-page],[data-file-select-all]')) {
+          const checked = event.target.checked;
+          page.querySelectorAll('.restored-file-table tbody .file-row').forEach(row => { if (!row.hidden) row.querySelector('[data-file-select]').checked = checked; });
+          updateBatchState();
+        }
+      });
 
       page.addEventListener('click', event => {
         const detailToggle = event.target.closest('.restored-info-more');
@@ -6618,7 +6682,30 @@
         }
 
         if (event.target.closest('#projectRecheckButton')) {
-          showProjectToast('已重新发起完整性检查');
+          const repeated = integrityPassed;
+          integrityPassed = true;
+          qualityCheckPassed = false;
+          window.entryApprovalSubmitted = false;
+          syncApprovalState();
+          showProjectToast(repeated ? '完整性检查已重新发起并完成' : '完整性检查已完成');
+          return;
+        }
+
+        if (event.target.closest('[data-batch-delete]')) {
+          const selected = selectedFileRows();
+          if (!selected.length) return;
+          document.querySelector('#batchDeleteFileModal [data-batch-delete-count]').textContent = String(selected.length);
+          document.getElementById('batchDeleteFileModal').classList.add('open');
+          return;
+        }
+
+        if (event.target.closest('[data-batch-move]')) {
+          const selected = selectedFileRows();
+          if (!selected.length) return;
+          const moveModal = document.getElementById('moveFileModal');
+          const current = moveModal?.querySelector('input[readonly]');
+          if (current) current.value = `已选择 ${selected.length} 个文件`;
+          moveModal?.classList.add('open');
           return;
         }
 
@@ -6653,12 +6740,32 @@
       });
 
       document.addEventListener('click', event => {
+        if (event.target.closest('[data-close-batch-delete]')) {
+          document.getElementById('batchDeleteFileModal')?.classList.remove('open');
+          return;
+        }
+        if (event.target.closest('[data-confirm-batch-delete]')) {
+          const count = selectedFileRows().length;
+          selectedFileRows().forEach(row => row.remove());
+          document.getElementById('batchDeleteFileModal')?.classList.remove('open');
+          updateBatchState();
+          showProjectToast(`已删除 ${count} 个文件`);
+          return;
+        }
+        if (event.target.closest('[data-confirm-batch-move]')) {
+          const count = selectedFileRows().length;
+          if (!count) return;
+          selectedFileRows().forEach(row => row.remove());
+          updateBatchState();
+          showProjectToast(`已移动 ${count} 个文件`);
+          return;
+        }
         if (event.target.closest('[data-page-to="projectPage"]')) {
           const selected = page.querySelector('[data-project-profession].active') || page.querySelector('[data-project-profession]');
           showRestoredView('professional', selected, selected?.dataset.projectProfession || '');
         }
         if (pendingReuploadRow && event.target.closest('#confirmReuploadWithChange')) {
-          const status = pendingReuploadRow.querySelector('td:nth-child(7) .status-tag');
+          const status = pendingReuploadRow.querySelector('.status-tag');
           if (status) {
             status.textContent = '待重新质检';
             status.className = 'status-tag wait';
@@ -6707,6 +6814,8 @@
         #projectPage .restored-integrity-state{display:flex;align-items:center;gap:4px;white-space:nowrap;color:#66756c;font-size:12px}
         #projectPage .restored-integrity-state>i{width:7px;height:7px;border-radius:50%;background:#27915b}
         #projectPage .restored-integrity-state strong{color:#238051;font-weight:600}
+        #projectPage .restored-integrity-state.pending>i{background:#aeb8b1}
+        #projectPage .restored-integrity-state.pending strong{color:#7d8982;font-weight:500}
         #projectPage .restored-integrity-state .link{margin-left:8px;padding-left:9px;border-left:1px solid #dfe6e1}
         #projectPage .restored-operation-row,#projectPage .restored-flow-sequence,#projectPage .restored-aux-actions{display:flex;align-items:center}
         #projectPage .restored-operation-row{min-height:54px;gap:8px}
@@ -6744,19 +6853,33 @@
         #projectPage .restored-file-filter>span{color:#8a958e;font-size:12px}
         #projectPage .restored-file-actions{display:flex;gap:5px;white-space:nowrap}
         #projectPage .restored-query-button{border-color:#b7d2c1;color:#246f49}
-        #projectPage .restored-file-table{width:100%;min-width:920px;margin-top:6px;border:1px solid #e7ece9;table-layout:fixed}
+        #projectPage .restored-file-batch{display:none;align-items:center;gap:14px;height:46px;padding:0 10px;border-bottom:1px solid #e4e9e6;background:#f7f9f8;color:#58675e;font-size:12px;box-sizing:border-box}
+        #projectPage .restored-professional-view.batch-mode .restored-professional-toolbar{display:none}
+        #projectPage .restored-professional-view.batch-mode .restored-file-batch{display:flex}
+        #projectPage .restored-file-batch label{display:flex;align-items:center;gap:5px;color:#286f4b;cursor:pointer}
+        #projectPage .restored-file-batch input,#projectPage .restored-file-table input{accent-color:#287e54}
+        #projectPage .restored-file-batch strong{font-weight:500}
+        #projectPage .restored-file-batch .btn{height:28px;padding:0 10px;font-size:12px}
+        #projectPage .restored-file-table{width:100%;min-width:980px;margin-top:6px;border:1px solid #e7ece9;table-layout:fixed}
         #projectPage .restored-file-table th{background:#f3f6f4;color:#647169;font-weight:500}
-        #projectPage .restored-file-table th:nth-child(1),#projectPage .restored-file-table td:nth-child(1){width:24%}
-        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:7%}
-        #projectPage .restored-file-table th:nth-child(3),#projectPage .restored-file-table td:nth-child(3){width:9%}
-        #projectPage .restored-file-table th:nth-child(4),#projectPage .restored-file-table td:nth-child(4){width:8%}
-        #projectPage .restored-file-table th:nth-child(5),#projectPage .restored-file-table td:nth-child(5){width:10%}
-        #projectPage .restored-file-table th:nth-child(6),#projectPage .restored-file-table td:nth-child(6){width:15%}
-        #projectPage .restored-file-table th:nth-child(7),#projectPage .restored-file-table td:nth-child(7){width:11%}
-        #projectPage .restored-file-table th:nth-child(8),#projectPage .restored-file-table td:nth-child(8){width:16%}
-        #projectPage .restored-file-table td:nth-child(1){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
-        #projectPage .restored-file-table td:nth-child(2),#projectPage .restored-file-table td:nth-child(4),#projectPage .restored-file-table td:nth-child(5),#projectPage .restored-file-table td:nth-child(6),#projectPage .restored-file-table td:nth-child(7),#projectPage .restored-file-table td:nth-child(8){white-space:nowrap}
+        #projectPage .restored-file-table th:nth-child(1),#projectPage .restored-file-table td:nth-child(1){width:4%;text-align:center}
+        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:21%}
+        #projectPage .restored-file-table th:nth-child(3),#projectPage .restored-file-table td:nth-child(3){width:6%}
+        #projectPage .restored-file-table th:nth-child(4),#projectPage .restored-file-table td:nth-child(4){width:9%}
+        #projectPage .restored-file-table th:nth-child(5),#projectPage .restored-file-table td:nth-child(5){width:7%}
+        #projectPage .restored-file-table th:nth-child(6),#projectPage .restored-file-table td:nth-child(6){width:9%}
+        #projectPage .restored-file-table th:nth-child(7),#projectPage .restored-file-table td:nth-child(7){width:14%}
+        #projectPage .restored-file-table th:nth-child(8),#projectPage .restored-file-table td:nth-child(8){width:11%}
+        #projectPage .restored-file-table th:nth-child(9),#projectPage .restored-file-table td:nth-child(9){width:19%}
+        #projectPage .restored-file-table td:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+        #projectPage .restored-file-table td:nth-child(3),#projectPage .restored-file-table td:nth-child(5),#projectPage .restored-file-table td:nth-child(6),#projectPage .restored-file-table td:nth-child(7),#projectPage .restored-file-table td:nth-child(8),#projectPage .restored-file-table td:nth-child(9){white-space:nowrap}
+        #projectPage .restored-file-table .file-row.selected td{background:#f2f8f4}
         #projectPage .restored-file-table .link+.link{margin-left:8px}
+        .restored-batch-modal{width:480px}
+        .restored-batch-warning{margin:0;padding:14px;border-left:3px solid #d58a39;background:#fff9ef;color:#5f625e;font-size:13px;line-height:1.7}
+        .restored-batch-warning b{color:#b96924}
+        .restored-batch-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+        .restored-danger-button{border-color:#b95445!important;background:#b95445!important}
         @media(max-width:1100px){
           #projectPage .restored-operation-row{align-items:flex-start;flex-wrap:wrap;padding:10px 0}
           #projectPage .restored-aux-actions{width:100%;margin-left:0}
@@ -6767,6 +6890,7 @@
       document.head.appendChild(style);
 
       const defaultProfession = page.querySelector('[data-project-profession].active') || page.querySelector('[data-project-profession]');
+      prepareBatchFiles();
       showRestoredView(currentView, defaultProfession, defaultProfession?.dataset.projectProfession || '');
       syncApprovalState();
     })();
@@ -6969,6 +7093,172 @@
         setTimeout(render, 0);
       }, true);
       render();
+    })();
+  </script>
+  <script>
+    /* 入库数据统计闭环：构件 / 空间 / 系统统一检索、模型定位与反向追溯 */
+    (() => {
+      const page = document.getElementById('assetStorageStatisticsPage');
+      const viewer = document.getElementById('semanticModelBrowserModal');
+      if (!page || !viewer) return;
+
+      const assetState = { type: 'component', keyword: '' };
+      const typeMeta = {
+        component: { label: '构件', total: '150,496,764', count: '2,300' },
+        space: { label: '空间', total: '2,488,587', count: '128' },
+        system: { label: '系统', total: '32,864', count: '32' }
+      };
+      const categoryStatistics = {
+        component: [['墙体','12,731,228',12731228],['弯头','12,151,603',12151603],['热浸镀锌钢管','10,733,494',10733494],['水管道','10,419,128',10419128],['幕墙竖梃','6,302,597',6302597]],
+        space: [['卫生间','143,278',143278],['阳台','104,509',104509],['主卧','90,727',90727],['卧室','85,144',85144],['起居室','83,519',83519]],
+        system: [['建筑系统','1,840',1840],['结构系统','1,206',1206],['电气系统','582',582],['暖通系统','510',510],['给排水系统','462',462]]
+      };
+      const rows = {
+        component: [
+          {dictionary:'墙体',name:'外墙-基本墙-200mm',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-建筑模型.ifc',unit:'车间',project:'白玉兰测试20260203',major:'建筑专业'},
+          {dictionary:'楼板',name:'结构楼板-F2-150mm',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-结构模型.ifc',unit:'车间',project:'白玉兰测试20260203',major:'结构专业'},
+          {dictionary:'桥架',name:'电缆桥架-CT-400×100',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-总图-机电专业.ifc',unit:'原辅料周转库',project:'白玉兰测试20260203',major:'电气专业'},
+          {dictionary:'立式污水泵',name:'立式水泵-4139197',standard:'—',model:'联合工房-给排水模型.ifc',unit:'地下车库',project:'白玉兰测试20260203',major:'给排水专业'},
+          {dictionary:'风管',name:'矩形风管-800×400',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-暖通模型.ifc',unit:'生产管理用房',project:'白玉兰测试20260203',major:'暖通专业'}
+        ],
+        space: [
+          {dictionary:'生产空间',name:'F1 生产区',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-建筑模型.ifc',unit:'车间',project:'白玉兰测试20260203',major:'建筑专业'},
+          {dictionary:'办公空间',name:'F2 办公区',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-建筑模型.ifc',unit:'生产管理用房',project:'白玉兰测试20260203',major:'建筑专业'},
+          {dictionary:'设备空间',name:'B1 设备用房',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-机电模型.ifc',unit:'地下车库',project:'白玉兰测试20260203',major:'机电专业'},
+          {dictionary:'交通空间',name:'F1 疏散走道',standard:'—',model:'联合工房-建筑模型.ifc',unit:'原辅料周转库',project:'白玉兰测试20260203',major:'建筑专业'},
+          {dictionary:'后勤服务空间',name:'F1 更衣室',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-建筑模型.ifc',unit:'后勤保障用房',project:'白玉兰测试20260203',major:'建筑专业'}
+        ],
+        system: [
+          {dictionary:'给排水系统',name:'生活给水系统-JL1',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-总图-机电专业.ifc',unit:'车间',project:'白玉兰测试20260203',major:'给排水专业'},
+          {dictionary:'消防系统',name:'自动喷淋系统-ZP1',standard:'企业 BIM 语义标准 V2.0',model:'联合工房-消防模型.ifc',unit:'原辅料周转库',project:'白玉兰测试20260203',major:'给排水专业'},
+          {dictionary:'暖通系统',name:'空调送风系统-KT1',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-暖通模型.ifc',unit:'生产管理用房',project:'白玉兰测试20260203',major:'暖通专业'},
+          {dictionary:'电气系统',name:'动力配电系统-AP1',standard:'合肥院 BIM 数据标准 V1.0',model:'联合工房-电气模型.ifc',unit:'车间',project:'白玉兰测试20260203',major:'电气专业'},
+          {dictionary:'弱电系统',name:'综合布线系统-ZH1',standard:'—',model:'联合工房-弱电模型.ifc',unit:'生产管理用房',project:'白玉兰测试20260203',major:'电气专业'}
+        ]
+      };
+      const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const visibleRows = () => {
+        const word = assetState.keyword.trim().toLowerCase();
+        return rows[assetState.type].filter(row => !word || Object.values(row).some(value => String(value).toLowerCase().includes(word)));
+      };
+      const standardCell = value => value === '—' ? '<span class="asset-standard-empty" title="历史数据未保存解析标准">—</span>' : `<button class="asset-standard-link" type="button" data-view-standard>${safe(value)}</button>`;
+      const tableRows = () => visibleRows().map((row,index) => {
+        const payload = encodeURIComponent(JSON.stringify({...row,type:assetState.type,index:index+1}));
+        return `<tr><td><span class="asset-type-tag">${typeMeta[assetState.type].label}</span></td><td>${safe(row.dictionary)}</td><td title="${safe(row.name)}">${safe(row.name)}</td><td>${standardCell(row.standard)}</td><td title="${safe(row.model)}">${safe(row.model)}</td><td>${safe(row.unit)}</td><td>${safe(row.project)}</td><td class="asset-closed-actions"><button type="button" data-instance-action="view" data-instance="${payload}">查看实例</button><button type="button" data-instance-action="property" data-instance="${payload}">查看属性</button><span class="asset-more-wrap"><button type="button" data-instance-more>更多⌄</button><span class="asset-more-menu" hidden><button type="button" data-instance-action="unit" data-instance="${payload}">查看单体</button><button type="button" data-instance-action="project" data-instance="${payload}">查看项目</button></span></span></td></tr>`;
+      }).join('') || '<tr><td colspan="8" class="asset-no-result">未找到匹配的实例数据</td></tr>';
+      const categoryChart = () => {
+        const items = categoryStatistics[assetState.type];
+        const max = Math.max(...items.map(item => item[2]));
+        return `<section class="asset-category-chart"><div class="asset-category-chart-head"><h3>${typeMeta[assetState.type].label}分类数量 TOP5</h3><span>按已解析并正式入库的实例数量统计</span></div><div class="asset-category-bars">${items.map(item => `<div class="asset-category-bar"><b title="${safe(item[0])}">${safe(item[0])}</b><div><i style="width:${Math.max(8, Math.round(item[2] / max * 100))}%"></i></div><strong>${safe(item[1])}</strong></div>`).join('')}</div></section>`;
+      };
+      const render = () => {
+        const meta = typeMeta[assetState.type];
+        page.innerHTML = `<div class="asset-closed-page"><header class="asset-closed-head"><h2>入库数据统计</h2><span>仅统计已解析并正式入库的数据</span></header><section class="asset-dimension-grid">${Object.entries(typeMeta).map(([key,item]) => `<button type="button" class="asset-dimension-card ${key === assetState.type ? 'active' : ''}" data-closed-type="${key}"><span>${item.label}统计</span><b>${item.total}</b><small>${item.count} 个${item.label}类型</small><i>查看数据 ›</i></button>`).join('')}</section>${categoryChart()}<section class="asset-closed-results"><div class="asset-closed-toolbar"><div><b>${meta.label}数据</b><span>共 ${meta.total} 条实例</span></div><label><span>关键词</span><input class="input" data-closed-keyword value="${safe(assetState.keyword)}" placeholder="筛选语义字典、实例、模型或项目"><button class="btn light" type="button" data-closed-filter>筛选</button></label></div><div class="asset-closed-table-wrap"><table class="asset-closed-table"><thead><tr><th>类型</th><th>语义字典</th><th>实例名称</th><th>所属标准</th><th>所属模型/模型文件</th><th>所属单体</th><th>所属项目</th><th>操作</th></tr></thead><tbody>${tableRows()}</tbody></table></div><div class="asset-closed-pager"><span>显示 ${visibleRows().length} 条示例数据</span><button type="button" disabled>‹</button><button type="button" class="active">1</button><button type="button" disabled>›</button></div></section></div>`;
+      };
+      const show = () => {
+        document.querySelectorAll('.page').forEach(item => item.classList.remove('active'));
+        page.classList.add('active');
+        if (typeof renderMenu === 'function') renderMenu('data', 'assetStorageStatisticsPage');
+        document.querySelectorAll('.top-btn').forEach(button => button.classList.toggle('active', button.dataset.top === 'data'));
+        document.querySelectorAll('#primarySide .primary-item').forEach(item => item.classList.toggle('active', item.textContent.includes('数据资产')));
+        const secondary = document.getElementById('secondarySide');
+        if (secondary) secondary.innerHTML = '<button class="sub-btn" type="button" data-open-asset-catalog>◩ 数据资产目录</button><button class="sub-btn active" type="button" data-open-asset-stats-page>◩ 入库数据统计</button><button class="sub-btn" type="button">◩ 数据可视化统计</button><button class="sub-btn" type="button">◩ 资产全览图</button>';
+        const crumb = document.getElementById('breadcrumb'); if (crumb) crumb.textContent = '项目数据管理 / 数据资产全览 / 入库数据统计';
+        render();
+      };
+      window.openAssetStatistics = show;
+      if (location.hash === '#asset-statistics') window.addEventListener('load', () => setTimeout(show, 60));
+
+      const businessTrees = {
+        component:[['墙体','外墙-基本墙-200mm'],['楼板','结构楼板-F2-150mm'],['桥架','电缆桥架-CT-400×100']],
+        space:[['生产空间','F1 生产区'],['办公空间','F2 办公区'],['设备空间','B1 设备用房']],
+        system:[['给排水系统','生活给水系统-JL1'],['暖通系统','空调送风系统-KT1'],['电气系统','动力配电系统-AP1']]
+      };
+      const renderViewerBusinessTree = (type, selectedName) => {
+        const tree = viewer.querySelector('[data-viewer-tree]');
+        const title = viewer.querySelector('[data-viewer-tree-title]');
+        if (title) title.textContent = `${typeMeta[type].label}分类 · 业务语义字典`;
+        viewer.querySelectorAll('[data-viewer-tab]').forEach(button => button.classList.toggle('active', button.dataset.viewerTab === type));
+        if (tree) tree.innerHTML = businessTrees[type].map(([group,name]) => `<button type="button" class="${name === selectedName ? 'selected' : ''}" data-closed-viewer-node data-node-type="${type}" data-node-name="${safe(name)}"><span>⌄　<b>${safe(group)}</b><small>${safe(name)}</small></span><em>${name === selectedName ? '已定位' : '›'}</em></button>`).join('');
+      };
+      const selectInViewer = (data, propertyOpen) => {
+        const type = data.type;
+        viewer.dataset.assetLocated = 'true';
+        viewer.dataset.activeTab = type;
+        viewer.querySelector('.semantic-viewer-modal')?.classList.add('asset-located-viewer');
+        const fileName = viewer.querySelector('.semantic-viewer-bar span b'); if (fileName) fileName.textContent = data.model;
+        const standard = viewer.querySelector('[data-viewer-standard]'); if (standard) standard.textContent = `解析标准：${data.standard}`;
+        const original = viewer.querySelector('.semantic-viewer-original-tree');
+        if (original) {
+          original.classList.add('asset-obv-tree');
+          original.innerHTML = `<b>模型树（OBV）</b><button type="button">⌄ ${safe(data.model)}</button><button type="button">　⌄ Site</button><button type="button">　　⌄ Building</button><button type="button" class="located">　　　${safe(data.unit)} / ${safe(data.name)}</button>`;
+        }
+        const classification = viewer.querySelector('.semantic-viewer-tree'); if (classification) classification.hidden = false;
+        const toggles = [...viewer.querySelectorAll('[data-toggle-file-tree]')]; toggles.slice(1).forEach(button => button.remove());
+        if (toggles[0]) toggles[0].textContent = '分类树';
+        renderViewerBusinessTree(type, data.name);
+        const building = viewer.querySelector('[data-semantic-building]'); if (building) building.dataset.highlight = type;
+        const hint = viewer.querySelector('.semantic-stage-hint'); if (hint) hint.innerHTML = `<b>已从${typeMeta[type].label}数据定位</b>　${safe(data.name)}`;
+        const panel = viewer.querySelector('.semantic-property-panel');
+        if (panel) {
+          panel.classList.toggle('property-open', propertyOpen);
+          panel.querySelector('h4').textContent = propertyOpen ? '实例属性' : '定位信息';
+          panel.querySelector('[data-viewer-selection]').className = '';
+          panel.querySelector('[data-viewer-selection]').innerHTML = `<b>${safe(data.name)}</b><dl><dt>语义字典</dt><dd>${safe(data.dictionary)}</dd><dt>所属单体</dt><dd>${safe(data.unit)}</dd><dt>所属项目</dt><dd>${safe(data.project)}</dd>${propertyOpen ? `<dt>专业</dt><dd>${safe(data.major)}</dd><dt>所属模型</dt><dd>${safe(data.model)}</dd><dt>定位状态</dt><dd><span>已高亮并聚焦</span></dd>` : '<dt>定位状态</dt><dd><span>已高亮并聚焦</span></dd>'}</dl>`;
+        }
+        viewer.classList.add('open');
+      };
+      const goProject = (data, unitOnly) => {
+        if (typeof showPage === 'function') showPage('projectPage','data');
+        else document.querySelector('[data-page-to="projectPage"]')?.click();
+        const crumb = document.getElementById('breadcrumb'); if (crumb) crumb.textContent = unitOnly ? `项目数据管理 / ${data.project} / ${data.unit}` : `项目数据管理 / 项目详情 / ${data.project}`;
+        document.querySelector('.project-page-toast')?.remove();
+        const toast = document.createElement('div'); toast.className = 'project-page-toast show'; toast.textContent = unitOnly ? `已进入所属单体：${data.unit}` : `已进入所属项目：${data.project}`; document.body.appendChild(toast); setTimeout(()=>toast.remove(),1800);
+      };
+
+      document.addEventListener('click', event => {
+        if (event.target.closest('[data-open-asset-stats-page]')) { event.preventDefault(); event.stopImmediatePropagation(); show(); return; }
+        const typeButton = event.target.closest('[data-closed-type]');
+        if (typeButton) { event.preventDefault(); event.stopImmediatePropagation(); assetState.type = typeButton.dataset.closedType; assetState.keyword = ''; render(); return; }
+        if (event.target.closest('[data-closed-filter]')) { event.preventDefault(); event.stopImmediatePropagation(); assetState.keyword = page.querySelector('[data-closed-keyword]')?.value || ''; render(); return; }
+        const more = event.target.closest('[data-instance-more]');
+        if (more) { event.preventDefault(); event.stopImmediatePropagation(); const menu = more.nextElementSibling; page.querySelectorAll('.asset-more-menu').forEach(item => { if (item !== menu) item.hidden = true; }); menu.hidden = !menu.hidden; return; }
+        const action = event.target.closest('[data-instance-action]');
+        if (action) { event.preventDefault(); event.stopImmediatePropagation(); const data = JSON.parse(decodeURIComponent(action.dataset.instance)); const kind = action.dataset.instanceAction; if (kind === 'view' || kind === 'property') selectInViewer(data, kind === 'property'); else goProject(data, kind === 'unit'); return; }
+        if (event.target.closest('[data-view-standard]')) { event.preventDefault(); event.stopImmediatePropagation(); const standardEntry = [...document.querySelectorAll('#primarySide .primary-item')].find(item => item.textContent.includes('标准数字')); if (standardEntry) standardEntry.click(); return; }
+        const tab = event.target.closest('#semanticModelBrowserModal [data-viewer-tab]');
+        if (tab && viewer.dataset.assetLocated === 'true') { event.preventDefault(); event.stopImmediatePropagation(); renderViewerBusinessTree(tab.dataset.viewerTab, ''); const building = viewer.querySelector('[data-semantic-building]'); if (building) building.dataset.highlight = tab.dataset.viewerTab; return; }
+        const node = event.target.closest('[data-closed-viewer-node]');
+        if (node) { event.preventDefault(); event.stopImmediatePropagation(); viewer.querySelectorAll('[data-closed-viewer-node]').forEach(item => item.classList.toggle('selected', item === node)); const building = viewer.querySelector('[data-semantic-building]'); if (building) building.dataset.highlight = node.dataset.nodeType; const hint = viewer.querySelector('.semantic-stage-hint'); if (hint) hint.innerHTML = `<b>已在模型中高亮</b>　${safe(node.dataset.nodeName)}`; return; }
+        page.querySelectorAll('.asset-more-menu').forEach(item => item.hidden = true);
+      }, true);
+      document.addEventListener('keydown', event => { if (event.key === 'Enter' && event.target.matches('[data-closed-keyword]')) { assetState.keyword = event.target.value; render(); } });
+
+      document.querySelectorAll('.asset-search-result-page').forEach(oldPage => oldPage.remove());
+      document.querySelectorAll('[data-open-search-result]').forEach(button => button.removeAttribute('data-open-search-result'));
+      document.querySelectorAll('[data-toggle-file-tree]').forEach((button,index) => { if (index > 0) button.remove(); });
+      const syncStandardGrouping = () => {
+        document.querySelectorAll('.dictionary-filter label').forEach(label => {
+          if (!label.textContent.trim().startsWith('类别')) return;
+          const select = label.querySelector('select');
+          if (select && !select.dataset.semanticGroupReady) {
+            select.dataset.semanticGroupReady = 'true';
+            select.innerHTML = '<option value="">请选择类别</option><option>构件</option><option>空间</option><option>系统</option><option>未分组</option>';
+          }
+        });
+      };
+      syncStandardGrouping();
+      new MutationObserver(syncStandardGrouping).observe(document.getElementById('assetTagCatalogPage') || document.body, {childList:true,subtree:true});
+      render();
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .asset-storage-statistics-page{padding:0!important;background:#f5f7f6!important;overflow:auto!important}.asset-closed-page{padding:14px 16px 18px}.asset-closed-head{display:flex;align-items:baseline;gap:12px;height:34px}.asset-closed-head h2{margin:0;color:#2f4236;font-size:19px}.asset-closed-head span{color:#89948d;font-size:12px}.asset-dimension-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:8px 0 10px}.asset-dimension-card{position:relative;height:76px;padding:10px 14px;border:1px solid #dce5df;border-radius:4px;background:#fff;color:#59685f;text-align:left;cursor:pointer}.asset-dimension-card:hover{border-color:#9fc5ac}.asset-dimension-card.active{border-color:#238052;background:#f2f8f4;box-shadow:inset 3px 0 #238052}.asset-dimension-card span,.asset-dimension-card small{display:block;font-size:12px}.asset-dimension-card b{display:block;margin:4px 0 2px;color:#245f41;font-size:21px;line-height:1}.asset-dimension-card small{color:#8a968e}.asset-dimension-card i{position:absolute;right:14px;bottom:10px;color:#237b4e;font-size:12px;font-style:normal}.asset-category-chart{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;min-height:154px;margin-bottom:10px;padding:12px 14px;border:1px solid #dce5df;background:#fff;box-sizing:border-box}.asset-category-chart-head{padding-top:2px}.asset-category-chart-head h3{margin:0 0 8px;color:#35463b;font-size:14px}.asset-category-chart-head span{color:#8a958e;font-size:12px;line-height:1.5}.asset-category-bars{display:grid;gap:7px}.asset-category-bar{display:grid;grid-template-columns:120px minmax(180px,1fr) 86px;gap:10px;align-items:center;min-height:20px;color:#56645c;font-size:12px}.asset-category-bar>b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}.asset-category-bar>div{height:9px;overflow:hidden;border-radius:2px;background:#edf3ef}.asset-category-bar i{display:block;height:100%;border-radius:2px;background:#2a8054}.asset-category-bar:nth-child(2) i{background:#438e65}.asset-category-bar:nth-child(3) i{background:#5e9d76}.asset-category-bar:nth-child(4) i{background:#7aad8b}.asset-category-bar:nth-child(5) i{background:#9dbfa8}.asset-category-bar strong{text-align:right;color:#43564a;font-weight:500;font-variant-numeric:tabular-nums}.asset-closed-results{border:1px solid #dce5df;background:#fff}.asset-closed-toolbar{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 12px;border-bottom:1px solid #e5ebe7}.asset-closed-toolbar>div{display:flex;align-items:center;gap:9px}.asset-closed-toolbar b{color:#35463b;font-size:14px}.asset-closed-toolbar>div span{color:#8a958e;font-size:12px}.asset-closed-toolbar label{display:flex;align-items:center;gap:7px;color:#68766d;font-size:12px}.asset-closed-toolbar .input{width:290px;height:32px}.asset-closed-toolbar .btn{height:32px;border-radius:4px}.asset-closed-table-wrap{overflow:auto}.asset-closed-table{width:100%;min-width:1180px;border-collapse:collapse;table-layout:fixed}.asset-closed-table th{height:38px;padding:0 9px;background:#f2f5f3;color:#4c5951;text-align:left;font-size:12px;font-weight:600}.asset-closed-table td{height:48px;padding:0 9px;border-bottom:1px solid #e9eeeb;color:#56645c;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-closed-table tbody tr:hover{background:#f8fbf9}.asset-closed-table th:nth-child(1){width:68px}.asset-closed-table th:nth-child(2){width:125px}.asset-closed-table th:nth-child(3){width:190px}.asset-closed-table th:nth-child(4){width:185px}.asset-closed-table th:nth-child(5){width:220px}.asset-closed-table th:nth-child(6){width:125px}.asset-closed-table th:nth-child(7){width:165px}.asset-closed-table th:nth-child(8){width:205px}.asset-type-tag{display:inline-block;padding:3px 7px;border-radius:3px;background:#eef6f0;color:#28764d}.asset-standard-link,.asset-closed-actions button{padding:0;border:0;background:transparent;color:#24794d;cursor:pointer;font-size:12px}.asset-standard-link:hover,.asset-closed-actions button:hover{text-decoration:underline}.asset-standard-empty{color:#a3aca6}.asset-closed-actions{overflow:visible!important}.asset-closed-actions>button{margin-right:9px}.asset-more-wrap{position:relative}.asset-more-menu{position:absolute;z-index:8;right:0;top:20px;width:92px;padding:4px;border:1px solid #d9e3dc;background:#fff;box-shadow:0 5px 14px rgba(42,70,51,.12)}.asset-more-menu button{display:block;width:100%;padding:7px;text-align:left}.asset-no-result{height:160px!important;text-align:center;color:#939d97!important}.asset-closed-pager{display:flex;align-items:center;justify-content:flex-end;gap:5px;height:42px;padding:0 10px;color:#7b8880;font-size:12px}.asset-closed-pager button{width:28px;height:27px;border:1px solid #dce4df;background:#fff;color:#65736a}.asset-closed-pager button.active{border-color:#2b8155;background:#edf7f0;color:#23764b}.semantic-viewer-modal.asset-located-viewer .semantic-building{transform:skewY(-8deg) rotateX(9deg) scale(1.08)}.semantic-viewer-modal.asset-located-viewer .semantic-stage-hint{padding:6px 10px;border:1px solid #d9e6dc;background:rgba(255,255,255,.92)}.semantic-viewer-modal.asset-located-viewer .semantic-stage-hint b{color:#23784b}.asset-obv-tree .located{background:#eaf5ed!important;color:#1e764a!important;font-weight:600}.semantic-property-panel.property-open{background:#f7fbf8}.semantic-property-panel.property-open h4{color:#23784b}.semantic-viewer-layout{grid-template-columns:210px 240px minmax(0,1fr) 240px!important}.semantic-viewer-original-tree{width:auto!important;box-sizing:border-box}.file-classification-panel{display:block!important}.semantic-viewer-bar [data-toggle-file-tree]{margin-left:auto}.semantic-viewer-bar label+[data-toggle-file-tree]{margin-left:10px}@media(max-width:1250px){.asset-closed-toolbar{height:auto;min-height:48px;flex-wrap:wrap;padding:7px 10px}.asset-category-chart{grid-template-columns:170px minmax(0,1fr)}.asset-category-bar{grid-template-columns:100px minmax(150px,1fr) 78px}.semantic-viewer-layout{grid-template-columns:180px 210px minmax(420px,1fr) 220px!important}.semantic-viewer-modal{overflow:auto}.asset-dimension-card i{display:none}}
+      `;
+      document.head.appendChild(style);
+      const compactFix = document.createElement('style');
+      compactFix.textContent = '.asset-closed-table th:nth-child(1){width:72px}.asset-closed-table th:first-child,.asset-closed-table td:first-child{text-align:center}.asset-type-tag{min-width:34px;padding:3px 5px!important;text-align:center;white-space:nowrap}';
+      document.head.appendChild(compactFix);
     })();
   </script>
 </body>
