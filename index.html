@@ -7261,5 +7261,173 @@
       document.head.appendChild(compactFix);
     })();
   </script>
+  <script>
+    /* 项目版本管理：快照差异、任意版本对比、历史模型追溯与安全回退 */
+    (() => {
+      const listPage = document.getElementById('dataListPage');
+      if (!listPage || document.getElementById('projectVersionModal')) return;
+
+      const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const baseVersions = [
+        {
+          id:'v1', version:'V1.0', source:'项目管理系统', time:'2026-02-03 14:37:28', operator:'admin', note:'首次同步入库',
+          info:{'项目名称':'白玉兰测试20260203','项目编号':'122113','项目阶段':'方案设计','合同编号':'1223','当前标准':'合肥院 BIM 数据标准 V1.0'},
+          files:[
+            {id:'civil-ifc',name:'联合工房-土建专业模型.ifc',size:'19.82 MB',hash:'civil-100',model:true},
+            {id:'floor-pdf',name:'1F建筑平面图.pdf',size:'1.72 MB',hash:'floor-100'},
+            {id:'electric-pdf',name:'电气系统图.pdf',size:'701.20 KB',hash:'electric-100'}
+          ]
+        },
+        {
+          id:'v2', version:'V1.1', source:'BIM协同平台', time:'2026-03-18 09:26:10', operator:'张伟', note:'补充机电模型及设备明细',
+          info:{'项目名称':'白玉兰测试20260203','项目编号':'122113','项目阶段':'方案设计','合同编号':'1223','当前标准':'合肥院 BIM 数据标准 V1.0'},
+          files:[
+            {id:'civil-ifc',name:'联合工房-土建专业模型.ifc',size:'19.82 MB',hash:'civil-100',model:true},
+            {id:'mep-ifc',name:'联合工房-机电专业模型.ifc',size:'17.95 MB',hash:'mep-110',model:true},
+            {id:'floor-pdf',name:'1F建筑平面图.pdf',size:'1.72 MB',hash:'floor-100'},
+            {id:'electric-pdf',name:'电气系统图.pdf',size:'701.20 KB',hash:'electric-100'},
+            {id:'device-xlsx',name:'设备明细.xlsx',size:'322.4 KB',hash:'device-110'}
+          ]
+        },
+        {
+          id:'v3', version:'V1.2', source:'BIM协同平台', time:'2026-04-21 10:18:42', operator:'李敏', note:'施工图阶段模型更新',
+          info:{'项目名称':'白玉兰测试20260203','项目编号':'122113','项目阶段':'施工图设计','合同编号':'1223','当前标准':'合肥院 BIM 数据标准 V1.0'},
+          files:[
+            {id:'civil-ifc',name:'联合工房-土建专业模型.ifc',size:'20.68 MB',hash:'civil-120',model:true},
+            {id:'mep-ifc',name:'联合工房-机电专业模型.ifc',size:'18.42 MB',hash:'mep-120',model:true},
+            {id:'floor-pdf',name:'1F建筑平面图.pdf',size:'1.86 MB',hash:'floor-120'},
+            {id:'electric-pdf',name:'电气系统图.pdf',size:'726.25 KB',hash:'electric-120'},
+            {id:'device-xlsx',name:'设备明细.xlsx',size:'348.6 KB',hash:'device-120'}
+          ]
+        },
+        {
+          id:'v4', version:'V1.3', source:'数据治理平台', time:'2026-04-23 14:39:32', operator:'admin', note:'质检整改后重新入库', current:true,
+          info:{'项目名称':'白玉兰测试20260203','项目编号':'122113','项目阶段':'设计阶段','合同编号':'1223','当前标准':'合肥院 BIM 数据标准 V1.0'},
+          files:[
+            {id:'civil-ifc',name:'联合工房-土建专业模型.ifc',size:'21.46 MB',hash:'civil-130',model:true},
+            {id:'mep-ifc',name:'联合工房-机电专业模型.ifc',size:'18.42 MB',hash:'mep-120',model:true},
+            {id:'floor-pdf',name:'1F建筑平面图.pdf',size:'1.86 MB',hash:'floor-120'},
+            {id:'electric-pdf',name:'电气系统图.pdf',size:'726.25 KB',hash:'electric-120'},
+            {id:'device-xlsx',name:'设备明细.xlsx',size:'348.6 KB',hash:'device-120'},
+            {id:'quality-pdf',name:'数据质检报告.pdf',size:'2.14 MB',hash:'quality-130'}
+          ]
+        }
+      ];
+      const state = {project:'白玉兰测试20260203', versions:baseVersions.map(item => ({...item,info:{...item.info},files:item.files.map(file => ({...file}))})), from:'v3', to:'v4', rollbackId:''};
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-mask';
+      modal.id = 'projectVersionModal';
+      modal.innerHTML = '<div class="modal project-version-modal"><div class="modal-head"><span data-project-version-title>项目版本</span><button class="modal-close" type="button" data-close-project-version>×</button></div><div class="modal-body" data-project-version-body></div></div>';
+      const rollbackModal = document.createElement('div');
+      rollbackModal.className = 'modal-mask';
+      rollbackModal.id = 'projectRollbackModal';
+      rollbackModal.innerHTML = '<div class="modal project-rollback-modal"><div class="modal-head">回退模型数据<button class="modal-close" type="button" data-close-project-rollback>×</button></div><div class="modal-body" data-project-rollback-body></div><div class="modal-foot"><button class="btn light" type="button" data-close-project-rollback>取消</button><button class="btn primary" type="button" data-confirm-project-rollback>确认生成新版本</button></div></div>';
+      document.body.append(modal, rollbackModal);
+
+      const body = modal.querySelector('[data-project-version-body]');
+      const versionById = id => state.versions.find(item => item.id === id);
+      const previousOf = version => state.versions[state.versions.indexOf(version) - 1] || version;
+      const diff = (from, to) => {
+        const info = Object.keys({...from.info,...to.info}).filter(key => from.info[key] !== to.info[key]).map(key => ({field:key,before:from.info[key] || '—',after:to.info[key] || '—'}));
+        const oldMap = new Map(from.files.map(file => [file.id,file]));
+        const newMap = new Map(to.files.map(file => [file.id,file]));
+        const files = [];
+        newMap.forEach((file,id) => {
+          if (!oldMap.has(id)) files.push({type:'新增',name:file.name,before:'—',after:file.size});
+          else if (oldMap.get(id).hash !== file.hash) files.push({type:'修改',name:file.name,before:oldMap.get(id).size,after:file.size});
+        });
+        oldMap.forEach((file,id) => { if (!newMap.has(id)) files.push({type:'删除',name:file.name,before:file.size,after:'—'}); });
+        return {info,files,added:files.filter(item => item.type === '新增').length,removed:files.filter(item => item.type === '删除').length,changed:files.filter(item => item.type === '修改').length};
+      };
+      const changeText = (version, index) => {
+        if (!index) return {info:'初始版本',files:`${version.files.length} 个文件`};
+        const result = diff(state.versions[index - 1],version);
+        return {info:result.info.length ? `修改 ${result.info.length} 项` : '无变化',files:`新增 ${result.added} / 删除 ${result.removed} / 修改 ${result.changed}`};
+      };
+      const options = selected => state.versions.map(item => `<option value="${item.id}" ${item.id === selected ? 'selected' : ''}>${item.version}</option>`).join('');
+
+      const renderList = () => {
+        modal.querySelector('[data-project-version-title]').textContent = `${state.project} · 项目版本`;
+        body.innerHTML = `
+          <div class="project-version-summary"><div><span>当前版本</span><b>${escapeHtml(state.versions.find(item => item.current)?.version || '—')}</b><small>历史版本文件采用不可变快照保存</small></div><div class="project-version-compare"><label>版本对比</label><select class="select" data-project-compare-from>${options(state.from)}</select><span>与</span><select class="select" data-project-compare-to>${options(state.to)}</select><button class="btn primary" type="button" data-run-project-compare>对比查看</button></div></div>
+          <table class="project-version-table"><thead><tr><th>版本</th><th>来源系统</th><th>同步时间</th><th>项目基本信息</th><th>项目文件变化</th><th>模型文件</th><th>状态</th><th>操作</th></tr></thead><tbody>${state.versions.slice().reverse().map(version => { const index = state.versions.indexOf(version); const changes = changeText(version,index); return `<tr><td><b>${version.version}</b>${version.rollbackFrom ? `<small>基于 ${version.rollbackFrom} 回退生成</small>`:''}</td><td>${escapeHtml(version.source)}</td><td>${escapeHtml(version.time)}</td><td>${changes.info}</td><td>${changes.files}</td><td>${version.files.filter(file => file.model).length} 个</td><td>${version.current ? '<span class="status-tag pass">当前版本</span>' : '<span class="status-tag">历史版本</span>'}</td><td><button class="link" type="button" data-project-change-detail="${version.id}">变更详情</button><button class="link" type="button" data-project-model-history="${version.id}">查看模型</button>${version.current ? '' : `<button class="link" type="button" data-project-rollback="${version.id}">回退</button>`}</td></tr>`; }).join('')}</tbody></table>
+          <div class="project-model-history"><div class="project-version-section-title"><b>模型版本历史</b><span>历史模型可直接加载查看，回退不会覆盖原版本</span></div>${state.versions.slice().reverse().map(version => `<div><span><b>${version.version}</b>${escapeHtml(version.files.filter(file=>file.model).map(file=>file.name).join('、') || '无模型文件')}</span><small>${escapeHtml(version.time)}　${escapeHtml(version.operator)}</small><button class="link" type="button" data-project-model-history="${version.id}">加载该版本模型</button></div>`).join('')}</div>
+          <div class="project-version-actions"><button class="btn light" type="button" data-close-project-version>关闭</button></div>`;
+      };
+      const renderDiff = (from,to,title) => {
+        const result = diff(from,to);
+        modal.querySelector('[data-project-version-title]').textContent = `${state.project} · ${title}`;
+        body.innerHTML = `
+          <div class="project-diff-head"><button class="link" type="button" data-back-project-versions>‹ 返回版本记录</button><div><b>${from.version}</b><span>对比</span><b>${to.version}</b></div><small>${escapeHtml(from.time)} → ${escapeHtml(to.time)}</small></div>
+          <div class="project-diff-summary"><span>基本信息变更<b>${result.info.length}</b></span><span>新增文件<b>${result.added}</b></span><span>删除文件<b>${result.removed}</b></span><span>修改文件<b>${result.changed}</b></span></div>
+          <div class="project-version-section-title"><b>项目基本信息变化</b></div>
+          <table class="project-diff-table"><thead><tr><th>字段</th><th>${from.version}</th><th>${to.version}</th><th>变化</th></tr></thead><tbody>${result.info.length ? result.info.map(item => `<tr><td>${escapeHtml(item.field)}</td><td>${escapeHtml(item.before)}</td><td>${escapeHtml(item.after)}</td><td><span class="project-change-tag changed">修改</span></td></tr>`).join('') : '<tr><td colspan="4" class="project-diff-empty">项目基本信息无变化</td></tr>'}</tbody></table>
+          <div class="project-version-section-title"><b>项目文件变化</b><span>依据文件唯一标识与文件 Hash 判断</span></div>
+          <table class="project-diff-table"><thead><tr><th>变化类型</th><th>文件名称</th><th>${from.version} 文件大小</th><th>${to.version} 文件大小</th></tr></thead><tbody>${result.files.length ? result.files.map(item => `<tr><td><span class="project-change-tag ${item.type === '新增' ? 'added' : item.type === '删除' ? 'removed' : 'changed'}">${item.type}</span></td><td>${escapeHtml(item.name)}</td><td>${escapeHtml(item.before)}</td><td>${escapeHtml(item.after)}</td></tr>`).join('') : '<tr><td colspan="4" class="project-diff-empty">项目文件无变化</td></tr>'}</tbody></table>
+          <div class="project-version-actions"><button class="btn light" type="button" data-back-project-versions>返回</button></div>`;
+      };
+      const openHistoricalModel = version => {
+        const viewer = document.getElementById('semanticModelBrowserModal');
+        if (!viewer) return;
+        let note = viewer.querySelector('[data-project-history-model-note]');
+        if (!note) {
+          note = document.createElement('div'); note.dataset.projectHistoryModelNote = 'true'; note.className = 'project-history-model-note';
+          viewer.querySelector('.semantic-viewer-bar')?.insertAdjacentElement('afterend',note);
+        }
+        const model = version.files.find(file => file.model);
+        const modelName = viewer.querySelector('.semantic-viewer-bar b'); if (modelName) modelName.textContent = model?.name || '当前版本无模型文件';
+        note.innerHTML = `<b>历史版本 ${version.version}</b><span>${escapeHtml(version.time)}　来源：${escapeHtml(version.source)}</span><em>只读查看</em>`;
+        const hint = viewer.querySelector('.semantic-stage-hint'); if (hint) hint.textContent = `已加载 ${version.version} 历史模型快照，可查看该时刻模型数据`;
+        modal.classList.remove('open'); viewer.classList.add('open');
+      };
+
+      listPage.querySelectorAll('tbody tr').forEach(row => {
+        const operation = row.cells[row.cells.length - 1];
+        if (!operation || operation.querySelector('[data-open-project-version]')) return;
+        const projectName = row.cells[1]?.textContent.trim() || '当前项目';
+        const button = document.createElement('button'); button.className = 'link'; button.type = 'button'; button.dataset.openProjectVersion = projectName; button.textContent = '项目版本';
+        operation.insertBefore(button, operation.querySelector('.link:nth-last-child(2)') || null);
+      });
+
+      document.addEventListener('click', event => {
+        const opener = event.target.closest('[data-open-project-version]');
+        if (opener) { state.project = opener.dataset.openProjectVersion; state.versions.forEach(version => { version.info['项目名称'] = state.project; }); renderList(); modal.classList.add('open'); return; }
+        if (event.target.closest('[data-close-project-version]') || event.target === modal) { modal.classList.remove('open'); return; }
+        if (event.target.closest('[data-back-project-versions]')) { renderList(); return; }
+        const detail = event.target.closest('[data-project-change-detail]');
+        if (detail) { const to = versionById(detail.dataset.projectChangeDetail); renderDiff(previousOf(to),to,'变更详情'); return; }
+        if (event.target.closest('[data-run-project-compare]')) {
+          state.from = body.querySelector('[data-project-compare-from]').value; state.to = body.querySelector('[data-project-compare-to]').value;
+          const from = versionById(state.from); const to = versionById(state.to);
+          if (from.id === to.id) { alert('请选择两个不同的项目版本进行对比'); return; }
+          renderDiff(from,to,'版本对比'); return;
+        }
+        const model = event.target.closest('[data-project-model-history]'); if (model) { openHistoricalModel(versionById(model.dataset.projectModelHistory)); return; }
+        const rollback = event.target.closest('[data-project-rollback]');
+        if (rollback) {
+          state.rollbackId = rollback.dataset.projectRollback; const target = versionById(state.rollbackId); const current = state.versions.find(item => item.current);
+          rollbackModal.querySelector('[data-project-rollback-body]').innerHTML = `<div class="project-rollback-warning"><b>将 ${state.project} 回退到 ${target.version}</b><p>系统不会删除或覆盖 ${current.version} 等历史版本，而是基于 ${target.version} 的项目基本信息、文件清单和模型快照生成一个新的当前版本。</p></div><dl><dt>当前版本</dt><dd>${current.version}</dd><dt>目标历史版本</dt><dd>${target.version}</dd><dt>生成方式</dt><dd>创建新版本并切换当前版本指针</dd></dl>`;
+          rollbackModal.classList.add('open'); return;
+        }
+        if (event.target.closest('[data-close-project-rollback]') || event.target === rollbackModal) { rollbackModal.classList.remove('open'); return; }
+        if (event.target.closest('[data-confirm-project-rollback]')) {
+          const target = versionById(state.rollbackId); const current = state.versions.find(item => item.current); if (!target || !current) return;
+          current.current = false;
+          const nextNumber = Math.max(...state.versions.map(item => Number(item.version.replace('V1.','')) || 0)) + 1;
+          const next = {id:`v${Date.now()}`,version:`V1.${nextNumber}`,source:'版本回退',time:'2026-09-11 16:30:00',operator:'admin',note:`基于 ${target.version} 回退生成`,rollbackFrom:target.version,current:true,info:{...target.info},files:target.files.map(file => ({...file}))};
+          state.versions.push(next); state.from = current.id; state.to = next.id; rollbackModal.classList.remove('open'); renderList();
+          let toast = document.querySelector('.project-version-toast'); if (!toast) { toast = document.createElement('div'); toast.className = 'project-version-toast'; document.body.appendChild(toast); }
+          toast.textContent = `已基于 ${target.version} 生成 ${next.version}，历史版本均已保留`; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'),2600);
+        }
+      });
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .project-version-modal{width:min(1180px,calc(100vw - 64px));max-height:calc(100vh - 70px);display:flex;flex-direction:column}.project-version-modal>.modal-body{overflow:auto;padding:18px 20px}.project-version-summary{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;margin-bottom:14px;border:1px solid #dfe8e2;background:#f7faf8}.project-version-summary>div:first-child{display:flex;align-items:baseline;gap:10px}.project-version-summary span,.project-version-summary small{color:#718078;font-size:12px}.project-version-summary b{color:#1f754a;font-size:20px}.project-version-compare{display:flex;align-items:center;gap:8px}.project-version-compare .select{width:100px;height:32px}.project-version-compare .btn{height:32px}.project-version-table,.project-diff-table{width:100%;border-collapse:collapse;table-layout:fixed}.project-version-table th,.project-diff-table th{height:38px;padding:0 10px;background:#f1f5f2;color:#536158;text-align:left;font-size:12px;font-weight:600}.project-version-table td,.project-diff-table td{padding:12px 10px;border-bottom:1px solid #e6ece8;color:#536158;font-size:12px;vertical-align:middle}.project-version-table th:nth-child(1){width:88px}.project-version-table th:nth-child(2){width:110px}.project-version-table th:nth-child(3){width:142px}.project-version-table th:nth-child(4){width:100px}.project-version-table th:nth-child(5){width:165px}.project-version-table th:nth-child(6){width:72px}.project-version-table th:nth-child(7){width:80px}.project-version-table th:nth-child(8){width:205px}.project-version-table td:first-child b,.project-version-table td:first-child small{display:block}.project-version-table td:first-child b{color:#2c4737;font-size:14px}.project-version-table td:first-child small{margin-top:4px;color:#8b968f;font-size:10px}.project-version-table .link+.link{margin-left:10px}.project-version-section-title{display:flex;align-items:center;gap:10px;margin:19px 0 9px;color:#34473b;font-size:14px}.project-version-section-title span{color:#89948d;font-size:11px}.project-model-history{margin-top:18px;border:1px solid #e1e8e3}.project-model-history>.project-version-section-title{height:40px;margin:0;padding:0 12px;background:#f7f9f8}.project-model-history>div:not(.project-version-section-title){display:grid;grid-template-columns:minmax(0,1fr) 220px 110px;align-items:center;min-height:45px;padding:0 12px;border-top:1px solid #edf1ee;color:#536158;font-size:12px}.project-model-history>div span b{display:inline-block;min-width:42px;margin-right:8px;color:#266f49}.project-model-history small{color:#89948d}.project-version-actions{display:flex;justify-content:flex-end;margin-top:16px}.project-diff-head{display:grid;grid-template-columns:180px 1fr 260px;align-items:center;margin-bottom:14px}.project-diff-head>div{text-align:center}.project-diff-head>div span{margin:0 15px;color:#8d9891}.project-diff-head>div b{color:#246f49;font-size:16px}.project-diff-head>small{text-align:right;color:#8b968f}.project-diff-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.project-diff-summary span{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border:1px solid #e0e7e2;background:#fafcfb;color:#65736a;font-size:12px}.project-diff-summary b{color:#26734c;font-size:19px}.project-diff-table th:first-child{width:150px}.project-change-tag{display:inline-block;min-width:36px;padding:3px 7px;border-radius:3px;text-align:center}.project-change-tag.added{background:#e8f5ec;color:#218153}.project-change-tag.removed{background:#fff0ef;color:#c75a54}.project-change-tag.changed{background:#fff5e5;color:#b77725}.project-diff-empty{height:72px;text-align:center;color:#98a19b!important}.project-rollback-modal{width:580px}.project-rollback-warning{padding:14px 16px;border-left:3px solid #d99b36;background:#fff8ec;color:#6e5b37}.project-rollback-warning b{color:#76531e}.project-rollback-warning p{margin:7px 0 0;line-height:1.7}.project-rollback-modal dl{display:grid;grid-template-columns:120px 1fr;margin:16px 0 0}.project-rollback-modal dt,.project-rollback-modal dd{margin:0;padding:9px;border-bottom:1px solid #edf0ee;font-size:13px}.project-rollback-modal dt{color:#89948d}.project-rollback-modal dd{color:#425249}.project-history-model-note{display:flex;align-items:center;gap:12px;padding:8px 18px;border-bottom:1px solid #dbe7df;background:#f0f7f2;color:#586b5f;font-size:12px}.project-history-model-note b{color:#1f774a}.project-history-model-note em{margin-left:auto;padding:3px 7px;background:#e4eee7;color:#567060;font-style:normal}.project-version-toast{position:fixed;z-index:150;top:74px;left:50%;padding:11px 18px;border-radius:4px;background:#253b2f;color:#fff;font-size:13px;opacity:0;transform:translate(-50%,-10px);pointer-events:none;transition:.2s}.project-version-toast.show{opacity:1;transform:translate(-50%,0)}@media(max-width:1200px){.project-version-table{min-width:1050px}.project-version-modal>.modal-body{overflow:auto}.project-model-history{min-width:900px}}
+      `;
+      document.head.appendChild(style);
+    })();
+  </script>
 </body>
 </html>
