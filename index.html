@@ -7262,6 +7262,126 @@
     })();
   </script>
   <script>
+    /* 控制台最小闭环：选数车提交后生成工单，五类个人资源统一管理 */
+    (() => {
+      const page = document.getElementById('personalConsolePage');
+      const workbenchButton = document.querySelector('.top-btn[data-top="workbench"]');
+      const modal = document.getElementById('consoleActionModal');
+      if (!page || !workbenchButton || !modal) return;
+
+      const state = {
+        active:'',
+        cart:[
+          {id:'DATA-001',name:'白玉兰测试20260203 · 土建专业模型数据',type:'模型数据',project:'白玉兰测试20260203',time:'2026-09-12 09:20'},
+          {id:'DATA-002',name:'联合工房 · 机电系统实例数据',type:'系统数据',project:'联合工房数字化项目',time:'2026-09-12 09:26'}
+        ],
+        tickets:[
+          {no:'WO-20260911-003',title:'项目数据下载申请',time:'2026-09-11 16:20',status:'待处理',kind:'wait',approver:'王处',items:['智慧园区一期 · 建筑模型数据'],result:'等待审批人处理'},
+          {no:'WO-20260910-008',title:'模型数据使用申请',time:'2026-09-10 10:15',status:'处理中',kind:'progress',approver:'郭处',items:['联合工房 · 暖通系统数据','联合工房 · 空间数据'],result:'审批已通过，正在生成数据包'},
+          {no:'WO-20260908-005',title:'项目成果数据申请',time:'2026-09-08 14:32',status:'已完成',kind:'done',approver:'总工',items:['白玉兰测试20260203 · 项目成果文件'],result:'申请已通过，数据已加入“我的订阅”'}
+        ],
+        subscriptions:[
+          {name:'白玉兰测试20260203 · 项目成果数据',type:'项目数据',time:'2026-09-08 16:10',status:'已开通'},
+          {name:'联合工房 · 模型质量检查结果',type:'质检数据',time:'2026-09-05 11:26',status:'已开通'},
+          {name:'智慧园区一期 · 建筑模型数据',type:'模型数据',time:'2026-09-11 16:20',status:'待审批'}
+        ],
+        scenes:[
+          {name:'项目模型协同审查',project:'联合工房数字化项目',time:'2026-09-11 14:20'},
+          {name:'模型质量交付检查',project:'智慧园区一期项目',time:'2026-09-10 10:45'},
+          {name:'设备运维巡检',project:'华盛学校改扩建项目',time:'2026-09-06 16:12'}
+        ],
+        apps:[
+          {name:'模型轻量化浏览器',desc:'在线查看项目模型及构件信息'},
+          {name:'模型质量检查',desc:'查看质量检查及问题整改结果'},
+          {name:'成果数据下载',desc:'下载已审批通过的项目成果文件'}
+        ],
+        pendingApprover:''
+      };
+      const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const notice = document.createElement('div'); notice.className = 'minimal-console-notice'; document.body.appendChild(notice);
+      const toast = text => { notice.textContent = text; notice.classList.add('show'); setTimeout(() => notice.classList.remove('show'),2200); };
+      const openModal = (title,body,foot='<button class="btn primary" type="button" data-minimal-console-close>关闭</button>') => {
+        modal.querySelector('[data-console-modal-title]').textContent = title;
+        modal.querySelector('[data-console-modal-body]').innerHTML = body;
+        modal.querySelector('[data-console-modal-foot]').innerHTML = foot;
+        modal.classList.add('open');
+      };
+      const status = (text,kind) => `<em class="console-status ${kind}">${text}</em>`;
+      const pageNames = {ticket:'我的工单',subscription:'我的订阅',scene:'我的场景',app:'我的应用',cart:'我的选数车'};
+      const side = active => {
+        document.getElementById('primarySide').innerHTML = '<div class="primary-item" data-workbench-primary><span class="primary-icon">▦</span><span>工作台</span></div><div class="primary-item active" data-console-primary><span class="primary-icon">▣</span><span>控制台</span></div>';
+        document.getElementById('secondarySide').innerHTML = Object.entries(pageNames).map(([key,label]) => `<button class="sub-btn ${active === key ? 'active' : ''}" type="button" data-minimal-console-page="${key}">◩ ${label}${key === 'cart' && state.cart.length ? `<em>${state.cart.length}</em>` : ''}</button>`).join('');
+      };
+      const shell = (title,description,content,action='') => `<section class="console-page minimal-console-page"><div class="console-head"><div><h2>${title}</h2><p>${description}</p></div>${action}</div>${content}</section>`;
+      const overview = () => {
+        const pending = state.tickets.filter(item => item.status !== '已完成').length;
+        const latestTicket = state.tickets[0];
+        return shell('控制台','admin，集中查看并管理您的个人资源和数据申请。',`
+          <div class="minimal-user-strip"><span><b>admin</b>　数据管理员</span><span>所属部门：数据管理部</span><span>最近登录：2026-09-12 09:18</span></div>
+          <div class="console-summary minimal-console-summary">
+            <button type="button" data-minimal-console-page="ticket"><span>我的工单</span><b>${state.tickets.length}</b><small>${pending} 项处理中</small></button>
+            <button type="button" data-minimal-console-page="subscription"><span>我的订阅</span><b>${state.subscriptions.length}</b><small>${state.subscriptions.filter(item=>item.status === '已开通').length} 项已开通</small></button>
+            <button type="button" data-minimal-console-page="scene"><span>我的场景</span><b>${state.scenes.length}</b><small>可直接进入</small></button>
+            <button type="button" data-minimal-console-page="app"><span>我的应用</span><b>${state.apps.length}</b><small>均运行正常</small></button>
+            <button type="button" data-minimal-console-page="cart"><span>我的选数车</span><b>${state.cart.length}</b><small>${state.cart.length ? '待统一提交' : '暂无待选数据'}</small></button>
+          </div>
+          <div class="minimal-console-overview">
+            <section class="console-card"><div class="console-card-head"><b>最近工单</b><button class="link" type="button" data-minimal-console-page="ticket">查看全部</button></div><div class="minimal-latest-ticket"><div><b>${safe(latestTicket.title)}</b><span>${safe(latestTicket.no)}　${safe(latestTicket.time)}</span></div>${status(latestTicket.status,latestTicket.kind)}<button class="link" type="button" data-minimal-ticket-detail="${latestTicket.no}">查看</button></div></section>
+            <section class="console-card"><div class="console-card-head"><b>选数车待提交</b><button class="link" type="button" data-minimal-console-page="cart">去处理</button></div><div class="minimal-overview-cart">${state.cart.length ? state.cart.map(item => `<p><span>${safe(item.name)}</span><small>${safe(item.type)}</small></p>`).join('') : '<div class="console-empty">暂无待提交数据</div>'}</div></section>
+          </div>`);
+      };
+      const tickets = () => shell('我的工单','查看选数车提交后生成的数据申请及处理结果。',`<section class="console-table-card"><div class="minimal-list-toolbar"><span>共 ${state.tickets.length} 条工单</span><select class="select" data-minimal-ticket-filter><option value="">全部状态</option><option>待处理</option><option>处理中</option><option>已完成</option></select></div><table><thead><tr><th>工单编号</th><th>工单标题</th><th>申请数据</th><th>提交时间</th><th>审批人</th><th>处理状态</th><th>操作</th></tr></thead><tbody>${state.tickets.map(item => `<tr data-minimal-ticket-row data-ticket-status="${item.status}"><td>${item.no}</td><td>${safe(item.title)}</td><td>${item.items.length} 项</td><td>${safe(item.time)}</td><td>${safe(item.approver)}</td><td>${status(item.status,item.kind)}</td><td><button class="link" type="button" data-minimal-ticket-detail="${item.no}">查看详情</button></td></tr>`).join('')}</tbody></table></section>`);
+      const subscriptions = () => shell('我的订阅','查看个人已申请和已开通的数据资源。',`<section class="console-table-card"><table><thead><tr><th>资源名称</th><th>资源类型</th><th>订阅时间</th><th>状态</th><th>操作</th></tr></thead><tbody>${state.subscriptions.map((item,index) => `<tr><td>${safe(item.name)}</td><td>${safe(item.type)}</td><td>${safe(item.time)}</td><td>${status(item.status,item.status === '已开通' ? 'active' : 'wait')}</td><td><button class="link" type="button" data-minimal-subscription-view="${index}">${item.status === '已开通' ? '查看资源' : '查看申请'}</button>${item.status === '待审批' ? `<button class="console-danger" type="button" data-minimal-subscription-cancel="${index}">取消订阅</button>` : ''}</td></tr>`).join('')}</tbody></table></section>`);
+      const scenes = () => shell('我的场景','进入已创建或已授权的 BIM 业务场景。',`<div class="console-resource-grid minimal-resource-grid">${state.scenes.map((item,index) => `<article><b>${safe(item.name)}</b><p>关联项目：${safe(item.project)}</p><span>最近访问：${safe(item.time)}</span><button class="link" type="button" data-minimal-scene-open="${index}">进入场景</button></article>`).join('')}</div>`);
+      const apps = () => shell('我的应用','打开当前账号已获得使用权限的应用。',`<div class="console-resource-grid minimal-resource-grid">${state.apps.map((item,index) => `<article><b>${safe(item.name)}</b><p>${safe(item.desc)}</p>${status('运行正常','active')}<button class="link" type="button" data-minimal-app-open="${index}">打开应用</button></article>`).join('')}</div>`);
+      const cart = () => shell('我的选数车','统一提交已选择的数据，提交后自动生成数据申请工单。',`<section class="console-table-card"><div class="console-cart-tip">当前共选择 <b>${state.cart.length}</b> 项数据；同一批数据仅选择一位审批人并生成一张工单。</div><table><thead><tr><th>数据名称</th><th>数据类型</th><th>所属项目</th><th>加入时间</th><th>操作</th></tr></thead><tbody>${state.cart.length ? state.cart.map((item,index) => `<tr><td>${safe(item.name)}</td><td>${safe(item.type)}</td><td>${safe(item.project)}</td><td>${safe(item.time)}</td><td><button class="console-danger" type="button" data-minimal-cart-remove="${index}">移除</button></td></tr>`).join('') : '<tr><td colspan="5" class="console-empty">选数车暂无数据</td></tr>'}</tbody></table><div class="console-cart-submit"><label>审批人</label><select class="select" data-minimal-cart-approver><option value="">请选择审批人</option><option>王处</option><option>郭处</option><option>总工</option></select><button class="btn primary" type="button" data-minimal-cart-submit ${state.cart.length ? '' : 'disabled'}>提交数据申请</button></div></section>`, '<button class="btn light" type="button" data-minimal-go-data>继续选数</button>');
+      const render = active => {
+        state.active = active || '';
+        document.querySelector('.layout')?.classList.remove('homepage-mode');
+        document.querySelectorAll('.top-btn').forEach(button => button.classList.toggle('active',button === workbenchButton));
+        document.querySelectorAll('.page').forEach(item => item.classList.remove('active')); page.classList.add('active'); side(state.active);
+        const crumb = document.getElementById('breadcrumb'); if (crumb) crumb.textContent = `工作台 / 控制台${state.active ? ` / ${pageNames[state.active]}` : ''}`;
+        page.innerHTML = state.active === 'ticket' ? tickets() : state.active === 'subscription' ? subscriptions() : state.active === 'scene' ? scenes() : state.active === 'app' ? apps() : state.active === 'cart' ? cart() : overview();
+      };
+      window.openPersonalConsole = render;
+
+      document.addEventListener('click',event => {
+        const primary = event.target.closest('[data-console-primary]');
+        const route = event.target.closest('[data-minimal-console-page]');
+        const oldRoute = event.target.closest('[data-console-page]');
+        if (primary || route || oldRoute) { event.preventDefault(); event.stopImmediatePropagation(); render(route?.dataset.minimalConsolePage || oldRoute?.dataset.consolePage || ''); return; }
+        if (!event.target.closest('#personalConsolePage') && !event.target.closest('#consoleActionModal')) return;
+        const remove = event.target.closest('[data-minimal-cart-remove]'); if (remove) { event.stopImmediatePropagation(); state.cart.splice(Number(remove.dataset.minimalCartRemove),1); render('cart'); return; }
+        if (event.target.closest('[data-minimal-cart-submit]')) {
+          event.stopImmediatePropagation(); const approver = page.querySelector('[data-minimal-cart-approver]')?.value; if (!approver) return toast('请选择一位审批人'); state.pendingApprover = approver;
+          openModal('提交数据申请',`<div class="minimal-submit-confirm"><b>确认提交 ${state.cart.length} 项数据申请</b><p>审批人：${safe(approver)}</p><ul>${state.cart.map(item => `<li>${safe(item.name)}</li>`).join('')}</ul><small>提交后将自动生成一张数据申请工单，可在“我的工单”查看状态。</small></div>`,'<button class="btn light" type="button" data-minimal-console-close>取消</button><button class="btn primary" type="button" data-minimal-cart-confirm>确认提交</button>'); return;
+        }
+        if (event.target.closest('[data-minimal-cart-confirm]')) {
+          event.stopImmediatePropagation(); const selected = state.cart.map(item => item.name); const no = `WO-20260912-${String(state.tickets.length + 1).padStart(3,'0')}`;
+          state.tickets.unshift({no,title:'选数车数据使用申请',time:'刚刚',status:'待处理',kind:'wait',approver:state.pendingApprover,items:selected,result:'等待审批人处理'}); state.cart.splice(0); modal.classList.remove('open'); render('ticket'); toast(`已生成工单 ${no}`); return;
+        }
+        const detail = event.target.closest('[data-minimal-ticket-detail]'); if (detail) {
+          event.stopImmediatePropagation(); const item = state.tickets.find(ticket => ticket.no === detail.dataset.minimalTicketDetail); if (!item) return;
+          openModal('工单详情',`<div class="minimal-ticket-detail"><div class="minimal-ticket-meta"><span>工单编号<b>${item.no}</b></span><span>审批人<b>${safe(item.approver)}</b></span><span>当前状态${status(item.status,item.kind)}</span></div><h4>申请数据</h4><ul>${item.items.map(name => `<li>${safe(name)}</li>`).join('')}</ul><h4>处理结果</h4><p>${safe(item.result)}</p></div>`); return;
+        }
+        const filter = event.target.closest('[data-minimal-ticket-filter]'); if (filter) return;
+        const viewSubscription = event.target.closest('[data-minimal-subscription-view]'); if (viewSubscription) { event.stopImmediatePropagation(); const item = state.subscriptions[Number(viewSubscription.dataset.minimalSubscriptionView)]; openModal(item.status === '已开通' ? '订阅资源' : '订阅申请',`<div class="console-detail-list"><p><b>资源名称：</b>${safe(item.name)}</p><p><b>资源类型：</b>${safe(item.type)}</p><p><b>订阅状态：</b>${safe(item.status)}</p><p><b>订阅时间：</b>${safe(item.time)}</p></div>`); return; }
+        const cancel = event.target.closest('[data-minimal-subscription-cancel]'); if (cancel) { event.stopImmediatePropagation(); state.subscriptions.splice(Number(cancel.dataset.minimalSubscriptionCancel),1); render('subscription'); toast('已取消待审批订阅'); return; }
+        const scene = event.target.closest('[data-minimal-scene-open]'); if (scene) { event.stopImmediatePropagation(); const item = state.scenes[Number(scene.dataset.minimalSceneOpen)]; openModal('进入场景',`<div class="console-service-open"><b>${safe(item.name)}</b><p>已进入 ${safe(item.project)} 的场景工作区。</p></div>`); return; }
+        const app = event.target.closest('[data-minimal-app-open]'); if (app) { event.stopImmediatePropagation(); const item = state.apps[Number(app.dataset.minimalAppOpen)]; openModal('打开应用',`<div class="console-service-open"><b>${safe(item.name)}</b><p>${safe(item.desc)}</p></div>`); return; }
+        if (event.target.closest('[data-minimal-console-close]') || event.target === modal) { event.stopImmediatePropagation(); modal.classList.remove('open'); return; }
+        if (event.target.closest('[data-minimal-go-data]')) { event.stopImmediatePropagation(); const dataButton = [...document.querySelectorAll('.top-btn')].find(button => button.textContent.includes('BIM数据管理')); dataButton?.click(); }
+      },true);
+      document.addEventListener('change',event => { if (!event.target.matches('[data-minimal-ticket-filter]')) return; const value = event.target.value; page.querySelectorAll('[data-minimal-ticket-row]').forEach(row => row.hidden = Boolean(value) && row.dataset.ticketStatus !== value); });
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .minimal-console-page{padding:0}.minimal-user-strip{display:flex;align-items:center;gap:28px;height:44px;padding:0 16px;margin-bottom:12px;border:1px solid #dfe8e2;background:#fff;color:#76847b;font-size:12px}.minimal-user-strip b{color:#285f42;font-size:14px}.minimal-console-summary{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:10px!important}.minimal-console-summary button{padding:15px 17px;border:1px solid #dfe8e2;border-radius:0;background:#fff;text-align:left;cursor:pointer}.minimal-console-summary button:hover{border-color:#88b79a;background:#f7fbf8}.minimal-console-summary span,.minimal-console-summary small{display:block;color:#849087;font-size:12px}.minimal-console-summary b{display:block;margin:6px 0;color:#246f4a;font-size:25px}.minimal-console-overview{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}.minimal-latest-ticket{display:grid;grid-template-columns:minmax(0,1fr) 80px 50px;align-items:center;padding:16px}.minimal-latest-ticket b,.minimal-latest-ticket span{display:block}.minimal-latest-ticket b{color:#405147;font-size:13px}.minimal-latest-ticket span{margin-top:5px;color:#8a958e;font-size:11px}.minimal-overview-cart{padding:6px 16px 10px}.minimal-overview-cart p{display:flex;justify-content:space-between;margin:0;padding:10px 0;border-bottom:1px solid #edf1ee;color:#4d5d53;font-size:12px}.minimal-overview-cart small{color:#8b968f}.minimal-list-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #e5ebe7;color:#748178;font-size:12px}.minimal-list-toolbar .select{width:130px;height:32px}.minimal-resource-grid article{min-height:128px!important}.minimal-submit-confirm>b{display:block;padding:12px 14px;background:#f1f8f3;color:#276b47}.minimal-submit-confirm p{color:#64736a}.minimal-submit-confirm ul,.minimal-ticket-detail ul{margin:10px 0;padding:0;list-style:none;border:1px solid #e3e9e5}.minimal-submit-confirm li,.minimal-ticket-detail li{padding:9px 11px;border-bottom:1px solid #edf1ee;color:#526158;font-size:12px}.minimal-submit-confirm li:last-child,.minimal-ticket-detail li:last-child{border:0}.minimal-submit-confirm small{color:#849087}.minimal-ticket-meta{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:10px}.minimal-ticket-meta span{padding:10px;background:#f5f8f6;color:#7a877f;font-size:11px}.minimal-ticket-meta b{display:block;margin-top:5px;color:#405147;font-size:13px}.minimal-ticket-detail h4{margin:18px 0 8px;color:#35473b}.minimal-ticket-detail>p{padding:11px;background:#f4faf6;color:#40604d}.minimal-console-notice{position:fixed;z-index:160;top:76px;left:50%;padding:10px 16px;border-radius:4px;background:#253b2f;color:#fff;font-size:13px;opacity:0;transform:translate(-50%,-8px);pointer-events:none;transition:.2s}.minimal-console-notice.show{opacity:1;transform:translate(-50%,0)}#secondarySide .sub-btn em{display:inline-grid;place-items:center;min-width:17px;height:17px;margin-left:auto;border-radius:9px;background:#2e8c5d;color:#fff;font-size:10px;font-style:normal}@media(max-width:1200px){.minimal-console-summary{grid-template-columns:repeat(3,1fr)!important}.minimal-console-overview{grid-template-columns:1fr}.minimal-user-strip{gap:14px}}
+      `;
+      document.head.appendChild(style);
+    })();
+  </script>
+  <script>
     /* 项目版本管理：快照差异、任意版本对比、历史模型追溯与安全回退 */
     (() => {
       const listPage = document.getElementById('dataListPage');
