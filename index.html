@@ -7584,5 +7584,50 @@
       document.head.appendChild(style);
     })();
   </script>
+  <script>
+    /* 企业工作台最小项目动态闭环：沿用现有布局，仅增强右侧项目状态区 */
+    (() => {
+      const page = document.getElementById('leadershipProjectPage');
+      if (!page) return;
+      const dynamics = [
+        {id:'P001',name:'白玉兰测试20260203',stage:'数据质检',progress:72,updated:'2026-09-14 10:20',latest:'数据质检任务已完成，正在复核检查结果。',events:[['2026-09-14 10:20','数据质检完成','模型数据质检完成，检查结果已生成。'],['2026-09-12 15:30','数据质检专题会召开','完成问题确认并明确本轮整改责任。'],['2026-09-10 16:30','模型资料归集完成','土建、机电专业模型及相关资料完成归集。'],['2026-09-01 09:15','项目进入设计阶段','项目阶段更新为设计阶段。']]},
+        {id:'P002',name:'联调测试-0910-02',stage:'完整性检查完成',progress:56,updated:'2026-09-13 16:45',latest:'完整性检查已通过，等待发起数据质检。',events:[['2026-09-13 16:45','完整性检查通过','项目上传文件满足当前标准要求。'],['2026-09-11 11:31','项目模型更新','土建专业模型完成重新上传。'],['2026-09-08 09:40','项目创建','完成项目基础信息登记。']]},
+        {id:'P003',name:'AFDASFD',stage:'模型入库',progress:90,updated:'2026-09-13 14:10',latest:'审批已通过，模型数据完成入库。',events:[['2026-09-13 14:10','审批入库完成','项目模型数据已进入正式数据资产库。'],['2026-09-12 10:25','审批申请提交','项目完成质检并提交入库审批。'],['2026-09-09 17:20','数据质检通过','本轮数据质检未发现阻断问题。']]}
+      ];
+      const approvals = [
+        ['项目数据接入','teng','2026-09-11 16:28:28','待审批'],
+        ['ceshi002','teng','2026-09-11 16:28:11','待审批'],
+        ['东风23','李糖糖','2026-09-11 11:33:30','待审批'],
+        ['联调测试-0910-02','李才哥','2026-09-11 11:31:04','待审批'],
+        ['项目3dtiles数据获取','teng','2026-09-11 11:20:39','待审批'],
+        ['如来','teng','2026-09-11 11:19:48','待审批'],
+        ['如来','fg','2026-09-04 14:22:36','已通过']
+      ];
+      const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const dynamicRows = () => dynamics.map(item => `<article class="wb-dynamic-item" data-workbench-dynamic="${item.id}"><div class="wb-dynamic-row"><span class="wb-stage-dot ${item.progress >= 80 ? 'done' : item.progress >= 60 ? 'progress' : 'wait'}"></span><b>${safe(item.stage)}</b><button class="link" type="button" data-workbench-dynamic-view="${item.id}">查看</button></div><strong>${safe(item.name)}</strong><p>${safe(item.latest)}</p><div class="wb-progress"><i style="width:${item.progress}%"></i></div><small>${item.progress}%　更新于 ${safe(item.updated)}</small></article>`).join('');
+      page.innerHTML = `
+        <div class="wb-stat-grid"><button type="button" data-lead-list="uploaded"><span>我上传的项目数</span><b>96</b><small>查看项目列表 ›</small></button><button type="button" data-lead-list="followed"><span>我关注的项目数</span><b>7</b><small>查看项目列表 ›</small></button></div>
+        <div class="wb-main-grid">
+          <section class="wb-panel wb-approval-panel"><div class="wb-panel-head"><b>我的审批</b><div><button class="active" type="button">我的申请</button><button type="button">待我审批</button></div></div><div class="wb-approval-list">${approvals.map(item => `<div><span><b>${safe(item[0])}</b><small>审批人：${safe(item[1])} · 时间：${safe(item[2])}</small></span><em class="${item[3] === '已通过' ? 'pass' : ''}">${item[3]}</em><button class="link" type="button">查看详情</button></div>`).join('')}</div></section>
+          <section class="wb-panel wb-dynamic-panel"><div class="wb-panel-head"><b>项目动态跟踪</b><button class="link" type="button" data-workbench-dynamic-refresh>刷新</button></div><div class="wb-dynamic-list">${dynamicRows()}</div></section>
+        </div>`;
+      const modal = document.createElement('div'); modal.className = 'modal-mask'; modal.id = 'workbenchDynamicModal';
+      modal.innerHTML = '<div class="modal wb-dynamic-modal"><div class="modal-head"><span data-wb-dynamic-title>项目动态</span><button class="modal-close" type="button" data-close-wb-dynamic>×</button></div><div class="modal-body" data-wb-dynamic-body></div><div class="modal-foot"><button class="btn light" type="button" data-close-wb-dynamic>关闭</button></div></div>';
+      document.body.appendChild(modal);
+      const openDynamic = item => {
+        modal.querySelector('[data-wb-dynamic-title]').textContent = `${item.name} · 项目动态`;
+        modal.querySelector('[data-wb-dynamic-body]').innerHTML = `<div class="wb-modal-summary"><span>当前阶段<b>${safe(item.stage)}</b></span><span>项目进度<b>${item.progress}%</b></span><span>最近更新<b>${safe(item.updated)}</b></span></div><div class="wb-modal-progress"><i style="width:${item.progress}%"></i></div><div class="wb-timeline">${item.events.map((event,index) => `<div class="${index === 0 ? 'latest' : ''}"><i></i><time>${safe(event[0])}</time><section><b>${safe(event[1])}</b><p>${safe(event[2])}</p></section></div>`).join('')}</div>`;
+        modal.classList.add('open');
+      };
+      page.addEventListener('click', event => {
+        const view = event.target.closest('[data-workbench-dynamic-view]'); if (view) { const item = dynamics.find(dynamic => dynamic.id === view.dataset.workbenchDynamicView); if (item) openDynamic(item); return; }
+        const refresh = event.target.closest('[data-workbench-dynamic-refresh]'); if (refresh) { const now = new Date(); const text = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`; refresh.textContent = `已更新 ${text}`; setTimeout(() => { refresh.textContent = '刷新'; },1400); }
+      });
+      document.addEventListener('click', event => { if (event.target.closest('[data-close-wb-dynamic]') || event.target === modal) modal.classList.remove('open'); });
+      const style = document.createElement('style'); style.textContent = `
+        .leadership-project-page{padding:0!important}.wb-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}.wb-stat-grid button{position:relative;min-height:84px;padding:15px 18px;border:1px solid #e4e9e6;background:#fff;color:#617067;text-align:left;cursor:pointer}.wb-stat-grid button:hover{border-color:#8fbaa0}.wb-stat-grid span,.wb-stat-grid b,.wb-stat-grid small{display:block}.wb-stat-grid b{margin-top:5px;color:#3978d4;font-size:25px}.wb-stat-grid small{position:absolute;right:18px;top:34px;color:#3978d4}.wb-main-grid{display:grid;grid-template-columns:minmax(600px,2fr) minmax(330px,1fr);gap:14px}.wb-panel{min-height:640px;border:1px solid #e4e9e6;background:#fff}.wb-panel-head{display:flex;align-items:center;justify-content:space-between;height:55px;padding:0 16px;border-bottom:1px solid #edf0ee}.wb-panel-head>b{padding-left:9px;border-left:3px solid #2e8054;color:#3b4940}.wb-panel-head>div{align-self:stretch;display:flex}.wb-panel-head>div button{padding:0 18px;border:0;border-bottom:2px solid transparent;background:#fff;color:#6d7971;cursor:pointer}.wb-panel-head>div button.active{border-color:#3978d4;color:#3978d4}.wb-approval-list>div{display:grid;grid-template-columns:minmax(0,1fr) 70px 70px;align-items:center;min-height:61px;padding:0 16px;border-bottom:1px solid #edf0ee}.wb-approval-list span b,.wb-approval-list span small{display:block}.wb-approval-list span b{color:#425148;font-size:13px}.wb-approval-list span small{margin-top:6px;color:#9aa39d;font-size:11px}.wb-approval-list em{justify-self:center;padding:3px 7px;border:1px solid #efd3a9;color:#c5872d;font-size:11px;font-style:normal}.wb-approval-list em.pass{border-color:#b8ddc4;color:#39945c}.wb-dynamic-list{padding:0 16px}.wb-dynamic-item{padding:15px 0;border-bottom:1px solid #edf0ee}.wb-dynamic-row{display:flex;align-items:center;gap:7px}.wb-dynamic-row b{color:#59665e;font-size:12px}.wb-dynamic-row .link{margin-left:auto}.wb-stage-dot{width:7px;height:7px;border-radius:50%;background:#aeb6b1}.wb-stage-dot.wait{background:#e5a038}.wb-stage-dot.progress{background:#35a867}.wb-stage-dot.done{background:#2e8054}.wb-dynamic-item>strong{display:block;margin:9px 0 5px;color:#3c4b42;font-size:13px}.wb-dynamic-item>p{margin:0 0 10px;color:#77837b;font-size:12px;line-height:1.45}.wb-progress{height:5px;overflow:hidden;background:#edf1ee}.wb-progress i{display:block;height:100%;background:#43a36a}.wb-dynamic-item>small{display:block;margin-top:6px;color:#9aa39d;font-size:10px}.wb-dynamic-modal{width:720px}.wb-modal-summary{display:grid;grid-template-columns:1fr .7fr 1fr;gap:10px}.wb-modal-summary span{padding:10px 12px;background:#f5f8f6;color:#849088;font-size:11px}.wb-modal-summary b{display:block;margin-top:5px;color:#34463b;font-size:13px}.wb-modal-progress{height:6px;margin:12px 0 18px;background:#edf1ee}.wb-modal-progress i{display:block;height:100%;background:#30915c}.wb-timeline>div{position:relative;display:grid;grid-template-columns:14px 138px 1fr;gap:10px;padding-bottom:18px}.wb-timeline>div:not(:last-child):before{position:absolute;left:5px;top:10px;bottom:0;width:1px;background:#dce5df;content:''}.wb-timeline i{z-index:1;width:11px;height:11px;border:2px solid #fff;border-radius:50%;background:#aeb8b1;box-sizing:border-box}.wb-timeline .latest i{background:#2fa262}.wb-timeline time{color:#929d96;font-size:12px}.wb-timeline section b{color:#405047;font-size:13px}.wb-timeline section p{margin:5px 0 0;color:#6e7a72;font-size:12px;line-height:1.5}@media(max-width:1200px){.wb-main-grid{grid-template-columns:1fr}.wb-panel{min-height:auto}.wb-dynamic-panel{min-height:420px}}
+      `; document.head.appendChild(style);
+    })();
+  </script>
 </body>
 </html>
