@@ -2666,6 +2666,10 @@
           <div class="info-card restored-project-info">
             <div class="restored-project-summary-row">
               <div class="project-title" data-page-to="dataListPage" title="返回项目列表">‹ 白玉兰测试20260203</div>
+              <div class="restored-summary-standard">
+                <span>当前标准：</span>
+                <button class="link restored-standard-link" type="button" data-change-project-standard title="更换当前标准"><span data-current-project-standard>合肥院 BIM 数据标准 V1.0</span></button>
+              </div>
               <button class="link restored-info-more" type="button" aria-expanded="false">更多详情⌄</button>
             </div>
             <div class="info-grid" data-project-detail-fields hidden>
@@ -2676,7 +2680,6 @@
               <div class="info-line">项目地址: <span>--</span></div>
               <div class="info-line">详细地址: <span>--</span></div>
               <div class="info-line">工程类别: <span>--</span></div>
-              <div class="info-line">当前标准: <button class="link restored-standard-link" type="button" data-change-project-standard><span data-current-project-standard>合肥院 BIM 数据标准 V1.0</span></button></div>
             </div>
           </div>
           <div class="card project-data restored-project-data">
@@ -6786,13 +6789,15 @@
       style.id = 'restored-project-page-style';
       style.textContent = `
         #projectPage .restored-project-info{padding:0 14px;margin-bottom:8px}
-        #projectPage .restored-project-summary-row{display:flex;height:56px;align-items:center;justify-content:space-between}
+        #projectPage .restored-project-summary-row{display:grid;height:56px;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:20px}
         #projectPage .restored-project-info .project-title{margin:0;font-size:16px}
         #projectPage .restored-project-info .info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 18px;padding:11px 0 13px;border-top:1px solid #edf1ee}
         #projectPage .restored-project-info .info-grid[hidden]{display:none!important}
         #projectPage .restored-project-info .info-line{color:#748078;font-size:12px}
         #projectPage .restored-project-info .info-line span{color:#3f4f46}
         #projectPage .restored-standard-link{padding:0;font-size:12px}
+        #projectPage .restored-summary-standard{display:flex;min-width:0;max-width:380px;align-items:center;gap:4px;color:#748078;font-size:12px;white-space:nowrap}
+        #projectPage .restored-summary-standard .restored-standard-link{max-width:280px;overflow:hidden;color:#28734c;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
         #projectPage .restored-info-more{position:static;padding:4px 0;color:#517261;font-size:12px}
         #projectPage .restored-project-data{display:grid;grid-template-columns:184px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);min-height:0;padding:0}
         #projectPage .restored-project-tree{grid-column:1;grid-row:2;padding:8px 8px;border-right:1px solid #edf1ee;background:#fbfcfb}
