@@ -6120,7 +6120,7 @@
           const item = projectStandards[index] || projectStandards[0]; row.dataset.currentStandard = item[0];
           const needsQualityUpdate = item[0] !== item[1];
           const updateTip = `当前质检使用：${item[1]}\n项目最新标准：${item[0]}\n当前质检结果基于旧版本标准，需要重新发起数据质检。`;
-          row.children[2]?.insertAdjacentHTML('beforebegin', `<td class="project-standard-summary"><b>当前：${item[0]}</b><span>质检：${item[1]}</span>${needsQualityUpdate ? `<em class="project-standard-state pending-qc-update" title="${updateTip}">质检标准待更新</em>` : ''}</td>`);
+          row.children[2]?.insertAdjacentHTML('beforebegin', `<td class="project-standard-summary"><b>当前：${item[0]}</b><span>质检：${item[1]}</span>${needsQualityUpdate ? `<em class="project-standard-state pending-qc-update" title="${updateTip}">质检标准待更换</em>` : ''}</td>`);
         });
       }
       document.addEventListener('change', event => {
@@ -6142,7 +6142,7 @@
       const assetStatisticsRequirement = [...(weeklyBody?.querySelectorAll('.weekly-requirement-section') || [])].find(section => section.querySelector('h3')?.textContent.includes('入库数据统计'));
       assetStatisticsRequirement?.querySelector('ul')?.replaceChildren();
       if (assetStatisticsRequirement?.querySelector('ul')) assetStatisticsRequirement.querySelector('ul').innerHTML = '<li><b>位置：</b>数据资产全览下新增“入库数据统计”二级菜单。</li><li><b>内容：</b>提供构件统计、空间统计两类视图；构件标识/空间名称检索跳转至对应分类结果。</li><li><b>统计口径：</b>仅统计「项目数据管理 → 数据入库」中状态为“已入库”且解析成功的项目模型；待审批、审批中、已驳回、解析失败、已删除项目不纳入。</li><li><b>分类依据：</b>构件、空间、系统的分类与统计均以文件实际使用的解析标准为准；同一项目仅统计最新成功入库版本。</li>';
-      if (weeklyBody && !weeklyBody.querySelector('[data-standard-requirement]')) weeklyBody.insertAdjacentHTML('beforeend', '<section class="weekly-requirement-section" data-standard-requirement><div class="weekly-requirement-section-head"><div><em>09</em><h3>项目标准与质检标准</h3></div></div><ul><li><b>项目绑定：</b>标准数字化 / 数据字典中可设置一项已发布标准为默认标准；新建项目自动带入，项目详情右上角可查看并更换。</li><li><b>标准变更：</b>更换项目标准仅更新后续解析默认值，不自动重新解析已有模型；需要应用新标准时，由用户在对应 IFC 文件的“更多 → 重新转换”中手动处理。不保留标准版本快照及变更留痕。</li><li><b>列表总览：</b>项目列表以单个“项目标准”列紧凑展示当前标准和质检标准；仅两者不一致时显示“质检标准待更新”，支持按当前标准筛选。</li><li><b>文件与分类树：</b>每个已解析 IFC 文件展示其实际解析标准；模型浏览保留原始模型树，并新增构件、空间、系统分类树。标准无法匹配的对象按 IFC 类型归入“未定义门 / 未定义墙”等兜底分类。</li><li><b>质检口径：</b>发起质检继承项目绑定标准，不单独选择；质检结果页展示本次使用的质检标准。</li></ul></section>');
+      if (weeklyBody && !weeklyBody.querySelector('[data-standard-requirement]')) weeklyBody.insertAdjacentHTML('beforeend', '<section class="weekly-requirement-section" data-standard-requirement><div class="weekly-requirement-section-head"><div><em>09</em><h3>项目标准与质检标准</h3></div></div><ul><li><b>项目绑定：</b>标准数字化 / 数据字典中可设置一项已发布标准为默认标准；新建项目自动带入，项目详情右上角可查看并更换。</li><li><b>标准变更：</b>更换项目标准仅更新后续解析默认值，不自动重新解析已有模型；需要应用新标准时，由用户在对应 IFC 文件的“更多 → 重新转换”中手动处理。不保留标准版本快照及变更留痕。</li><li><b>列表总览：</b>项目列表以单个“项目标准”列紧凑展示当前标准和质检标准；仅两者不一致时显示“质检标准待更换”，支持按当前标准筛选。</li><li><b>文件与分类树：</b>每个已解析 IFC 文件展示其实际解析标准；模型浏览保留原始模型树，并新增构件、空间、系统分类树。标准无法匹配的对象按 IFC 类型归入“未定义门 / 未定义墙”等兜底分类。</li><li><b>质检口径：</b>发起质检继承项目绑定标准，不单独选择；质检结果页展示本次使用的质检标准。</li></ul></section>');
 
       let defaultProjectStandard = window.defaultProjectStandard || '合肥院 BIM 数据标准 V1.0';
       const mountDefaultStandard = () => {
