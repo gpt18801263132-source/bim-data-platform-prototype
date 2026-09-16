@@ -2667,8 +2667,10 @@
             <div class="restored-project-summary-row">
               <div class="project-title" data-page-to="dataListPage" title="返回项目列表">‹ 白玉兰测试20260203</div>
               <div class="restored-summary-standard">
-                <span>当前标准：</span>
-                <button class="link restored-standard-link" type="button" data-change-project-standard title="更换当前标准"><span data-current-project-standard>合肥院 BIM 数据标准 V1.0</span></button>
+                <span class="restored-standard-compare"><small>当前项目标准</small><button class="link restored-standard-link" type="button" data-change-project-standard title="更换当前项目标准"><span data-current-project-standard>合肥院 BIM 数据标准 V1.0</span></button></span>
+                <i aria-hidden="true"></i>
+                <span class="restored-standard-compare"><small>当前质检标准</small><b data-current-quality-standard>合肥院 BIM 数据标准 V1.0</b></span>
+                <em class="restored-standard-status" data-current-standard-status hidden>需重新质检</em>
               </div>
               <button class="link restored-info-more" type="button" aria-expanded="false">更多详情⌄</button>
             </div>
@@ -2694,13 +2696,13 @@
               <section class="restored-project-view" data-restored-project-view="project">
                 <div class="restored-view-title">项目数据</div>
                 <div class="restored-project-toolbar">
-                  <div class="restored-status-row">
-                    <div class="restored-integrity-state" data-integrity-state><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>未发起</strong></div>
-                  </div>
                   <div class="restored-qc-standard-warning" data-qc-standard-warning hidden>
                     <strong>⚠ 质检规范已更新</strong>
-                    <span>当前部分文件的质检结果基于旧版规范，需要重新发起数据质检后才能继续审批。</span>
-                    <em>当前使用：<b data-qc-used-version>V1.0</b>　最新版本：<b data-qc-latest-version>V2.0</b></em>
+                    <span class="restored-qc-standard-versions">当前项目标准：<b data-qc-latest-version>V2.0</b> ｜ 当前质检标准：<b data-qc-used-version>V1.0</b></span>
+                    <span>部分文件结果基于旧版规范，需重新发起数据质检后再继续审批。</span>
+                  </div>
+                  <div class="restored-status-row">
+                    <div class="restored-integrity-state" data-integrity-state><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>未发起</strong></div>
                   </div>
                   <div class="restored-operation-row">
                     <div class="restored-flow-sequence" aria-label="项目数据处理顺序">
@@ -2714,6 +2716,7 @@
                       <div class="restored-flow-node" data-quality-flow-node>
                         <span class="restored-flow-title">发起数据质检</span>
                         <button class="restored-flow-state restored-flow-control" type="button" id="startDataQualityCheck" disabled>待完整性检查</button>
+                        <small class="restored-flow-standard-hint" data-flow-standard-hint hidden>规范已更新，请重新发起数据质检</small>
                       </div>
                       <span class="restored-flow-arrow" aria-hidden="true">→</span>
                       <div class="restored-flow-node" data-result-flow-node>
@@ -5821,6 +5824,11 @@
         const statsTab = event.target.closest('[data-stats-tab]'); if (statsTab) renderStats(statsTab.dataset.statsTab);
       });
       [standardModal, viewerModal, statsModal].forEach(modal => modal.addEventListener('click', event => { if (event.target === modal) modal.classList.remove('open'); }));
+      document.addEventListener('project-standard-context', event => {
+        if (!event.detail?.latestStandard) return;
+        state.standard = event.detail.latestStandard;
+        refreshStandardStatus();
+      });
       refreshStandardStatus();
 
       const style = document.createElement('style');
@@ -6119,6 +6127,13 @@
         projectList.querySelectorAll('table tbody tr').forEach((row, index) => {
           const item = projectStandards[index] || projectStandards[0]; row.dataset.currentStandard = item[0];
           const needsQualityUpdate = item[0] !== item[1];
+          row.dataset.qualityStandard = item[1];
+          row.dataset.qualityStandardOutdated = String(needsQualityUpdate);
+          row.querySelectorAll('[data-page-to="projectPage"]').forEach(button => {
+            button.dataset.projectLatestStandard = item[0];
+            button.dataset.projectQualityStandard = item[1];
+            button.dataset.projectQualityOutdated = String(needsQualityUpdate);
+          });
           const updateTip = `当前质检使用：${item[1]}\n项目最新标准：${item[0]}\n当前质检结果基于旧版本标准，需要重新发起数据质检。`;
           row.children[2]?.insertAdjacentHTML('beforebegin', `<td class="project-standard-summary"><b>当前：${item[0]}</b><span>质检：${item[1]}</span>${needsQualityUpdate ? `<em class="project-standard-state pending-qc-update" title="${updateTip}">质检标准待更换</em>` : ''}</td>`);
         });
@@ -6558,6 +6573,14 @@
       const syncQualityStandardState = () => {
         const warning = page.querySelector('[data-qc-standard-warning]');
         if (warning) warning.hidden = !qualityStandardOutdated;
+        const currentProjectStandard = page.querySelector('[data-current-project-standard]');
+        const currentQualityStandard = page.querySelector('[data-current-quality-standard]');
+        const currentStandardStatus = page.querySelector('[data-current-standard-status]');
+        const flowStandardHint = page.querySelector('[data-flow-standard-hint]');
+        if (currentProjectStandard) currentProjectStandard.textContent = latestProjectStandard;
+        if (currentQualityStandard) currentQualityStandard.textContent = qualityStandardUsed;
+        if (currentStandardStatus) currentStandardStatus.hidden = !qualityStandardOutdated;
+        if (flowStandardHint) flowStandardHint.hidden = !qualityStandardOutdated;
         const usedVersion = page.querySelector('[data-qc-used-version]');
         const latestVersion = page.querySelector('[data-qc-latest-version]');
         if (usedVersion) usedVersion.textContent = getVersionLabel(qualityStandardUsed);
@@ -6568,9 +6591,17 @@
           const statusCell = row.cells[7];
           if (!statusCell || !isIfc) return;
           if (!statusCell.dataset.originalQcStatus) statusCell.dataset.originalQcStatus = statusCell.innerHTML;
+          const parseStandard = row.querySelector('[data-file-parse-standard]');
+          if (parseStandard && !parseStandard.dataset.originalParseLabel) parseStandard.dataset.originalParseLabel = parseStandard.textContent.trim();
           statusCell.innerHTML = qualityStandardOutdated
             ? '<span class="status-tag qc-update-required" title="该文件当前质检结果基于旧版质检规范，请重新发起数据质检。">需重新质检</span>'
             : statusCell.dataset.originalQcStatus;
+          if (parseStandard) {
+            parseStandard.textContent = qualityStandardOutdated
+              ? `解析标准：${getVersionLabel(qualityStandardUsed)} ｜ 当前标准：${getVersionLabel(latestProjectStandard)} ｜ 需重新质检`
+              : parseStandard.dataset.originalParseLabel;
+            parseStandard.classList.toggle('qc-update-required-text', qualityStandardOutdated);
+          }
         });
 
         document.querySelectorAll('.qc-standard-used b,.quality-standard-used b').forEach(item => {
@@ -6615,13 +6646,41 @@
 
         button.disabled = !qualityCheckPassed;
         button.title = qualityStandardOutdated ? '质检规范已更新，请重新发起数据质检后再审批' : !qualityCheckPassed ? '请先完成数据质检' : submitted ? '查看已提交的审批流程' : '';
-        button.textContent = submitted ? '查看审批流' : qualityCheckPassed ? '审批入库' : '未满足条件';
+        button.textContent = qualityStandardOutdated ? '需重新质检后方可审批' : submitted ? '查看审批流' : qualityCheckPassed ? '审批入库' : '未满足条件';
         button.className = qualityCheckPassed && !submitted
           ? 'btn primary restored-flow-control restored-entry-ready'
             : submitted
               ? 'btn light restored-flow-control restored-approval-view'
               : 'restored-flow-state restored-flow-control';
         syncQualityStandardState();
+      };
+
+      const applyProjectStandardContext = source => {
+        const row = source?.closest('#dataListPage tbody tr');
+        const latestStandard = source?.dataset.projectLatestStandard || row?.dataset.currentStandard;
+        const usedStandard = source?.dataset.projectQualityStandard || row?.dataset.qualityStandard;
+        if (!latestStandard || !usedStandard) return;
+        const outdated = (source?.dataset.projectQualityOutdated || row?.dataset.qualityStandardOutdated) === 'true';
+        latestProjectStandard = latestStandard;
+        qualityStandardUsed = usedStandard;
+        qualityStandardOutdated = outdated;
+        integrityPassed = outdated;
+        hasQualityResult = outdated;
+        qualityCheckPassed = hasQualityResult && !outdated;
+        qualityResultInvalidated = false;
+        window.entryApprovalSubmitted = false;
+
+        const projectName = row?.cells[1]?.textContent.trim();
+        if (projectName) {
+          const title = page.querySelector('.project-title');
+          const detailName = page.querySelector('[data-project-detail-fields] .info-line span');
+          if (title) title.textContent = `‹ ${projectName}`;
+          if (detailName) detailName.textContent = projectName;
+          const breadcrumb = document.getElementById('breadcrumb');
+          if (breadcrumb) breadcrumb.textContent = `项目数据管理 / 数据治理 / ${projectName}`;
+        }
+        document.dispatchEvent(new CustomEvent('project-standard-context', { detail: { latestStandard } }));
+        syncApprovalState();
       };
 
       const runFileFilter = () => {
@@ -6820,6 +6879,7 @@
           return;
         }
         if (event.target.closest('[data-page-to="projectPage"]')) {
+          applyProjectStandardContext(event.target.closest('[data-page-to="projectPage"]'));
           const selected = page.querySelector('[data-project-profession].active') || page.querySelector('[data-project-profession]');
           showRestoredView('professional', selected, selected?.dataset.projectProfession || '');
         }
@@ -6855,15 +6915,21 @@
       style.id = 'restored-project-page-style';
       style.textContent = `
         #projectPage .restored-project-info{padding:0 14px;margin-bottom:8px}
-        #projectPage .restored-project-summary-row{display:grid;height:56px;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:20px}
+        #projectPage .restored-project-summary-row{display:grid;min-height:56px;grid-template-columns:minmax(190px,1fr) minmax(0,auto) auto;align-items:center;gap:18px}
         #projectPage .restored-project-info .project-title{margin:0;font-size:16px}
         #projectPage .restored-project-info .info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 18px;padding:11px 0 13px;border-top:1px solid #edf1ee}
         #projectPage .restored-project-info .info-grid[hidden]{display:none!important}
         #projectPage .restored-project-info .info-line{color:#748078;font-size:12px}
         #projectPage .restored-project-info .info-line span{color:#3f4f46}
         #projectPage .restored-standard-link{padding:0;font-size:12px}
-        #projectPage .restored-summary-standard{display:flex;min-width:0;max-width:380px;align-items:center;gap:4px;color:#748078;font-size:12px;white-space:nowrap}
-        #projectPage .restored-summary-standard .restored-standard-link{max-width:280px;overflow:hidden;color:#28734c;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+        #projectPage .restored-summary-standard{display:flex;min-width:0;max-width:760px;align-items:center;gap:10px;color:#748078;font-size:12px;white-space:nowrap}
+        #projectPage .restored-standard-compare{display:flex;min-width:0;flex-direction:column;gap:2px}
+        #projectPage .restored-standard-compare small{color:#8a958e;font-size:10px;line-height:13px}
+        #projectPage .restored-standard-compare b{max-width:240px;overflow:hidden;color:#59685f;font-size:12px;font-weight:600;text-overflow:ellipsis}
+        #projectPage .restored-summary-standard>i{width:1px;height:25px;background:#e1e7e3}
+        #projectPage .restored-summary-standard .restored-standard-link{max-width:240px;overflow:hidden;color:#28734c;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+        #projectPage .restored-standard-status{padding:2px 6px;border:1px solid #efc894;border-radius:3px;background:#fff4e3;color:#b66a1e;font-size:11px;font-style:normal;line-height:18px}
+        #projectPage .restored-standard-status[hidden]{display:none!important}
         #projectPage .restored-info-more{position:static;padding:4px 0;color:#517261;font-size:12px}
         #projectPage .restored-project-data{display:grid;grid-template-columns:184px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);min-height:0;padding:0}
         #projectPage .restored-project-tree{grid-column:1;grid-row:2;padding:8px 8px;border-right:1px solid #edf1ee;background:#fbfcfb}
@@ -6881,11 +6947,11 @@
         #projectPage .restored-view-title{height:36px;border-bottom:1px solid #e7ece9;color:#34483c;font-size:15px;font-weight:650;line-height:36px}
         #projectPage .restored-project-toolbar{display:block;min-height:84px}
         #projectPage .restored-status-row{display:flex;height:30px;align-items:center;border-bottom:1px solid #f0f3f1}
-        #projectPage .restored-qc-standard-warning{display:flex;min-height:32px;box-sizing:border-box;align-items:center;gap:10px;padding:5px 10px;border-left:3px solid #d98a32;background:#fff7ea;color:#765a35;font-size:11px;line-height:1.35}
+        #projectPage .restored-qc-standard-warning{display:flex;min-height:34px;box-sizing:border-box;align-items:center;gap:12px;padding:5px 10px;border-left:3px solid #d98a32;background:#fff7ea;color:#765a35;font-size:11px;line-height:1.35}
         #projectPage .restored-qc-standard-warning[hidden]{display:none!important}
         #projectPage .restored-qc-standard-warning strong{flex:none;color:#a8601c}
-        #projectPage .restored-qc-standard-warning em{margin-left:auto;color:#7b5d36;font-style:normal;white-space:nowrap}
         #projectPage .restored-qc-standard-warning b{color:#a8601c;font-weight:600}
+        #projectPage .restored-qc-standard-versions{flex:none;padding-right:12px;border-right:1px solid #edcfaa;white-space:nowrap}
         #projectPage .restored-integrity-state{display:flex;align-items:center;gap:4px;white-space:nowrap;color:#66756c;font-size:12px}
         #projectPage .restored-integrity-state>i{width:7px;height:7px;border-radius:50%;background:#27915b}
         #projectPage .restored-integrity-state strong{color:#238051;font-weight:600}
@@ -6899,6 +6965,8 @@
         #projectPage .restored-flow-complete{min-width:172px}
         #projectPage .restored-flow-node-actions{display:flex;align-items:center;gap:6px}
         #projectPage .restored-flow-title{color:#647269;font-size:11px;line-height:14px;white-space:nowrap}
+        #projectPage .restored-flow-standard-hint{color:#b66a1e;font-size:10px;font-weight:500;line-height:12px;white-space:nowrap}
+        #projectPage .restored-flow-standard-hint[hidden]{display:none!important}
         #projectPage .restored-flow-arrow{color:#b5c0b9;font-size:16px}
         #projectPage .restored-flow-state{height:28px;padding:0;border:0;background:transparent;color:#8b9690;font-size:12px;line-height:28px;text-align:left;cursor:default}
         #projectPage button.restored-flow-state:not(:disabled){color:#277d53;cursor:pointer}
@@ -6950,6 +7018,7 @@
         #projectPage .restored-file-table td:nth-child(3),#projectPage .restored-file-table td:nth-child(5),#projectPage .restored-file-table td:nth-child(6),#projectPage .restored-file-table td:nth-child(7),#projectPage .restored-file-table td:nth-child(8),#projectPage .restored-file-table td:nth-child(9){white-space:nowrap}
         #projectPage .restored-file-table .file-row.selected td{background:#f2f8f4}
         #projectPage .status-tag.qc-update-required{border:1px solid #efc894;background:#fff4e3;color:#b66a1e}
+        #projectPage .file-parse-standard.qc-update-required-text{color:#b66a1e}
         #projectPage .restored-file-table .link+.link{margin-left:8px}
         .restored-batch-modal{width:480px}
         .restored-batch-warning{margin:0;padding:14px;border-left:3px solid #d58a39;background:#fff9ef;color:#5f625e;font-size:13px;line-height:1.7}
@@ -6957,6 +7026,9 @@
         .restored-batch-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
         .restored-danger-button{border-color:#b95445!important;background:#b95445!important}
         @media(max-width:1100px){
+          #projectPage .restored-project-summary-row{grid-template-columns:minmax(0,1fr) auto}
+          #projectPage .restored-summary-standard{grid-column:1/-1;grid-row:2;max-width:none;padding-bottom:8px}
+          #projectPage .restored-qc-standard-warning{align-items:flex-start;flex-wrap:wrap}
           #projectPage .restored-operation-row{align-items:flex-start;flex-wrap:wrap;padding:10px 0}
           #projectPage .restored-aux-actions{width:100%;margin-left:0}
           #projectPage .restored-professional-toolbar{grid-template-columns:1fr auto;padding:10px 0}
