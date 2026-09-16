@@ -2698,8 +2698,8 @@
                 <div class="restored-project-toolbar">
                   <div class="restored-qc-standard-warning" data-qc-standard-warning hidden>
                     <strong>⚠ 质检规范已更新</strong>
-                    <span class="restored-qc-standard-versions">当前项目标准：<b data-qc-latest-version>V2.0</b> ｜ <b data-qc-affected-count>0</b> 个模型使用旧版质检标准</span>
-                    <span>仅受影响模型需重新发起数据质检，全部完成后方可继续审批。</span>
+                    <span class="restored-qc-standard-versions"><b data-qc-affected-count>0</b> 个模型的当前质检结果基于旧版标准</span>
+                    <span>请查看文件名下方的版本对比；仅受影响模型需重新质检，全部完成后方可继续审批。</span>
                   </div>
                   <div class="restored-status-row">
                     <div class="restored-integrity-state" data-integrity-state><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>未发起</strong></div>
@@ -6111,11 +6111,11 @@
       const projectPage = document.getElementById('projectPage');
       const standardOptions = ['全部标准', '合肥院 BIM 数据标准 V1.0', '合肥院 BIM 数据标准 V2.0', '工程建设 IFC 数据交付标准 V1.0'];
       const projectStandards = [
-        ['合肥院 BIM 数据标准 V1.0', ['合肥院 BIM 数据标准 V1.0', '合肥院 BIM 数据标准 V1.0']],
-        ['合肥院 BIM 数据标准 V2.0', ['合肥院 BIM 数据标准 V1.0', '合肥院 BIM 数据标准 V2.0']],
-        ['工程建设 IFC 数据交付标准 V1.0', ['工程建设 IFC 数据交付标准 V1.0', '工程建设 IFC 数据交付标准 V1.0']],
-        ['合肥院 BIM 数据标准 V1.0', ['合肥院 BIM 数据标准 V1.0', '合肥院 BIM 数据标准 V1.0']],
-        ['合肥院 BIM 数据标准 V2.0', ['合肥院 BIM 数据标准 V2.0', '合肥院 BIM 数据标准 V2.0']]
+        ['合肥院 BIM 数据标准 V1.0', [{used:'合肥院 BIM 数据标准 V1.0',latest:'合肥院 BIM 数据标准 V1.0'},{used:'机电 BIM 数据标准 V2.0',latest:'机电 BIM 数据标准 V2.0'}]],
+        ['合肥院 BIM 数据标准 V2.0', [{used:'合肥院 BIM 数据标准 V1.0',latest:'合肥院 BIM 数据标准 V1.2'},{used:'机电 BIM 数据标准 V2.0',latest:'机电 BIM 数据标准 V2.0'}]],
+        ['工程建设 IFC 数据交付标准 V1.0', [{used:'工程建设 IFC 数据交付标准 V1.0',latest:'工程建设 IFC 数据交付标准 V1.0'},{used:'机电 BIM 数据标准 V2.0',latest:'机电 BIM 数据标准 V2.0'}]],
+        ['合肥院 BIM 数据标准 V1.0', [{used:'合肥院 BIM 数据标准 V1.0',latest:'合肥院 BIM 数据标准 V1.0'},{used:'机电 BIM 数据标准 V2.0',latest:'机电 BIM 数据标准 V2.0'}]],
+        ['合肥院 BIM 数据标准 V2.0', [{used:'合肥院 BIM 数据标准 V2.0',latest:'合肥院 BIM 数据标准 V2.0'},{used:'机电 BIM 数据标准 V2.0',latest:'机电 BIM 数据标准 V2.0'}]]
       ];
       if (projectList && !projectList.dataset.standardEnhanced) {
         projectList.dataset.standardEnhanced = 'true';
@@ -6127,18 +6127,17 @@
         projectList.querySelectorAll('table tbody tr').forEach((row, index) => {
           const item = projectStandards[index] || projectStandards[0]; row.dataset.currentStandard = item[0];
           const modelStandards = item[1];
-          const affectedModelCount = modelStandards.filter(standard => standard !== item[0]).length;
+          const affectedModelCount = modelStandards.filter(model => model.used !== model.latest).length;
           const needsQualityUpdate = affectedModelCount > 0;
-          const qualitySummary = [...new Set(modelStandards)].map(standard => standard.match(/V[\d.]+/i)?.[0] || standard).join(' / ');
-          row.dataset.modelQualityStandards = JSON.stringify(modelStandards);
+          row.dataset.modelQualityContexts = JSON.stringify(modelStandards);
           row.dataset.qualityStandardOutdated = String(needsQualityUpdate);
           row.querySelectorAll('[data-page-to="projectPage"]').forEach(button => {
             button.dataset.projectLatestStandard = item[0];
-            button.dataset.projectModelQualityStandards = JSON.stringify(modelStandards);
+            button.dataset.projectModelQualityContexts = JSON.stringify(modelStandards);
             button.dataset.projectQualityOutdated = String(needsQualityUpdate);
           });
-          const updateTip = `项目最新标准：${item[0]}\n${affectedModelCount} 个模型仍使用旧版质检标准，需要分别重新发起数据质检。`;
-          row.children[2]?.insertAdjacentHTML('beforebegin', `<td class="project-standard-summary"><b>当前：${item[0]}</b><span>模型质检：${qualitySummary}</span>${needsQualityUpdate ? `<em class="project-standard-state pending-qc-update" title="${updateTip}">质检标准待更换</em>` : ''}</td>`);
+          const updateTip = `${affectedModelCount} 个模型的当前质检标准与其最新适用标准不一致，需要分别重新发起数据质检。`;
+          row.children[2]?.insertAdjacentHTML('beforebegin', `<td class="project-standard-summary"><b>当前：${item[0]}</b><span>模型质检：按模型分别记录</span>${needsQualityUpdate ? `<em class="project-standard-state pending-qc-update" title="${updateTip}">质检标准待更换</em>` : ''}</td>`);
         });
       }
       document.addEventListener('change', event => {
@@ -6150,17 +6149,17 @@
       // 本期不保留项目标准版本记录或变更人等留痕信息。
 
       const qcModal = document.getElementById('qcModal');
-      if (qcModal && !qcModal.querySelector('.qc-standard-used')) qcModal.querySelector('.modal-body')?.insertAdjacentHTML('afterbegin', '<div class="qc-standard-used">本次质检使用标准：<b>合肥院 BIM 数据标准 V1.0</b><span>（继承项目绑定标准，发起质检时不可另选）</span></div>');
+      if (qcModal && !qcModal.querySelector('.qc-standard-used')) qcModal.querySelector('.modal-body')?.insertAdjacentHTML('afterbegin', '<div class="qc-standard-used">本次模型质检标准：<b>按模型分别记录</b><span>（每个模型记录本次质检实际使用的标准版本）</span></div>');
       const qualityPage = document.getElementById('qualityResultsPage');
-      if (qualityPage && !qualityPage.querySelector('.quality-standard-used')) qualityPage.insertAdjacentHTML('afterbegin', '<div class="quality-standard-used">质检记录标准：<b>合肥院 BIM 数据标准 V1.0</b>　<span>用于识别本次结果的解析与质检口径。</span></div>');
+      if (qualityPage && !qualityPage.querySelector('.quality-standard-used')) qualityPage.insertAdjacentHTML('afterbegin', '<div class="quality-standard-used">模型质检标准：<b>按模型分别记录</b>　<span>用于识别各模型本次质检结果的实际标准版本。</span></div>');
       const qualityButton = projectPage?.querySelector('#startDataQualityCheck');
-      if (qualityButton) qualityButton.title = '使用当前项目绑定标准发起质检';
+      if (qualityButton) qualityButton.title = '按各模型当前最新适用标准发起质检';
 
       const weeklyBody = document.querySelector('#weeklyRequirementModal .modal-body');
       const assetStatisticsRequirement = [...(weeklyBody?.querySelectorAll('.weekly-requirement-section') || [])].find(section => section.querySelector('h3')?.textContent.includes('入库数据统计'));
       assetStatisticsRequirement?.querySelector('ul')?.replaceChildren();
       if (assetStatisticsRequirement?.querySelector('ul')) assetStatisticsRequirement.querySelector('ul').innerHTML = '<li><b>位置：</b>数据资产全览下新增“入库数据统计”二级菜单。</li><li><b>内容：</b>提供构件统计、空间统计两类视图；构件标识/空间名称检索跳转至对应分类结果。</li><li><b>统计口径：</b>仅统计「项目数据管理 → 数据入库」中状态为“已入库”且解析成功的项目模型；待审批、审批中、已驳回、解析失败、已删除项目不纳入。</li><li><b>分类依据：</b>构件、空间、系统的分类与统计均以文件实际使用的解析标准为准；同一项目仅统计最新成功入库版本。</li>';
-      if (weeklyBody && !weeklyBody.querySelector('[data-standard-requirement]')) weeklyBody.insertAdjacentHTML('beforeend', '<section class="weekly-requirement-section" data-standard-requirement><div class="weekly-requirement-section-head"><div><em>09</em><h3>项目标准与质检标准</h3></div></div><ul><li><b>项目绑定：</b>标准数字化 / 数据字典中可设置一项已发布标准为默认标准；新建项目自动带入，项目详情右上角可查看并更换。</li><li><b>标准变更：</b>更换项目标准仅更新后续解析默认值，不自动重新解析已有模型；需要应用新标准时，由用户在对应 IFC 文件的“更多 → 重新转换”中手动处理。不保留标准版本快照及变更留痕。</li><li><b>列表总览：</b>项目列表以单个“项目标准”列紧凑展示当前标准和质检标准；仅两者不一致时显示“质检标准待更换”，支持按当前标准筛选。</li><li><b>文件与分类树：</b>每个已解析 IFC 文件展示其实际解析标准；模型浏览保留原始模型树，并新增构件、空间、系统分类树。标准无法匹配的对象按 IFC 类型归入“未定义门 / 未定义墙”等兜底分类。</li><li><b>质检口径：</b>发起质检继承项目绑定标准，不单独选择；质检结果页展示本次使用的质检标准。</li></ul></section>');
+      if (weeklyBody && !weeklyBody.querySelector('[data-standard-requirement]')) weeklyBody.insertAdjacentHTML('beforeend', '<section class="weekly-requirement-section" data-standard-requirement><div class="weekly-requirement-section-head"><div><em>09</em><h3>项目标准与质检标准</h3></div></div><ul><li><b>项目绑定：</b>标准数字化 / 数据字典中可设置一项已发布标准为默认标准；新建项目自动带入，项目详情右上角可查看并更换。</li><li><b>标准变更：</b>更换项目标准仅更新后续解析默认值，不自动重新解析已有模型；需要应用新标准时，由用户在对应 IFC 文件的“更多 → 重新转换”中手动处理。不保留标准版本快照及变更留痕。</li><li><b>列表总览：</b>项目列表展示项目当前标准；只要存在模型的质检使用标准与该模型最新适用标准不一致，即显示“质检标准待更换”。</li><li><b>文件与分类树：</b>每个已解析 IFC 文件展示其实际解析标准；模型浏览保留原始模型树，并新增构件、空间、系统分类树。标准无法匹配的对象按 IFC 类型归入“未定义门 / 未定义墙”等兜底分类。</li><li><b>质检口径：</b>每个 IFC 模型分别记录本次质检实际使用的标准和当前最新适用标准；仅两者不一致的模型显示“需重新质检”，PDF、XLSX 等非模型文件不参与判断。</li></ul></section>');
 
       let defaultProjectStandard = window.defaultProjectStandard || '合肥院 BIM 数据标准 V1.0';
       const mountDefaultStandard = () => {
@@ -6539,7 +6538,10 @@
       let hasQualityResult = false;
       let qualityCheckPassed = false;
       let latestProjectStandard = '合肥院 BIM 数据标准 V1.0';
-      let modelQualityStandards = ['合肥院 BIM 数据标准 V1.0', '合肥院 BIM 数据标准 V1.0'];
+      let modelQualityContexts = [
+        {used:'合肥院 BIM 数据标准 V1.0',latest:'合肥院 BIM 数据标准 V1.0'},
+        {used:'机电 BIM 数据标准 V2.0',latest:'机电 BIM 数据标准 V2.0'}
+      ];
       let qualityStandardOutdated = false;
       let qualityResultInvalidated = false;
       let pendingReuploadRow = null;
@@ -6573,14 +6575,11 @@
 
       const getVersionLabel = standard => standard.match(/V[\d.]+/i)?.[0] || standard;
       const getAffectedModelCount = () => hasQualityResult
-        ? modelQualityStandards.filter(standard => standard !== latestProjectStandard).length
+        ? modelQualityContexts.filter(model => model.used !== model.latest).length
         : 0;
       const getModelQualitySummary = () => {
         if (!hasQualityResult) return '尚未发起质检';
-        const standards = [...new Set(modelQualityStandards)];
-        return standards.length === 1
-          ? standards[0]
-          : `${standards.map(getVersionLabel).join(' / ')}（按模型）`;
+        return modelQualityContexts.length === 1 ? modelQualityContexts[0].used : '按模型分别记录';
       };
 
       const syncQualityStandardState = () => {
@@ -6597,31 +6596,28 @@
         if (currentStandardStatus) currentStandardStatus.hidden = !qualityStandardOutdated;
         if (flowStandardHint) flowStandardHint.hidden = !qualityStandardOutdated;
         page.querySelectorAll('[data-affected-model-count],[data-qc-affected-count]').forEach(item => { item.textContent = String(affectedModelCount); });
-        const latestVersion = page.querySelector('[data-qc-latest-version]');
-        if (latestVersion) latestVersion.textContent = getVersionLabel(latestProjectStandard);
-
         let modelIndex = 0;
         page.querySelectorAll('.restored-file-table tbody .file-row').forEach(row => {
           const isIfc = row.cells[2]?.textContent.trim().toLowerCase() === 'ifc';
-          const statusCell = row.cells[7];
-          if (!statusCell || !isIfc) return;
-          const modelQualityStandard = modelQualityStandards[modelIndex++] || latestProjectStandard;
-          const modelNeedsQualityUpdate = hasQualityResult && modelQualityStandard !== latestProjectStandard;
-          row.dataset.modelQualityStandard = modelQualityStandard;
-          if (!statusCell.dataset.originalQcStatus) statusCell.dataset.originalQcStatus = statusCell.innerHTML;
+          if (!isIfc) return;
+          const modelContext = modelQualityContexts[modelIndex++] || {used:latestProjectStandard,latest:latestProjectStandard};
+          const modelNeedsQualityUpdate = hasQualityResult && modelContext.used !== modelContext.latest;
+          row.dataset.modelQualityStandardUsed = modelContext.used;
+          row.dataset.modelQualityStandardLatest = modelContext.latest;
           const parseStandard = row.querySelector('[data-file-parse-standard]');
           if (parseStandard && !parseStandard.dataset.originalParseLabel) parseStandard.dataset.originalParseLabel = parseStandard.textContent.trim();
-          statusCell.innerHTML = modelNeedsQualityUpdate
-            ? '<span class="status-tag qc-update-required" title="该文件当前质检结果基于旧版质检规范，请重新发起数据质检。">需重新质检</span>'
-            : statusCell.dataset.originalQcStatus;
-          if (parseStandard) {
-            parseStandard.textContent = !hasQualityResult
-              ? parseStandard.dataset.originalParseLabel
-              : modelNeedsQualityUpdate
-                ? `${parseStandard.dataset.originalParseLabel} ｜ 质检标准：${getVersionLabel(modelQualityStandard)} ｜ 当前标准：${getVersionLabel(latestProjectStandard)} ｜ 需重新质检`
-                : `${parseStandard.dataset.originalParseLabel} ｜ 质检标准：${getVersionLabel(modelQualityStandard)}`;
-            parseStandard.classList.toggle('qc-update-required-text', modelNeedsQualityUpdate);
+          let qualityInfo = row.querySelector('[data-file-quality-standard]');
+          if (!qualityInfo) {
+            qualityInfo = document.createElement('small');
+            qualityInfo.className = 'file-quality-standard';
+            qualityInfo.dataset.fileQualityStandard = '';
+            (parseStandard?.parentElement || row.cells[1])?.appendChild(qualityInfo);
           }
+          qualityInfo.hidden = !hasQualityResult;
+          qualityInfo.classList.toggle('needs-recheck', modelNeedsQualityUpdate);
+          qualityInfo.innerHTML = modelNeedsQualityUpdate
+            ? `<span class="file-quality-compare">质检 ${getVersionLabel(modelContext.used)} / 最新 ${getVersionLabel(modelContext.latest)} <em title="该模型当前质检结果基于旧版质检标准。\n上次质检使用：${getVersionLabel(modelContext.used)}\n当前最新标准：${getVersionLabel(modelContext.latest)}\n请重新发起数据质检。">需重新质检</em></span>`
+            : `<span>质检标准：${modelContext.used}</span>`;
         });
 
         document.querySelectorAll('.qc-standard-used b,.quality-standard-used b').forEach(item => {
@@ -6655,10 +6651,10 @@
         startButton.title = !integrityPassed
           ? '请先完成完整性检查'
           : qualityStandardOutdated
-            ? `${getAffectedModelCount()} 个模型使用旧版质检标准，请按${getVersionLabel(latestProjectStandard)}重新发起数据质检`
+            ? `${getAffectedModelCount()} 个模型使用旧版质检标准，请按各模型当前最新适用标准重新发起数据质检`
             : hasQualityResult
-              ? '再次使用当前项目绑定标准发起数据质检'
-              : '使用当前项目绑定标准发起数据质检';
+              ? '再次按各模型当前最新适用标准发起数据质检'
+              : '按各模型当前最新适用标准发起数据质检';
 
         resultButton.disabled = !hasQualityResult;
         resultButton.textContent = hasQualityResult ? '数据质检结果' : '暂不可查看';
@@ -6678,14 +6674,14 @@
       const applyProjectStandardContext = source => {
         const row = source?.closest('#dataListPage tbody tr');
         const latestStandard = source?.dataset.projectLatestStandard || row?.dataset.currentStandard;
-        const encodedModelStandards = source?.dataset.projectModelQualityStandards || row?.dataset.modelQualityStandards;
-        if (!latestStandard || !encodedModelStandards) return;
-        let nextModelStandards;
-        try { nextModelStandards = JSON.parse(encodedModelStandards); } catch { return; }
+        const encodedModelContexts = source?.dataset.projectModelQualityContexts || row?.dataset.modelQualityContexts;
+        if (!latestStandard || !encodedModelContexts) return;
+        let nextModelContexts;
+        try { nextModelContexts = JSON.parse(encodedModelContexts); } catch { return; }
         latestProjectStandard = latestStandard;
-        modelQualityStandards = nextModelStandards;
-        hasQualityResult = modelQualityStandards.length > 0;
-        qualityStandardOutdated = modelQualityStandards.some(standard => standard !== latestProjectStandard);
+        modelQualityContexts = nextModelContexts;
+        hasQualityResult = modelQualityContexts.length > 0;
+        qualityStandardOutdated = modelQualityContexts.some(model => model.used !== model.latest);
         integrityPassed = true;
         qualityCheckPassed = hasQualityResult && !qualityStandardOutdated;
         qualityResultInvalidated = false;
@@ -6849,7 +6845,7 @@
           qualityCheckPassed = true;
           qualityResultInvalidated = false;
           qualityStandardOutdated = false;
-          modelQualityStandards = modelQualityStandards.map(() => latestProjectStandard);
+          modelQualityContexts = modelQualityContexts.map(model => ({...model, used:model.latest}));
           window.entryApprovalSubmitted = false;
           syncApprovalState();
           showProjectToast(isRepeatedQualityCheck ? '数据质检已重新发起，可查看最新数据质检结果' : '数据质检已完成，可查看数据质检结果');
@@ -6926,7 +6922,7 @@
 
       document.addEventListener('project-standard-changed', event => {
         latestProjectStandard = event.detail?.latestStandard || latestProjectStandard;
-        qualityStandardOutdated = hasQualityResult && modelQualityStandards.some(standard => standard !== latestProjectStandard);
+        qualityStandardOutdated = hasQualityResult && modelQualityContexts.some(model => model.used !== model.latest);
         qualityCheckPassed = hasQualityResult && !qualityStandardOutdated && !qualityResultInvalidated;
         if (qualityStandardOutdated) window.entryApprovalSubmitted = false;
         syncApprovalState();
@@ -7038,8 +7034,12 @@
         #projectPage .restored-file-table td:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
         #projectPage .restored-file-table td:nth-child(3),#projectPage .restored-file-table td:nth-child(5),#projectPage .restored-file-table td:nth-child(6),#projectPage .restored-file-table td:nth-child(7),#projectPage .restored-file-table td:nth-child(8),#projectPage .restored-file-table td:nth-child(9){white-space:nowrap}
         #projectPage .restored-file-table .file-row.selected td{background:#f2f8f4}
-        #projectPage .status-tag.qc-update-required{border:1px solid #efc894;background:#fff4e3;color:#b66a1e}
-        #projectPage .file-parse-standard.qc-update-required-text{color:#b66a1e}
+        #projectPage .file-quality-standard{display:block;margin:2px 0 0 24px;color:#75837b;font-size:11px;font-weight:400;line-height:16px}
+        #projectPage .file-quality-standard[hidden]{display:none!important}
+        #projectPage .file-quality-standard span{display:block;white-space:normal}
+        #projectPage .file-quality-standard .file-quality-compare{display:flex;align-items:center;white-space:nowrap}
+        #projectPage .file-quality-standard.needs-recheck{color:#9d6324}
+        #projectPage .file-quality-standard em{display:inline-flex;align-items:center;margin-left:5px;padding:0 6px;border:1px solid #efc894;border-radius:8px;background:#fff4e3;color:#b66a1e;font-size:10px;font-style:normal;line-height:17px;vertical-align:1px;cursor:help}
         #projectPage .restored-file-table .link+.link{margin-left:8px}
         .restored-batch-modal{width:480px}
         .restored-batch-warning{margin:0;padding:14px;border-left:3px solid #d58a39;background:#fff9ef;color:#5f625e;font-size:13px;line-height:1.7}
