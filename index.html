@@ -6621,7 +6621,7 @@
         const latestStandardId = model.latestStandardId || getStandardName(model.latest);
         const usedVersion = model.usedVersion || getVersionLabel(model.used);
         const latestVersion = model.latestVersion || getVersionLabel(model.latest);
-        if (usedStandardId !== latestStandardId) return `<span class="file-quality-name">${getStandardName(model.latest)}</span><em class="file-quality-version-change">规范已切换</em>`;
+        if (usedStandardId !== latestStandardId) return `<em class="file-quality-standard-switch">规范已更换</em><span class="file-quality-name">${getStandardName(model.latest)}</span>`;
         const standardName = getStandardName(model.latest);
         const changeText = usedVersion !== latestVersion ? `${usedVersion} → ${latestVersion}` : '内容已调整';
         return `<span class="file-quality-name">${standardName}</span><em class="file-quality-version-change">${changeText}</em>`;
@@ -7179,6 +7179,7 @@
         #projectPage .file-quality-standard .file-quality-compare{display:flex;min-width:0;align-items:center;gap:5px;overflow:hidden;color:#75837b;font-weight:400;white-space:nowrap;cursor:help}
         #projectPage .file-quality-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         #projectPage .file-quality-version-change{display:inline-flex;flex:none;align-items:center;height:18px;padding:0 5px;border:1px solid #edc58e;border-radius:3px;background:#fff7ea;color:#a96418;font-size:11px;font-style:normal;font-weight:500;line-height:16px}
+        #projectPage .file-quality-standard-switch{display:inline-flex;flex:none;align-items:center;height:18px;padding:0 5px;border:1px solid #e4b676;border-radius:3px;background:#fff3df;color:#9e5b13;font-size:11px;font-style:normal;font-weight:500;line-height:16px}
         #projectPage .restored-file-table .link+.link{margin-left:8px}
         .restored-batch-modal{width:480px}
         .restored-batch-warning{margin:0;padding:14px;border-left:3px solid #d58a39;background:#fff9ef;color:#5f625e;font-size:13px;line-height:1.7}
