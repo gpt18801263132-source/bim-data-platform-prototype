@@ -6622,7 +6622,7 @@
         const latestStandardId = model.latestStandardId || getStandardName(model.latest);
         const usedVersion = model.usedVersion || getVersionLabel(model.used);
         const latestVersion = model.latestVersion || getVersionLabel(model.latest);
-        if (usedStandardId !== latestStandardId) return `<em class="file-quality-standard-switch">规范已更换</em><span class="file-quality-name">${getStandardName(model.latest)}</span>`;
+        if (usedStandardId !== latestStandardId) return `<em class="file-quality-standard-switch">质检规范已变更</em><span class="file-quality-name">${getStandardName(model.latest)}</span>`;
         const standardName = getStandardName(model.latest);
         const changeText = usedVersion !== latestVersion ? `${usedVersion} → ${latestVersion}` : '内容已调整';
         return `<span class="file-quality-name">${standardName}</span><em class="file-quality-version-change">${changeText}</em>`;
