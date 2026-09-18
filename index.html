@@ -2668,11 +2668,8 @@
               <div class="project-title" data-page-to="dataListPage" title="返回项目列表">‹ 白玉兰测试20260203</div>
               <div class="restored-summary-standard">
                 <span class="restored-standard-compare"><small>当前项目标准</small><button class="link restored-standard-link" type="button" data-change-project-standard title="更换当前项目标准"><span data-current-project-standard>合肥院 BIM 数据标准 V1.0</span></button></span>
-                <i aria-hidden="true"></i>
-                <span class="restored-standard-change-summary">
-                  <span>模型质检标准</span>
-                  <em class="restored-standard-status" data-current-standard-status hidden><span data-affected-model-count>0</span> 个模型标准已变更</em>
-                </span>
+                <i data-quality-standard-divider aria-hidden="true" hidden></i>
+                <em class="restored-standard-status" data-current-standard-status hidden><span data-affected-model-count>0</span> 个模型质检标准已变更</em>
               </div>
               <button class="link restored-info-more" type="button" aria-expanded="false">更多详情⌄</button>
             </div>
@@ -6573,10 +6570,19 @@
       const getStandardName = standard => standard.replace(/\s*V[\d.]+\s*$/i, '').trim();
       const getCompactStandard = standard => standard.replace(/\s*数据标准\s*/g, ' ').replace(/\s+/g, ' ').trim();
       const getStandardChangeText = (used, latest) => getStandardName(used) === getStandardName(latest)
-        ? `质检标准：${getVersionLabel(used)} → ${getVersionLabel(latest)}`
-        : `质检标准：${getCompactStandard(used)} → ${getCompactStandard(latest)}`;
+        ? `${getVersionLabel(used)} → ${getVersionLabel(latest)}`
+        : `${getCompactStandard(used)} → ${getCompactStandard(latest)}`;
+      const hasModelQualityRecord = model => Boolean(model?.used && model?.latest);
+      const hasModelQualityStandardChanged = model => {
+        if (!hasModelQualityRecord(model)) return false;
+        const usedStandardId = model.usedStandardId || getStandardName(model.used);
+        const latestStandardId = model.latestStandardId || getStandardName(model.latest);
+        const usedVersion = model.usedVersion || getVersionLabel(model.used);
+        const latestVersion = model.latestVersion || getVersionLabel(model.latest);
+        return usedStandardId !== latestStandardId || usedVersion !== latestVersion;
+      };
       const getAffectedModelCount = () => hasQualityResult
-        ? modelQualityContexts.filter(model => model.used !== model.latest).length
+        ? modelQualityContexts.filter(hasModelQualityStandardChanged).length
         : 0;
       const getModelQualitySummary = () => {
         if (!hasQualityResult) return '尚未发起质检';
@@ -6588,30 +6594,39 @@
         qualityStandardOutdated = affectedModelCount > 0;
         const currentProjectStandard = page.querySelector('[data-current-project-standard]');
         const currentStandardStatus = page.querySelector('[data-current-standard-status]');
+        const qualityStandardDivider = page.querySelector('[data-quality-standard-divider]');
         if (currentProjectStandard) currentProjectStandard.textContent = latestProjectStandard;
         if (currentStandardStatus) currentStandardStatus.hidden = !qualityStandardOutdated;
+        if (qualityStandardDivider) qualityStandardDivider.hidden = !qualityStandardOutdated;
         page.querySelectorAll('[data-affected-model-count]').forEach(item => { item.textContent = String(affectedModelCount); });
         let modelIndex = 0;
         page.querySelectorAll('.restored-file-table tbody .file-row').forEach(row => {
           const isIfc = row.cells[2]?.textContent.trim().toLowerCase() === 'ifc';
           if (!isIfc) return;
-          const modelContext = modelQualityContexts[modelIndex++] || {used:latestProjectStandard,latest:latestProjectStandard};
-          const modelNeedsQualityUpdate = hasQualityResult && modelContext.used !== modelContext.latest;
-          row.dataset.modelQualityStandardUsed = modelContext.used;
-          row.dataset.modelQualityStandardLatest = modelContext.latest;
+          const modelContext = modelQualityContexts[modelIndex++] || null;
+          const modelHasQualityRecord = hasQualityResult && hasModelQualityRecord(modelContext);
+          const modelNeedsQualityUpdate = modelHasQualityRecord && hasModelQualityStandardChanged(modelContext);
+          if (modelContext) {
+            row.dataset.modelQualityStandardUsed = modelContext.used;
+            row.dataset.modelQualityStandardLatest = modelContext.latest;
+          }
           const parseStandard = row.querySelector('[data-file-parse-standard]');
-          if (parseStandard && !parseStandard.dataset.originalParseLabel) parseStandard.dataset.originalParseLabel = parseStandard.textContent.trim();
+          const fileCell = parseStandard?.parentElement || row.cells[1];
+          if (parseStandard) {
+            parseStandard.classList.add('is-hidden');
+            if (fileCell) fileCell.title = parseStandard.textContent.trim();
+          }
           let qualityInfo = row.querySelector('[data-file-quality-standard]');
           if (!qualityInfo) {
             qualityInfo = document.createElement('small');
             qualityInfo.className = 'file-quality-standard';
             qualityInfo.dataset.fileQualityStandard = '';
-            (parseStandard?.parentElement || row.cells[1])?.appendChild(qualityInfo);
+            fileCell?.appendChild(qualityInfo);
           }
-          qualityInfo.hidden = !hasQualityResult;
+          qualityInfo.hidden = !modelHasQualityRecord;
           qualityInfo.classList.toggle('needs-recheck', modelNeedsQualityUpdate);
           qualityInfo.innerHTML = modelNeedsQualityUpdate
-            ? `<span class="file-quality-compare" title="上次质检使用：${modelContext.used}\n当前适用标准：${modelContext.latest}">${getStandardChangeText(modelContext.used, modelContext.latest)}</span>`
+            ? `<span class="file-quality-compare" title="上次质检使用：${modelContext.used}\n当前适用标准：${modelContext.latest}"><em class="file-quality-change-tag">质检标准已变更</em><span class="file-quality-change-value">${getStandardChangeText(modelContext.used, modelContext.latest)}</span></span>`
             : `<span>质检标准：${modelContext.used}</span>`;
         });
 
@@ -6676,7 +6691,7 @@
         latestProjectStandard = latestStandard;
         modelQualityContexts = nextModelContexts;
         hasQualityResult = modelQualityContexts.length > 0;
-        qualityStandardOutdated = modelQualityContexts.some(model => model.used !== model.latest);
+        qualityStandardOutdated = modelQualityContexts.some(hasModelQualityStandardChanged);
         integrityPassed = true;
         qualityCheckPassed = hasQualityResult && !qualityStandardOutdated;
         qualityResultInvalidated = false;
@@ -6917,7 +6932,7 @@
 
       document.addEventListener('project-standard-changed', event => {
         latestProjectStandard = event.detail?.latestStandard || latestProjectStandard;
-        qualityStandardOutdated = hasQualityResult && modelQualityContexts.some(model => model.used !== model.latest);
+        qualityStandardOutdated = hasQualityResult && modelQualityContexts.some(hasModelQualityStandardChanged);
         qualityCheckPassed = hasQualityResult && !qualityStandardOutdated && !qualityResultInvalidated;
         if (qualityStandardOutdated) window.entryApprovalSubmitted = false;
         syncApprovalState();
@@ -6939,8 +6954,8 @@
         #projectPage .restored-standard-compare small{color:#8a958e;font-size:10px;line-height:13px}
         #projectPage .restored-standard-compare b{max-width:240px;overflow:hidden;color:#59685f;font-size:12px;font-weight:600;text-overflow:ellipsis}
         #projectPage .restored-summary-standard>i{width:1px;height:25px;background:#e1e7e3}
+        #projectPage .restored-summary-standard>i[hidden]{display:none!important}
         #projectPage .restored-summary-standard .restored-standard-link{max-width:240px;overflow:hidden;color:#28734c;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
-        #projectPage .restored-standard-change-summary{display:flex;align-items:center;gap:7px;color:#59685f;font-size:12px}
         #projectPage .restored-standard-status{padding:2px 6px;border:1px solid #efc894;border-radius:3px;background:#fff4e3;color:#b66a1e;font-size:11px;font-style:normal;line-height:18px}
         #projectPage .restored-standard-status[hidden]{display:none!important}
         #projectPage .restored-info-more{position:static;padding:4px 0;color:#517261;font-size:12px}
@@ -7012,22 +7027,23 @@
         #projectPage .restored-file-table{width:100%;min-width:980px;margin-top:6px;border:1px solid #e7ece9;table-layout:fixed}
         #projectPage .restored-file-table th{background:#f3f6f4;color:#647169;font-weight:500}
         #projectPage .restored-file-table th:nth-child(1),#projectPage .restored-file-table td:nth-child(1){width:4%;text-align:center}
-        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:21%}
+        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:23%}
         #projectPage .restored-file-table th:nth-child(3),#projectPage .restored-file-table td:nth-child(3){width:6%}
         #projectPage .restored-file-table th:nth-child(4),#projectPage .restored-file-table td:nth-child(4){width:9%}
         #projectPage .restored-file-table th:nth-child(5),#projectPage .restored-file-table td:nth-child(5){width:7%}
         #projectPage .restored-file-table th:nth-child(6),#projectPage .restored-file-table td:nth-child(6){width:9%}
         #projectPage .restored-file-table th:nth-child(7),#projectPage .restored-file-table td:nth-child(7){width:14%}
         #projectPage .restored-file-table th:nth-child(8),#projectPage .restored-file-table td:nth-child(8){width:11%}
-        #projectPage .restored-file-table th:nth-child(9),#projectPage .restored-file-table td:nth-child(9){width:19%}
+        #projectPage .restored-file-table th:nth-child(9),#projectPage .restored-file-table td:nth-child(9){width:17%}
         #projectPage .restored-file-table td:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
         #projectPage .restored-file-table td:nth-child(3),#projectPage .restored-file-table td:nth-child(5),#projectPage .restored-file-table td:nth-child(6),#projectPage .restored-file-table td:nth-child(7),#projectPage .restored-file-table td:nth-child(8),#projectPage .restored-file-table td:nth-child(9){white-space:nowrap}
         #projectPage .restored-file-table .file-row.selected td{background:#f2f8f4}
-        #projectPage .file-quality-standard{display:block;margin:2px 0 0 24px;color:#75837b;font-size:11px;font-weight:400;line-height:16px}
+        #projectPage .file-quality-standard{display:block;margin:2px 0 0;color:#75837b;font-size:12px;font-weight:400;line-height:18px}
         #projectPage .file-quality-standard[hidden]{display:none!important}
-        #projectPage .file-quality-standard span{display:block;white-space:normal}
-        #projectPage .file-quality-standard .file-quality-compare{display:block;color:#b66a1e;font-weight:400;white-space:nowrap;cursor:help}
-        #projectPage .file-quality-standard.needs-recheck{color:#9d6324}
+        #projectPage .file-quality-standard>span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        #projectPage .file-quality-standard .file-quality-compare{display:flex;min-width:0;align-items:center;gap:6px;overflow:visible;color:#75837b;font-weight:400;white-space:nowrap;cursor:help}
+        #projectPage .file-quality-change-tag{display:inline-flex;flex:none;align-items:center;padding:0 6px;border:1px solid #efc894;border-radius:3px;background:#fff4e3;color:#b66a1e;font-size:12px;font-style:normal;font-weight:400;line-height:18px}
+        #projectPage .file-quality-change-value{min-width:0;overflow:hidden;color:#7b746c;text-overflow:ellipsis;white-space:nowrap}
         #projectPage .restored-file-table .link+.link{margin-left:8px}
         .restored-batch-modal{width:480px}
         .restored-batch-warning{margin:0;padding:14px;border-left:3px solid #d58a39;background:#fff9ef;color:#5f625e;font-size:13px;line-height:1.7}
