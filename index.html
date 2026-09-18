@@ -2668,8 +2668,9 @@
               <div class="project-title" data-page-to="dataListPage" title="返回项目列表">‹ 白玉兰测试20260203</div>
               <div class="restored-summary-standard">
                 <span class="restored-standard-compare"><small>当前项目标准</small><button class="link restored-standard-link" type="button" data-change-project-standard title="更换当前项目标准"><span data-current-project-standard>合肥院 BIM 数据标准 V1.0</span></button></span>
-                <i data-quality-standard-divider aria-hidden="true" hidden></i>
-                <em class="restored-standard-status" data-current-standard-status hidden><span data-affected-model-count>0</span> 个模型质检规范已变更</em>
+                <i aria-hidden="true"></i>
+                <span class="restored-quality-standard-summary"><small>模型质检标准</small><b>按模型分别记录</b></span>
+                <em class="restored-standard-status" data-current-standard-status hidden><span data-affected-model-count>0</span>个模型需重新质检</em>
               </div>
               <button class="link restored-info-more" type="button" aria-expanded="false">更多详情⌄</button>
             </div>
@@ -2694,6 +2695,7 @@
             <div class="data-main restored-project-main">
               <section class="restored-project-view" data-restored-project-view="project">
                 <div class="restored-view-title">项目数据</div>
+                <div class="restored-quality-alert" data-quality-standard-alert hidden><span aria-hidden="true">!</span><p><strong>质检规范已更新</strong><span data-affected-model-count>0</span>个模型的当前质检结果基于旧版标准，请查看文件下方的版本对比；仅受影响模型需重新质检，全部完成后方可继续审批。</p></div>
                 <div class="restored-project-toolbar">
                   <div class="restored-status-row">
                     <div class="restored-integrity-state" data-integrity-state><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>未发起</strong></div>
@@ -6617,14 +6619,14 @@
         const latestRevision = model.latestRevision || '';
         return usedStandardId !== latestStandardId || usedVersion !== latestVersion || usedRevision !== latestRevision;
       };
-      const getQualityStandardChangeText = model => {
+      const getQualityStandardDifferenceText = model => {
         const usedStandardId = model.usedStandardId || getStandardName(model.used);
         const latestStandardId = model.latestStandardId || getStandardName(model.latest);
         const usedVersion = model.usedVersion || getVersionLabel(model.used);
         const latestVersion = model.latestVersion || getVersionLabel(model.latest);
-        if (usedStandardId !== latestStandardId) return getStandardChangeText(model.used, model.latest);
-        if (usedVersion !== latestVersion) return `${usedVersion} → ${latestVersion}`;
-        return '内容已调整';
+        if (usedStandardId !== latestStandardId) return `质检 ${getCompactStandard(model.used)} / 最新 ${getCompactStandard(model.latest)}`;
+        if (usedVersion !== latestVersion) return `质检 ${usedVersion} / 最新 ${latestVersion}`;
+        return `质检 ${usedVersion} / 最新 ${latestVersion}（内容已调整）`;
       };
       const persistQualityContexts = () => {
         let stored = {};
@@ -6697,10 +6699,10 @@
         qualityStandardOutdated = affectedModelCount > 0;
         const currentProjectStandard = page.querySelector('[data-current-project-standard]');
         const currentStandardStatus = page.querySelector('[data-current-standard-status]');
-        const qualityStandardDivider = page.querySelector('[data-quality-standard-divider]');
+        const qualityStandardAlert = page.querySelector('[data-quality-standard-alert]');
         if (currentProjectStandard) currentProjectStandard.textContent = latestProjectStandard;
         if (currentStandardStatus) currentStandardStatus.hidden = !qualityStandardOutdated;
-        if (qualityStandardDivider) qualityStandardDivider.hidden = !qualityStandardOutdated;
+        if (qualityStandardAlert) qualityStandardAlert.hidden = !qualityStandardOutdated;
         page.querySelectorAll('[data-affected-model-count]').forEach(item => { item.textContent = String(affectedModelCount); });
         let modelIndex = 0;
         page.querySelectorAll('.restored-file-table tbody .file-row').forEach(row => {
@@ -6729,7 +6731,7 @@
           qualityInfo.hidden = !modelHasQualityRecord;
           qualityInfo.classList.toggle('needs-recheck', modelNeedsQualityUpdate);
           qualityInfo.innerHTML = modelNeedsQualityUpdate
-            ? `<span class="file-quality-compare" title="上次质检使用：${modelContext.used}\n当前适用规范：${modelContext.latest}"><em class="file-quality-change-tag">质检规范已变更</em><span class="file-quality-change-value">${getQualityStandardChangeText(modelContext)}</span></span>`
+            ? `<span class="file-quality-compare" title="上次质检使用：${modelContext.used}\n当前适用规范：${modelContext.latest}">${getQualityStandardDifferenceText(modelContext)}</span>`
             : `<span>质检规范：${modelContext.used}</span>`;
         });
 
@@ -7084,6 +7086,9 @@
         #projectPage .restored-summary-standard{display:flex;min-width:0;max-width:760px;align-items:center;gap:10px;color:#748078;font-size:12px;white-space:nowrap}
         #projectPage .restored-standard-compare{display:flex;min-width:0;flex-direction:column;gap:2px}
         #projectPage .restored-standard-compare small{color:#8a958e;font-size:10px;line-height:13px}
+        #projectPage .restored-quality-standard-summary{display:flex;min-width:0;flex-direction:column;gap:2px}
+        #projectPage .restored-quality-standard-summary small{color:#8a958e;font-size:10px;line-height:13px}
+        #projectPage .restored-quality-standard-summary b{color:#59685f;font-size:12px;font-weight:500}
         #projectPage .restored-standard-compare b{max-width:240px;overflow:hidden;color:#59685f;font-size:12px;font-weight:600;text-overflow:ellipsis}
         #projectPage .restored-summary-standard>i{width:1px;height:25px;background:#e1e7e3}
         #projectPage .restored-summary-standard>i[hidden]{display:none!important}
@@ -7105,6 +7110,11 @@
         #projectPage [data-restored-project-view="project"]{grid-column:1/-1;grid-row:1;padding:0 14px;border-bottom:1px solid #e2e9e4}
         #projectPage .restored-professional-view{grid-column:2;grid-row:2;min-width:0;overflow-x:auto;padding:0 12px 10px}
         #projectPage .restored-view-title{height:36px;border-bottom:1px solid #e7ece9;color:#34483c;font-size:15px;font-weight:650;line-height:36px}
+        #projectPage .restored-quality-alert{display:flex;min-height:34px;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid #f0ddb8;background:#fff9e9;box-sizing:border-box;color:#6f6045;font-size:12px;line-height:20px}
+        #projectPage .restored-quality-alert[hidden]{display:none!important}
+        #projectPage .restored-quality-alert>span{display:inline-flex;width:16px;height:16px;flex:none;align-items:center;justify-content:center;border:1px solid #d7a95f;border-radius:50%;color:#a66b22;font-size:11px;font-weight:600;line-height:14px}
+        #projectPage .restored-quality-alert p{margin:0}
+        #projectPage .restored-quality-alert strong{margin-right:7px;color:#8c5d1f;font-weight:600}
         #projectPage .restored-project-toolbar{display:block;min-height:84px}
         #projectPage .restored-status-row{display:flex;height:30px;align-items:center;border-bottom:1px solid #f0f3f1}
         #projectPage .restored-integrity-state{display:flex;align-items:center;gap:4px;white-space:nowrap;color:#66756c;font-size:12px}
@@ -7173,9 +7183,7 @@
         #projectPage .file-quality-standard{display:block;margin:2px 0 0;color:#75837b;font-size:12px;font-weight:400;line-height:18px}
         #projectPage .file-quality-standard[hidden]{display:none!important}
         #projectPage .file-quality-standard>span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        #projectPage .file-quality-standard .file-quality-compare{display:flex;min-width:0;align-items:center;gap:6px;overflow:visible;color:#75837b;font-weight:400;white-space:nowrap;cursor:help}
-        #projectPage .file-quality-change-tag{display:inline-flex;flex:none;align-items:center;padding:0 6px;border:1px solid #efc894;border-radius:3px;background:#fff4e3;color:#b66a1e;font-size:12px;font-style:normal;font-weight:400;line-height:18px}
-        #projectPage .file-quality-change-value{min-width:0;overflow:hidden;color:#7b746c;text-overflow:ellipsis;white-space:nowrap}
+        #projectPage .file-quality-standard .file-quality-compare{display:block;overflow:hidden;color:#a16b2e;font-weight:400;text-overflow:ellipsis;white-space:nowrap;cursor:help}
         #projectPage .restored-file-table .link+.link{margin-left:8px}
         .restored-batch-modal{width:480px}
         .restored-batch-warning{margin:0;padding:14px;border-left:3px solid #d58a39;background:#fff9ef;color:#5f625e;font-size:13px;line-height:1.7}
