@@ -6621,9 +6621,10 @@
         const latestStandardId = model.latestStandardId || getStandardName(model.latest);
         const usedVersion = model.usedVersion || getVersionLabel(model.used);
         const latestVersion = model.latestVersion || getVersionLabel(model.latest);
-        if (usedStandardId !== latestStandardId) return `质检 ${getCompactStandard(model.used)} / 最新 ${getCompactStandard(model.latest)}`;
-        if (usedVersion !== latestVersion) return `质检 ${usedVersion} / 最新 ${latestVersion}`;
-        return `质检 ${usedVersion} / 最新 ${latestVersion}（内容已调整）`;
+        if (usedStandardId !== latestStandardId) return `质检：${model.used} / 最新：${model.latest}`;
+        const standardName = getStandardName(model.latest);
+        if (usedVersion !== latestVersion) return `${standardName}：质检 ${usedVersion} / 最新 ${latestVersion}`;
+        return `${standardName}：质检 ${usedVersion} / 最新 ${latestVersion}（内容已调整）`;
       };
       const persistQualityContexts = () => {
         let stored = {};
