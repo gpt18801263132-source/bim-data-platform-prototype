@@ -6104,7 +6104,7 @@
       const projectList = document.getElementById('dataListPage');
       const projectPage = document.getElementById('projectPage');
       const standardOptions = ['全部标准', '合肥院 BIM 数据标准 V1.0', '合肥院 BIM 数据标准 V2.0', '工程建设 IFC 数据交付标准 V1.0'];
-      const qualityStorageKey = 'bimPrototypeModelQualityContextsV2';
+      const qualityStorageKey = 'bimPrototypeModelQualityContextsV3';
       const qualityModel = (modelId, fileName, standardId, standardName, usedVersion, latestVersion = usedVersion, usedRevision = 'r1', latestRevision = usedRevision) => ({
         modelId,
         fileName,
@@ -6118,7 +6118,7 @@
         latestRevision
       });
       const projectStandards = [
-        ['合肥院 BIM 数据标准 V1.0', [qualityModel('civil-ifc','联合工房-土建专业模型.ifc','qc-civil','合肥院 BIM 质检规范','V1.0','V1.2','r1','r2'),qualityModel('mep-ifc','联合工房-机电专业模型.ifc','qc-mep','机电 BIM 质检规范','V2.0')]],
+        ['合肥院 BIM 数据标准 V1.0', [{...qualityModel('civil-ifc','联合工房-土建专业模型.ifc','qc-civil','合肥院 BIM 质检规范','V1.0'),latest:'工程建设 IFC 质检规范 V1.0',latestStandardId:'qc-ifc'},qualityModel('mep-ifc','联合工房-机电专业模型.ifc','qc-mep','机电 BIM 质检规范','V2.0')]],
         ['合肥院 BIM 数据标准 V2.0', [qualityModel('civil-ifc','联合工房-土建专业模型.ifc','qc-civil','合肥院 BIM 质检规范','V1.0','V1.2','r1','r2'),qualityModel('mep-ifc','联合工房-机电专业模型.ifc','qc-mep','机电 BIM 质检规范','V2.0')]],
         ['工程建设 IFC 数据交付标准 V1.0', [qualityModel('civil-ifc','联合工房-土建专业模型.ifc','qc-civil','合肥院 BIM 质检规范','V1.0'),qualityModel('mep-ifc','联合工房-机电专业模型.ifc','qc-mep','机电 BIM 质检规范','V2.0')]],
         ['合肥院 BIM 数据标准 V1.0', [qualityModel('civil-ifc','联合工房-土建专业模型.ifc','qc-civil','合肥院 BIM 质检规范','V1.0'),qualityModel('mep-ifc','联合工房-机电专业模型.ifc','qc-mep','机电 BIM 质检规范','V2.0')]],
@@ -6555,7 +6555,7 @@
       let qualityCheckPassed = false;
       let latestProjectStandard = '合肥院 BIM 数据标准 V1.0';
       let modelQualityContexts = [
-        {modelId:'civil-ifc',fileName:'联合工房-土建专业模型.ifc',used:'合肥院 BIM 质检规范 V1.0',latest:'合肥院 BIM 质检规范 V1.0',usedStandardId:'qc-civil',latestStandardId:'qc-civil',usedVersion:'V1.0',latestVersion:'V1.0',usedRevision:'r1',latestRevision:'r1'},
+        {modelId:'civil-ifc',fileName:'联合工房-土建专业模型.ifc',used:'合肥院 BIM 质检规范 V1.0',latest:'工程建设 IFC 质检规范 V1.0',usedStandardId:'qc-civil',latestStandardId:'qc-ifc',usedVersion:'V1.0',latestVersion:'V1.0',usedRevision:'r1',latestRevision:'r1'},
         {modelId:'mep-ifc',fileName:'联合工房-机电专业模型.ifc',used:'机电 BIM 质检规范 V2.0',latest:'机电 BIM 质检规范 V2.0',usedStandardId:'qc-mep',latestStandardId:'qc-mep',usedVersion:'V2.0',latestVersion:'V2.0',usedRevision:'r1',latestRevision:'r1'}
       ];
       let qualityStandardOutdated = false;
@@ -6563,11 +6563,12 @@
       let qualityCheckRunning = false;
       let currentProjectKey = '白玉兰测试20260203';
       let pendingReuploadRow = null;
-      const qualityStorageKey = 'bimPrototypeModelQualityContextsV2';
+      const qualityStorageKey = 'bimPrototypeModelQualityContextsV3';
       const qualityStandardOptions = [
         {key:'qc-civil-v1-r1',standardId:'qc-civil',name:'合肥院 BIM 质检规范',version:'V1.0',revision:'r1',label:'合肥院 BIM 质检规范 V1.0'},
         {key:'qc-civil-v1-r2',standardId:'qc-civil',name:'合肥院 BIM 质检规范',version:'V1.0',revision:'r2',label:'合肥院 BIM 质检规范 V1.0（内容修订）'},
         {key:'qc-civil-v12-r2',standardId:'qc-civil',name:'合肥院 BIM 质检规范',version:'V1.2',revision:'r2',label:'合肥院 BIM 质检规范 V1.2'},
+        {key:'qc-ifc-v1-r1',standardId:'qc-ifc',name:'工程建设 IFC 质检规范',version:'V1.0',revision:'r1',label:'工程建设 IFC 质检规范 V1.0'},
         {key:'qc-mep-v2-r1',standardId:'qc-mep',name:'机电 BIM 质检规范',version:'V2.0',revision:'r1',label:'机电 BIM 质检规范 V2.0'},
         {key:'qc-mep-v21-r2',standardId:'qc-mep',name:'机电 BIM 质检规范',version:'V2.1',revision:'r2',label:'机电 BIM 质检规范 V2.1'}
       ];
