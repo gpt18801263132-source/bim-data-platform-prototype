@@ -2669,8 +2669,10 @@
               <div class="restored-summary-standard">
                 <span class="restored-standard-compare"><small>当前项目标准</small><button class="link restored-standard-link" type="button" data-change-project-standard title="更换当前项目标准"><span data-current-project-standard>合肥院 BIM 数据标准 V1.0</span></button></span>
                 <i aria-hidden="true"></i>
-                <span class="restored-standard-compare"><small>模型质检标准</small><b data-current-quality-standard>按模型分别记录</b></span>
-                <em class="restored-standard-status" data-current-standard-status hidden><span data-affected-model-count>0</span> 个模型需重新质检</em>
+                <span class="restored-standard-change-summary">
+                  <span>模型质检标准</span>
+                  <em class="restored-standard-status" data-current-standard-status hidden><span data-affected-model-count>0</span> 个模型标准已变更</em>
+                </span>
               </div>
               <button class="link restored-info-more" type="button" aria-expanded="false">更多详情⌄</button>
             </div>
@@ -2696,11 +2698,6 @@
               <section class="restored-project-view" data-restored-project-view="project">
                 <div class="restored-view-title">项目数据</div>
                 <div class="restored-project-toolbar">
-                  <div class="restored-qc-standard-warning" data-qc-standard-warning hidden>
-                    <strong>⚠ 质检规范已更新</strong>
-                    <span class="restored-qc-standard-versions"><b data-qc-affected-count>0</b> 个模型的当前质检结果基于旧版标准</span>
-                    <span>请查看文件名下方的版本对比；仅受影响模型需重新质检，全部完成后方可继续审批。</span>
-                  </div>
                   <div class="restored-status-row">
                     <div class="restored-integrity-state" data-integrity-state><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>未发起</strong></div>
                   </div>
@@ -2716,7 +2713,6 @@
                       <div class="restored-flow-node" data-quality-flow-node>
                         <span class="restored-flow-title">发起数据质检</span>
                         <button class="restored-flow-state restored-flow-control" type="button" id="startDataQualityCheck" disabled>待完整性检查</button>
-                        <small class="restored-flow-standard-hint" data-flow-standard-hint hidden>规范已更新，请重新发起数据质检</small>
                       </div>
                       <span class="restored-flow-arrow" aria-hidden="true">→</span>
                       <div class="restored-flow-node" data-result-flow-node>
@@ -6574,28 +6570,27 @@
       };
 
       const getVersionLabel = standard => standard.match(/V[\d.]+/i)?.[0] || standard;
+      const getStandardName = standard => standard.replace(/\s*V[\d.]+\s*$/i, '').trim();
+      const getCompactStandard = standard => standard.replace(/\s*数据标准\s*/g, ' ').replace(/\s+/g, ' ').trim();
+      const getStandardChangeText = (used, latest) => getStandardName(used) === getStandardName(latest)
+        ? `质检标准：${getVersionLabel(used)} → ${getVersionLabel(latest)}`
+        : `质检标准：${getCompactStandard(used)} → ${getCompactStandard(latest)}`;
       const getAffectedModelCount = () => hasQualityResult
         ? modelQualityContexts.filter(model => model.used !== model.latest).length
         : 0;
       const getModelQualitySummary = () => {
         if (!hasQualityResult) return '尚未发起质检';
-        return modelQualityContexts.length === 1 ? modelQualityContexts[0].used : '按模型分别记录';
+        return modelQualityContexts.length === 1 ? modelQualityContexts[0].used : `${modelQualityContexts.length} 个模型质检记录`;
       };
 
       const syncQualityStandardState = () => {
         const affectedModelCount = getAffectedModelCount();
         qualityStandardOutdated = affectedModelCount > 0;
-        const warning = page.querySelector('[data-qc-standard-warning]');
-        if (warning) warning.hidden = !qualityStandardOutdated;
         const currentProjectStandard = page.querySelector('[data-current-project-standard]');
-        const currentQualityStandard = page.querySelector('[data-current-quality-standard]');
         const currentStandardStatus = page.querySelector('[data-current-standard-status]');
-        const flowStandardHint = page.querySelector('[data-flow-standard-hint]');
         if (currentProjectStandard) currentProjectStandard.textContent = latestProjectStandard;
-        if (currentQualityStandard) currentQualityStandard.textContent = getModelQualitySummary();
         if (currentStandardStatus) currentStandardStatus.hidden = !qualityStandardOutdated;
-        if (flowStandardHint) flowStandardHint.hidden = !qualityStandardOutdated;
-        page.querySelectorAll('[data-affected-model-count],[data-qc-affected-count]').forEach(item => { item.textContent = String(affectedModelCount); });
+        page.querySelectorAll('[data-affected-model-count]').forEach(item => { item.textContent = String(affectedModelCount); });
         let modelIndex = 0;
         page.querySelectorAll('.restored-file-table tbody .file-row').forEach(row => {
           const isIfc = row.cells[2]?.textContent.trim().toLowerCase() === 'ifc';
@@ -6616,7 +6611,7 @@
           qualityInfo.hidden = !hasQualityResult;
           qualityInfo.classList.toggle('needs-recheck', modelNeedsQualityUpdate);
           qualityInfo.innerHTML = modelNeedsQualityUpdate
-            ? `<span class="file-quality-compare">质检 ${getVersionLabel(modelContext.used)} / 最新 ${getVersionLabel(modelContext.latest)} <em title="该模型当前质检结果基于旧版质检标准。\n上次质检使用：${getVersionLabel(modelContext.used)}\n当前最新标准：${getVersionLabel(modelContext.latest)}\n请重新发起数据质检。">需重新质检</em></span>`
+            ? `<span class="file-quality-compare" title="上次质检使用：${modelContext.used}\n当前适用标准：${modelContext.latest}">${getStandardChangeText(modelContext.used, modelContext.latest)}</span>`
             : `<span>质检标准：${modelContext.used}</span>`;
         });
 
@@ -6662,7 +6657,7 @@
 
         button.disabled = !qualityCheckPassed;
         button.title = qualityStandardOutdated ? '质检规范已更新，请重新发起数据质检后再审批' : !qualityCheckPassed ? '请先完成数据质检' : submitted ? '查看已提交的审批流程' : '';
-        button.textContent = qualityStandardOutdated ? '需重新质检后方可审批' : submitted ? '查看审批流' : qualityCheckPassed ? '审批入库' : '未满足条件';
+        button.textContent = submitted ? '查看审批流' : qualityCheckPassed ? '审批入库' : '未满足条件';
         button.className = qualityCheckPassed && !submitted
           ? 'btn primary restored-flow-control restored-entry-ready'
             : submitted
@@ -6945,6 +6940,7 @@
         #projectPage .restored-standard-compare b{max-width:240px;overflow:hidden;color:#59685f;font-size:12px;font-weight:600;text-overflow:ellipsis}
         #projectPage .restored-summary-standard>i{width:1px;height:25px;background:#e1e7e3}
         #projectPage .restored-summary-standard .restored-standard-link{max-width:240px;overflow:hidden;color:#28734c;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+        #projectPage .restored-standard-change-summary{display:flex;align-items:center;gap:7px;color:#59685f;font-size:12px}
         #projectPage .restored-standard-status{padding:2px 6px;border:1px solid #efc894;border-radius:3px;background:#fff4e3;color:#b66a1e;font-size:11px;font-style:normal;line-height:18px}
         #projectPage .restored-standard-status[hidden]{display:none!important}
         #projectPage .restored-info-more{position:static;padding:4px 0;color:#517261;font-size:12px}
@@ -6964,11 +6960,6 @@
         #projectPage .restored-view-title{height:36px;border-bottom:1px solid #e7ece9;color:#34483c;font-size:15px;font-weight:650;line-height:36px}
         #projectPage .restored-project-toolbar{display:block;min-height:84px}
         #projectPage .restored-status-row{display:flex;height:30px;align-items:center;border-bottom:1px solid #f0f3f1}
-        #projectPage .restored-qc-standard-warning{display:flex;min-height:34px;box-sizing:border-box;align-items:center;gap:12px;padding:5px 10px;border-left:3px solid #d98a32;background:#fff7ea;color:#765a35;font-size:11px;line-height:1.35}
-        #projectPage .restored-qc-standard-warning[hidden]{display:none!important}
-        #projectPage .restored-qc-standard-warning strong{flex:none;color:#a8601c}
-        #projectPage .restored-qc-standard-warning b{color:#a8601c;font-weight:600}
-        #projectPage .restored-qc-standard-versions{flex:none;padding-right:12px;border-right:1px solid #edcfaa;white-space:nowrap}
         #projectPage .restored-integrity-state{display:flex;align-items:center;gap:4px;white-space:nowrap;color:#66756c;font-size:12px}
         #projectPage .restored-integrity-state>i{width:7px;height:7px;border-radius:50%;background:#27915b}
         #projectPage .restored-integrity-state strong{color:#238051;font-weight:600}
@@ -6982,8 +6973,6 @@
         #projectPage .restored-flow-complete{min-width:172px}
         #projectPage .restored-flow-node-actions{display:flex;align-items:center;gap:6px}
         #projectPage .restored-flow-title{color:#647269;font-size:11px;line-height:14px;white-space:nowrap}
-        #projectPage .restored-flow-standard-hint{color:#b66a1e;font-size:10px;font-weight:500;line-height:12px;white-space:nowrap}
-        #projectPage .restored-flow-standard-hint[hidden]{display:none!important}
         #projectPage .restored-flow-arrow{color:#b5c0b9;font-size:16px}
         #projectPage .restored-flow-state{height:28px;padding:0;border:0;background:transparent;color:#8b9690;font-size:12px;line-height:28px;text-align:left;cursor:default}
         #projectPage button.restored-flow-state:not(:disabled){color:#277d53;cursor:pointer}
@@ -7037,9 +7026,8 @@
         #projectPage .file-quality-standard{display:block;margin:2px 0 0 24px;color:#75837b;font-size:11px;font-weight:400;line-height:16px}
         #projectPage .file-quality-standard[hidden]{display:none!important}
         #projectPage .file-quality-standard span{display:block;white-space:normal}
-        #projectPage .file-quality-standard .file-quality-compare{display:flex;align-items:center;white-space:nowrap}
+        #projectPage .file-quality-standard .file-quality-compare{display:block;color:#b66a1e;font-weight:400;white-space:nowrap;cursor:help}
         #projectPage .file-quality-standard.needs-recheck{color:#9d6324}
-        #projectPage .file-quality-standard em{display:inline-flex;align-items:center;margin-left:5px;padding:0 6px;border:1px solid #efc894;border-radius:8px;background:#fff4e3;color:#b66a1e;font-size:10px;font-style:normal;line-height:17px;vertical-align:1px;cursor:help}
         #projectPage .restored-file-table .link+.link{margin-left:8px}
         .restored-batch-modal{width:480px}
         .restored-batch-warning{margin:0;padding:14px;border-left:3px solid #d58a39;background:#fff9ef;color:#5f625e;font-size:13px;line-height:1.7}
@@ -7049,7 +7037,6 @@
         @media(max-width:1100px){
           #projectPage .restored-project-summary-row{grid-template-columns:minmax(0,1fr) auto}
           #projectPage .restored-summary-standard{grid-column:1/-1;grid-row:2;max-width:none;padding-bottom:8px}
-          #projectPage .restored-qc-standard-warning{align-items:flex-start;flex-wrap:wrap}
           #projectPage .restored-operation-row{align-items:flex-start;flex-wrap:wrap;padding:10px 0}
           #projectPage .restored-aux-actions{width:100%;margin-left:0}
           #projectPage .restored-professional-toolbar{grid-template-columns:1fr auto;padding:10px 0}
