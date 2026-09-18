@@ -6616,15 +6616,15 @@
         const latestRevision = model.latestRevision || '';
         return usedStandardId !== latestStandardId || usedVersion !== latestVersion || usedRevision !== latestRevision;
       };
-      const getQualityStandardDifferenceText = model => {
+      const getQualityStandardDifferenceMarkup = model => {
         const usedStandardId = model.usedStandardId || getStandardName(model.used);
         const latestStandardId = model.latestStandardId || getStandardName(model.latest);
         const usedVersion = model.usedVersion || getVersionLabel(model.used);
         const latestVersion = model.latestVersion || getVersionLabel(model.latest);
-        if (usedStandardId !== latestStandardId) return `质检：${model.used} / 最新：${model.latest}`;
+        if (usedStandardId !== latestStandardId) return `<span class="file-quality-name">${getStandardName(model.latest)}</span><em class="file-quality-version-change">规范已切换</em>`;
         const standardName = getStandardName(model.latest);
-        if (usedVersion !== latestVersion) return `${standardName}：质检 ${usedVersion} / 最新 ${latestVersion}`;
-        return `${standardName}：质检 ${usedVersion} / 最新 ${latestVersion}（内容已调整）`;
+        const changeText = usedVersion !== latestVersion ? `${usedVersion} → ${latestVersion}` : '内容已调整';
+        return `<span class="file-quality-name">${standardName}</span><em class="file-quality-version-change">${changeText}</em>`;
       };
       const persistQualityContexts = () => {
         let stored = {};
@@ -6729,7 +6729,7 @@
           qualityInfo.hidden = !modelHasQualityRecord;
           qualityInfo.classList.toggle('needs-recheck', modelNeedsQualityUpdate);
           qualityInfo.innerHTML = modelNeedsQualityUpdate
-            ? `<span class="file-quality-compare" title="上次质检使用：${modelContext.used}\n当前适用规范：${modelContext.latest}">${getQualityStandardDifferenceText(modelContext)}</span>`
+            ? `<span class="file-quality-compare" title="上次质检使用：${modelContext.used}\n当前适用规范：${modelContext.latest}">${getQualityStandardDifferenceMarkup(modelContext)}</span>`
             : `<span>质检规范：${modelContext.used}</span>`;
         });
 
@@ -7162,21 +7162,23 @@
         #projectPage .restored-file-table{width:100%;min-width:980px;margin-top:6px;border:1px solid #e7ece9;table-layout:fixed}
         #projectPage .restored-file-table th{background:#f3f6f4;color:#647169;font-weight:500}
         #projectPage .restored-file-table th:nth-child(1),#projectPage .restored-file-table td:nth-child(1){width:4%;text-align:center}
-        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:23%}
+        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:26%}
         #projectPage .restored-file-table th:nth-child(3),#projectPage .restored-file-table td:nth-child(3){width:6%}
         #projectPage .restored-file-table th:nth-child(4),#projectPage .restored-file-table td:nth-child(4){width:9%}
         #projectPage .restored-file-table th:nth-child(5),#projectPage .restored-file-table td:nth-child(5){width:7%}
         #projectPage .restored-file-table th:nth-child(6),#projectPage .restored-file-table td:nth-child(6){width:9%}
         #projectPage .restored-file-table th:nth-child(7),#projectPage .restored-file-table td:nth-child(7){width:14%}
         #projectPage .restored-file-table th:nth-child(8),#projectPage .restored-file-table td:nth-child(8){width:11%}
-        #projectPage .restored-file-table th:nth-child(9),#projectPage .restored-file-table td:nth-child(9){width:17%}
+        #projectPage .restored-file-table th:nth-child(9),#projectPage .restored-file-table td:nth-child(9){width:14%}
         #projectPage .restored-file-table td:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
         #projectPage .restored-file-table td:nth-child(3),#projectPage .restored-file-table td:nth-child(5),#projectPage .restored-file-table td:nth-child(6),#projectPage .restored-file-table td:nth-child(7),#projectPage .restored-file-table td:nth-child(8),#projectPage .restored-file-table td:nth-child(9){white-space:nowrap}
         #projectPage .restored-file-table .file-row.selected td{background:#f2f8f4}
         #projectPage .file-quality-standard{display:block;margin:2px 0 0;color:#75837b;font-size:12px;font-weight:400;line-height:18px}
         #projectPage .file-quality-standard[hidden]{display:none!important}
         #projectPage .file-quality-standard>span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        #projectPage .file-quality-standard .file-quality-compare{display:block;overflow:hidden;color:#a16b2e;font-weight:400;text-overflow:ellipsis;white-space:nowrap;cursor:help}
+        #projectPage .file-quality-standard .file-quality-compare{display:flex;min-width:0;align-items:center;gap:5px;overflow:hidden;color:#75837b;font-weight:400;white-space:nowrap;cursor:help}
+        #projectPage .file-quality-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        #projectPage .file-quality-version-change{display:inline-flex;flex:none;align-items:center;height:18px;padding:0 5px;border:1px solid #edc58e;border-radius:3px;background:#fff7ea;color:#a96418;font-size:11px;font-style:normal;font-weight:500;line-height:16px}
         #projectPage .restored-file-table .link+.link{margin-left:8px}
         .restored-batch-modal{width:480px}
         .restored-batch-warning{margin:0;padding:14px;border-left:3px solid #d58a39;background:#fff9ef;color:#5f625e;font-size:13px;line-height:1.7}
