@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
+  <script>if (!new URLSearchParams(location.search).has("view") && !location.hash) location.replace("operations.html");</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>合肥中台-数据质检推送审批流原型</title>
   <style>
@@ -2484,7 +2485,7 @@
       <button class="top-btn" data-top="home">首页</button>
       <button class="top-btn active" data-top="workbench">工作台</button>
       <button class="top-btn" data-top="data">BIM数据管理</button>
-      <button class="top-btn">智慧运维</button>
+      <button class="top-btn" data-operations-entry>智慧运维</button>
       <button class="top-btn">BIM模型展示</button>
       <button class="top-btn">BIM公共服务</button>
       <button class="top-btn">后台管理</button>
@@ -2666,6 +2667,9 @@
           <div class="info-card restored-project-info">
             <div class="restored-project-summary-row">
               <div class="project-title" data-page-to="dataListPage" title="返回项目列表">‹ 白玉兰测试20260203</div>
+              <div class="restored-summary-standard">
+                <span class="restored-standard-compare"><small>当前项目标准</small><button class="link restored-standard-link" type="button" data-change-project-standard title="更换当前项目标准"><span data-current-project-standard>合肥院 BIM 数据标准 V1.0</span></button></span>
+              </div>
               <button class="link restored-info-more" type="button" aria-expanded="false">更多详情⌄</button>
             </div>
             <div class="info-grid" data-project-detail-fields hidden>
@@ -2676,7 +2680,6 @@
               <div class="info-line">项目地址: <span>--</span></div>
               <div class="info-line">详细地址: <span>--</span></div>
               <div class="info-line">工程类别: <span>--</span></div>
-              <div class="info-line">当前标准: <button class="link restored-standard-link" type="button" data-change-project-standard><span data-current-project-standard>合肥院 BIM 数据标准 V1.0</span></button></div>
             </div>
           </div>
           <div class="card project-data restored-project-data">
@@ -2690,6 +2693,7 @@
             <div class="data-main restored-project-main">
               <section class="restored-project-view" data-restored-project-view="project">
                 <div class="restored-view-title">项目数据</div>
+                <div class="restored-quality-alert" data-quality-standard-alert hidden><span aria-hidden="true">!</span><p><strong>质检规范已更新</strong><span data-affected-model-count>0</span>个模型的当前质检结果基于旧版标准，请查看文件下方的版本对比；仅受影响模型需重新质检，全部完成后方可继续审批。</p></div>
                 <div class="restored-project-toolbar">
                   <div class="restored-status-row">
                     <div class="restored-integrity-state" data-integrity-state><span>完整性检查状态：</span><i aria-hidden="true"></i><strong>未发起</strong></div>
@@ -5507,8 +5511,8 @@
       const renderMarket = () => {
         document.querySelector('.layout')?.classList.remove('homepage-mode');
         document.querySelectorAll('.top-btn').forEach(button => button.classList.toggle('active', button === publicService));
-        document.getElementById('primarySide').innerHTML = '<div class="primary-item active"><span class="primary-icon">◉</span><span>能力<br>市场</span></div><div class="primary-item"><span class="primary-icon">▣</span><span>我的<br>订阅</span></div>';
-        document.getElementById('secondarySide').innerHTML = '<button class="sub-btn active" type="button">◩ 服务中心</button><button class="sub-btn" type="button">◩ 订阅申请记录</button>';
+        document.getElementById('primarySide').innerHTML = '<div class="primary-item active"><span class="primary-icon">◉</span><span>能力<br>市场</span></div>';
+        document.getElementById('secondarySide').innerHTML = '<button class="sub-btn active" type="button">◩ 服务中心</button>';
         document.getElementById('breadcrumb').textContent = 'BIM公共服务 / 能力市场 / 服务中心';
         document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
         marketPage.classList.add('active');
@@ -5543,7 +5547,7 @@
         const remove = event.target.closest('[data-remove-cart-item]'); if (remove) { cart.splice(cart.indexOf(remove.dataset.removeCartItem), 1); renderCart(); renderMarket(); }
         if (event.target.closest('[data-open-cart-apply]')) openApply([...cart]);
         if (event.target.closest('[data-close-sub-apply]')) applyModal.classList.remove('open');
-        if (event.target.closest('[data-submit-subscription]')) { const approver = applyModal.querySelector('[data-subscription-approver]').value; if (!approver) return showToast('请选择一位审批人'); const ids = applyModal.dataset.subscriptionIds.split(',').filter(Boolean); const category = applyModal.querySelector('[data-subscription-approval-category]')?.value || 'BIM公共服务'; const priority = applyModal.querySelector('[data-subscription-approval-priority]')?.value || '普通'; const application = { name: `${ids.length} 项 BIM公共服务订阅申请`, category, priority, user: 'admin', dept: '数字化处', time: new Date().toLocaleString('zh-CN', { hour12: false }), status: '待审批' }; window.approvalPriorities = { ...(window.approvalPriorities || {}), [application.name]: application.priority }; document.dispatchEvent(new CustomEvent('approval-submitted', { detail: application })); ids.forEach(id => { const index = cart.indexOf(id); if (index >= 0) cart.splice(index, 1); }); applyModal.classList.remove('open'); renderMarket(); showToast(`已提交 ${ids.length} 项能力订阅申请，审批人：${approver}`); }
+        if (event.target.closest('[data-submit-subscription]')) { const approver = applyModal.querySelector('[data-subscription-approver]').value; if (!approver) return showToast('请选择一位审批人'); const ids = applyModal.dataset.subscriptionIds.split(',').filter(Boolean); const category = applyModal.querySelector('[data-subscription-approval-category]')?.value || 'BIM公共服务'; const priority = applyModal.querySelector('[data-subscription-approval-priority]')?.value || '普通'; const reason = applyModal.querySelector('[data-subscription-reason]')?.value.trim() || '申请使用 BIM 公共服务能力'; const application = { name: `${ids.length} 项 BIM公共服务订阅申请`, category, priority, user: 'admin', dept: '数字化处', time: new Date().toLocaleString('zh-CN', { hour12: false }), status: '待审批' }; window.approvalPriorities = { ...(window.approvalPriorities || {}), [application.name]: application.priority }; document.dispatchEvent(new CustomEvent('approval-submitted', { detail: application })); document.dispatchEvent(new CustomEvent('console-subscription-submitted', { detail:{names:ids.map(id => serviceById(id).title),approver,reason,time:application.time} })); ids.forEach(id => { const index = cart.indexOf(id); if (index >= 0) cart.splice(index, 1); }); applyModal.classList.remove('open'); renderMarket(); showToast(`已提交 ${ids.length} 项能力订阅申请，可在控制台查看`); }
         if (event.target.closest('[data-market-search]')) { const keyword = document.querySelector('[data-market-keyword]')?.value.trim(); document.querySelectorAll('.market-service-card').forEach(card => card.hidden = !!keyword && !card.textContent.includes(keyword)); }
       });
       const style = document.createElement('style'); style.textContent = '.bim-market-page{padding:0}.market-page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}.market-page-head h2{margin:0 0 7px;font-size:22px}.market-page-head p{margin:0;color:#7b8780;font-size:13px}.subscription-cart-button{position:relative;padding:9px 14px;border:1px solid #b9d9c4;border-radius:3px;background:#fff;color:#1c7049;cursor:pointer}.subscription-cart-button b{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:5px;border-radius:10px;background:#188556;color:#fff;font-size:11px}.market-search{padding:15px 17px;margin-bottom:16px;border:1px solid #dfe8e2;background:#fff}.market-search .input{width:280px;margin-right:8px}.market-categories{display:flex;gap:9px;margin-top:14px}.market-categories button{padding:5px 10px;border:0;background:#f3f6f4;color:#647168;cursor:pointer;font-size:12px}.market-categories button.active{background:#e1f2e6;color:#1b764d}.market-service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.market-service-card{min-height:240px;padding:20px;border:1px solid #dfe8e2;background:#fff}.market-service-icon{display:grid;place-items:center;width:43px;height:43px;border-radius:50%;background:#e8f4ec;color:#218355;font-size:21px}.market-service-card h3{margin:15px 0 8px;font-size:16px}.market-service-tags span{display:inline-block;margin:0 5px 0 0;padding:3px 6px;background:#eef5ff;color:#4a76ad;font-size:11px}.market-service-card p{min-height:45px;margin:14px 0;color:#748078;font-size:13px;line-height:1.65}.market-service-foot{display:flex;align-items:center;justify-content:space-between;margin-top:16px}.market-service-foot>span{color:#ad8450;font-size:12px}.market-subscription-actions{display:flex;gap:8px}.market-subscription-actions .btn{height:30px;padding:0 9px;font-size:12px}.subscription-choice-modal{width:620px}.subscription-choice-service{padding:13px 15px;background:#f4f8f5}.subscription-choice-service b,.subscription-choice-service span{display:block}.subscription-choice-service span{margin-top:5px;color:#748178;font-size:13px}.subscription-choice-tip{margin:18px 0 10px;color:#55645a;font-size:13px}.subscription-choice-options{display:grid;grid-template-columns:1fr 1fr;gap:13px}.subscription-choice-options button{min-height:105px;padding:17px;border:1px solid #cfe1d5;background:#fff;text-align:left;cursor:pointer}.subscription-choice-options button:hover{border-color:#29895a;background:#f4fbf6}.subscription-choice-options b,.subscription-choice-options span{display:block}.subscription-choice-options b{margin-bottom:10px;color:#246b49;font-size:15px}.subscription-choice-options span{color:#738177;font-size:12px;line-height:1.6}.subscription-cart-modal{width:670px}.subscription-cart-intro,.subscription-apply-note{padding:10px 12px;background:#f1f8f3;color:#50715d;font-size:13px}.subscription-cart-list{margin-top:14px;border-top:1px solid #e8eeea}.subscription-cart-item{display:flex;align-items:center;gap:12px;padding:13px 5px;border-bottom:1px solid #e8eeea}.subscription-cart-item>span{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e4f3e9;color:#1e764c;font-size:11px}.subscription-cart-item div{flex:1}.subscription-cart-item b{font-size:14px;color:#415248}.subscription-cart-item p{margin:4px 0 0;color:#89958e;font-size:12px}.subscription-cart-empty{padding:45px;text-align:center;color:#929d96;font-size:13px}.subscription-apply-modal{width:680px}.subscription-selected-list{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.subscription-selected-list span{padding:6px 9px;background:#e7f3eb;color:#27754f;font-size:12px}.subscription-form-row{display:grid;grid-template-columns:90px 1fr;gap:12px;align-items:start;margin:13px 0}.subscription-form-row label{text-align:right;padding-top:8px;color:#59685e;font-size:13px}.subscription-form-row textarea{height:78px;padding:8px;resize:vertical}.subscription-apply-rule{margin:16px 0 0;padding:10px 12px;background:#fff9ed;color:#846c3f;font-size:12px;line-height:1.65}.subscription-toast{position:fixed;z-index:100;left:50%;top:86px;transform:translate(-50%,-12px);padding:11px 16px;border-radius:3px;background:#233a2e;color:#fff;font-size:13px;opacity:0;pointer-events:none;transition:.2s}.subscription-toast.show{opacity:1;transform:translate(-50%,0)}'; document.head.appendChild(style);
@@ -5597,17 +5601,16 @@
         document.getElementById('primarySide').innerHTML = '<div class="primary-item" data-workbench-primary><span class="primary-icon">▦</span><span>工作台</span></div><div class="primary-item active" data-console-primary><span class="primary-icon">▣</span><span>控制台</span></div>';
         document.getElementById('secondarySide').innerHTML = `<button class="sub-btn ${active === 'ticket' ? 'active' : ''}" type="button" data-console-page="ticket">◩ 我的工单</button><button class="sub-btn ${active === 'subscription' ? 'active' : ''}" type="button" data-console-page="subscription">◩ 我的订阅</button><button class="sub-btn ${active === 'scene' ? 'active' : ''}" type="button" data-console-page="scene">◩ 我的场景</button><button class="sub-btn ${active === 'app' ? 'active' : ''}" type="button" data-console-page="app">◩ 我的应用</button><button class="sub-btn ${active === 'cart' ? 'active' : ''}" type="button" data-console-page="cart">◩ 我的选数车${cartItems.length ? `<em>${cartItems.length}</em>` : ''}</button>`;
       };
-      const overview = () => `<section class="console-page"><div class="console-head"><div><h2>控制台</h2><p>admin，集中查看并管理您的资源、订阅与业务事项。</p></div><span>最近登录：2026-09-01 17:48</span></div><div class="console-summary"><article><span>我的订阅</span><b>6</b><small>其中 1 项待审批</small></article><article><span>我的场景</span><b>3</b><small>2 个运行中</small></article><article><span>我的应用</span><b>5</b><small>均运行正常</small></article><article><span>待处理工单</span><b>2</b><small>请及时处理</small></article></div><div class="console-overview-grid"><section class="console-card"><div class="console-card-head"><b>我的订阅</b><button class="link" type="button" data-console-page="subscription">查看全部</button></div><div class="console-list"><div><span>项目数据查询</span><em class="console-status wait">待审批</em></div><div><span>模型质量检查</span><em class="console-status active">已开通</em></div><div><span>图模联审</span><em class="console-status active">已开通</em></div></div></section><section class="console-card"><div class="console-card-head"><b>待处理工单</b><button class="link" type="button" data-console-page="ticket">查看全部</button></div><div class="console-list"><div><span>模型质量检查规则咨询</span><em class="console-status wait">待处理</em></div><div><span>项目数据下载权限申请</span><em class="console-status progress">处理中</em></div><div><span>接口调用异常反馈</span><em class="console-status done">已完成</em></div></div></section><section class="console-card console-project-status"><div class="console-card-head"><b>资源动态</b></div><p><i class="green-dot"></i>智慧园区一期 · 模型质量检查已完成</p><p><i class="yellow-dot"></i>联合工房 · 订阅申请等待审批</p><p><i class="blue-dot"></i>项目数据查询 · 今日调用 28 次</p><button class="btn light" type="button" data-console-page="cart">查看选数车</button></section></div></section>`;
       const tickets = () => `<section class="console-page"><div class="console-head"><div><h2>我的工单</h2><p>查看您提交和参与处理的服务工单。</p></div><button class="btn primary" type="button" data-new-console-ticket>＋ 新建工单</button></div><section class="console-table-card"><div class="console-toolbar"><select class="select"><option>全部状态</option><option>待处理</option><option>处理中</option><option>已完成</option></select><input class="input" placeholder="搜索工单标题"><button class="btn light" type="button">查询</button></div><table><thead><tr><th>工单编号</th><th>工单标题</th><th>提交时间</th><th>处理状态</th><th>操作</th></tr></thead><tbody><tr><td>WO-20260901-001</td><td>模型质量检查规则咨询</td><td>2026-09-01 10:32</td><td><em class="console-status wait">待处理</em></td><td><button class="link" type="button" data-console-detail>查看</button></td></tr><tr><td>WO-20260831-015</td><td>项目数据下载权限申请</td><td>2026-08-31 15:10</td><td><em class="console-status progress">处理中</em></td><td><button class="link" type="button" data-console-detail>查看</button></td></tr><tr><td>WO-20260829-008</td><td>接口调用异常反馈</td><td>2026-08-29 09:25</td><td><em class="console-status done">已完成</em></td><td><button class="link" type="button" data-console-detail>查看</button></td></tr></tbody></table></section></section>`;
       const subscriptions = () => `<section class="console-page"><div class="console-head"><div><h2>我的订阅</h2><p>管理已申请和已开通的 BIM 能力订阅。</p></div><button class="btn light" type="button" data-go-market>前往能力市场</button></div><section class="console-table-card"><table><thead><tr><th>能力名称</th><th>申请时间</th><th>审批人</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>项目数据查询</td><td>2026-09-01 15:22</td><td>王处</td><td><em class="console-status wait">待审批</em></td><td><button class="link" type="button">查看申请</button><button class="console-danger" type="button">撤销</button></td></tr><tr><td>模型质量检查</td><td>2026-08-26 10:10</td><td>王处</td><td><em class="console-status active">已开通</em></td><td><button class="link" type="button">进入服务</button></td></tr><tr><td>图模联审</td><td>2026-08-20 14:35</td><td>郭处</td><td><em class="console-status active">已开通</em></td><td><button class="link" type="button">进入服务</button></td></tr></tbody></table></section></section>`;
       const scenes = () => `<section class="console-page"><div class="console-head"><div><h2>我的场景</h2><p>管理您创建或收藏的 BIM 业务场景。</p></div><button class="btn primary" type="button" data-new-scene>＋ 新建场景</button></div><div class="console-resource-grid"><article><b>项目模型协同审查</b><p>关联：联合工房数字化项目</p><span>最后编辑：2026-09-01 14:20</span><button class="link" type="button">进入场景</button></article><article><b>模型质量交付检查</b><p>关联：智慧园区一期项目</p><span>最后编辑：2026-08-30 10:45</span><button class="link" type="button">进入场景</button></article><article><b>设备运维巡检</b><p>关联：华盛学校改扩建项目</p><span>最后编辑：2026-08-26 16:12</span><button class="link" type="button">进入场景</button></article></div></section>`;
       const apps = () => `<section class="console-page"><div class="console-head"><div><h2>我的应用</h2><p>查看您已开通的应用及运行状态。</p></div></div><div class="console-resource-grid"><article><b>模型轻量化浏览器</b><p>在线查看项目模型及构件信息。</p><em class="console-status active">运行正常</em><button class="link" type="button">打开应用</button></article><article><b>模型质量检查</b><p>发起质量检查并查看问题整改闭环。</p><em class="console-status active">运行正常</em><button class="link" type="button">打开应用</button></article><article><b>成果数据下载</b><p>按授权范围下载项目成果文件。</p><em class="console-status active">运行正常</em><button class="link" type="button">打开应用</button></article></div></section>`;
       const cart = () => `<section class="console-page"><div class="console-head"><div><h2>我的选数车</h2><p>暂存待统一申请的 BIM 能力资源。</p></div><button class="btn light" type="button" data-go-market>继续选择能力</button></div><section class="console-table-card"><div class="console-cart-tip">多个能力可合并为一次申请，统一选择 <b>一位审批人</b>。</div><table><thead><tr><th>能力名称</th><th>资源类型</th><th>加入时间</th><th>操作</th></tr></thead><tbody data-console-cart-body>${cartItems.length ? cartItems.map((item,index)=>`<tr><td>${item.name}</td><td>${item.type}</td><td>${item.time}</td><td><button class="console-danger" type="button" data-console-cart-remove="${index}">移除</button></td></tr>`).join('') : '<tr><td colspan="4" class="console-empty">选数车暂无资源</td></tr>'}</tbody></table><div class="console-cart-submit"><label>审批人</label><select class="select" data-console-cart-approver><option value="">请选择一位审批人</option><option>王处</option><option>郭处</option><option>总工</option></select><button class="btn primary" type="button" data-console-cart-submit ${cartItems.length ? '' : 'disabled'}>统一提交申请</button></div></section></section>`;
-      const render = page => { document.querySelector('.layout')?.classList.remove('homepage-mode'); document.querySelectorAll('.top-btn').forEach(button => button.classList.toggle('active', button === workbenchButton)); document.querySelectorAll('.page').forEach(item => item.classList.remove('active')); consolePage.classList.add('active'); side(page); document.getElementById('breadcrumb').textContent = `工作台 / 控制台${page ? ` / ${({ticket:'我的工单',subscription:'我的订阅',scene:'我的场景',app:'我的应用',cart:'我的选数车'})[page]}` : ''}`; consolePage.innerHTML = page === 'ticket' ? tickets() : page === 'subscription' ? subscriptions() : page === 'scene' ? scenes() : page === 'app' ? apps() : page === 'cart' ? cart() : overview(); };
+      const render = page => { page = page || 'ticket'; document.querySelector('.layout')?.classList.remove('homepage-mode'); document.querySelectorAll('.top-btn').forEach(button => button.classList.toggle('active', button === workbenchButton)); document.querySelectorAll('.page').forEach(item => item.classList.remove('active')); consolePage.classList.add('active'); side(page); document.getElementById('breadcrumb').textContent = `工作台 / 控制台 / ${({ticket:'我的工单',subscription:'我的订阅',scene:'我的场景',app:'我的应用',cart:'我的选数车'})[page] || '我的工单'}`; consolePage.innerHTML = page === 'subscription' ? subscriptions() : page === 'scene' ? scenes() : page === 'app' ? apps() : page === 'cart' ? cart() : tickets(); };
       window.openPersonalConsole = render;
       document.addEventListener('click', event => {
-        if (event.target.closest('[data-console-primary]')) { render(); return; }
-        if (event.target.closest('[data-console-home]')) { render(); return; }
+        if (event.target.closest('[data-console-primary]')) { render('ticket'); return; }
+        if (event.target.closest('[data-console-home]')) { render('ticket'); return; }
         const page = event.target.closest('[data-console-page]'); if (page) { render(page.dataset.consolePage); return; }
         const remove = event.target.closest('[data-console-cart-remove]'); if (remove) { cartItems.splice(Number(remove.dataset.consoleCartRemove), 1); render('cart'); }
         if (event.target.closest('[data-console-cart-submit]')) { const approver = content.querySelector('[data-console-cart-approver]')?.value; if (!approver) return showNotice('请选择一位审批人'); cartItems.splice(0); render('cart'); showNotice(`已统一提交申请，审批人：${approver}`); }
@@ -5769,7 +5772,13 @@
       const openStandardModal = () => { standardModal.querySelector('[data-standard-choice]').value = state.standard; standardModal.classList.add('open'); };
       const changeProjectStandard = () => {
         const nextStandard = standardModal.querySelector('[data-standard-choice]').value;
-        state.standard = nextStandard; refreshStandardStatus(); standardModal.classList.remove('open');
+        const previousStandard = state.standard;
+        standardModal.classList.remove('open');
+        if (nextStandard === previousStandard) return;
+        state.standard = nextStandard; refreshStandardStatus();
+        document.dispatchEvent(new CustomEvent('project-standard-changed', {
+          detail: { previousStandard, latestStandard: nextStandard }
+        }));
         showNotice('已更新项目标准；已解析文件可在“更多 → 重新转换”中按需更新');
       };
       const openViewer = () => {
@@ -5810,6 +5819,11 @@
         const statsTab = event.target.closest('[data-stats-tab]'); if (statsTab) renderStats(statsTab.dataset.statsTab);
       });
       [standardModal, viewerModal, statsModal].forEach(modal => modal.addEventListener('click', event => { if (event.target === modal) modal.classList.remove('open'); }));
+      document.addEventListener('project-standard-context', event => {
+        if (!event.detail?.latestStandard) return;
+        state.standard = event.detail.latestStandard;
+        refreshStandardStatus();
+      });
       refreshStandardStatus();
 
       const style = document.createElement('style');
@@ -6091,13 +6105,34 @@
       const projectList = document.getElementById('dataListPage');
       const projectPage = document.getElementById('projectPage');
       const standardOptions = ['全部标准', '合肥院 BIM 数据标准 V1.0', '合肥院 BIM 数据标准 V2.0', '工程建设 IFC 数据交付标准 V1.0'];
+      const qualityStorageKey = 'bimPrototypeModelQualityContextsV3';
+      const qualityModel = (modelId, fileName, standardId, standardName, usedVersion, latestVersion = usedVersion, usedRevision = 'r1', latestRevision = usedRevision) => ({
+        modelId,
+        fileName,
+        used: `${standardName} ${usedVersion}`,
+        latest: `${standardName} ${latestVersion}`,
+        usedStandardId: standardId,
+        latestStandardId: standardId,
+        usedVersion,
+        latestVersion,
+        usedRevision,
+        latestRevision
+      });
       const projectStandards = [
-        ['合肥院 BIM 数据标准 V1.0', '合肥院 BIM 数据标准 V1.0', '一致'],
-        ['合肥院 BIM 数据标准 V2.0', '合肥院 BIM 数据标准 V1.0', '已变更'],
-        ['工程建设 IFC 数据交付标准 V1.0', '工程建设 IFC 数据交付标准 V1.0', '一致'],
-        ['合肥院 BIM 数据标准 V1.0', '合肥院 BIM 数据标准 V1.0', '一致'],
-        ['合肥院 BIM 数据标准 V2.0', '合肥院 BIM 数据标准 V2.0', '一致']
+        ['合肥院 BIM 数据标准 V1.0', [{...qualityModel('civil-ifc','联合工房-土建专业模型.ifc','qc-civil','合肥院 BIM 质检规范','V1.0'),latest:'工程建设 IFC 质检规范 V1.0',latestStandardId:'qc-ifc'},qualityModel('mep-ifc','联合工房-机电专业模型.ifc','qc-mep','机电 BIM 质检规范','V2.0')]],
+        ['合肥院 BIM 数据标准 V2.0', [qualityModel('civil-ifc','联合工房-土建专业模型.ifc','qc-civil','合肥院 BIM 质检规范','V1.0','V1.2','r1','r2'),qualityModel('mep-ifc','联合工房-机电专业模型.ifc','qc-mep','机电 BIM 质检规范','V2.0')]],
+        ['工程建设 IFC 数据交付标准 V1.0', [qualityModel('civil-ifc','联合工房-土建专业模型.ifc','qc-civil','合肥院 BIM 质检规范','V1.0'),qualityModel('mep-ifc','联合工房-机电专业模型.ifc','qc-mep','机电 BIM 质检规范','V2.0')]],
+        ['合肥院 BIM 数据标准 V1.0', [qualityModel('civil-ifc','联合工房-土建专业模型.ifc','qc-civil','合肥院 BIM 质检规范','V1.0'),qualityModel('mep-ifc','联合工房-机电专业模型.ifc','qc-mep','机电 BIM 质检规范','V2.0')]],
+        ['合肥院 BIM 数据标准 V2.0', [qualityModel('civil-ifc','联合工房-土建专业模型.ifc','qc-civil','合肥院 BIM 质检规范','V1.2'),qualityModel('mep-ifc','联合工房-机电专业模型.ifc','qc-mep','机电 BIM 质检规范','V2.0')]]
       ];
+      const storedQualityContexts = (() => {
+        try { return JSON.parse(localStorage.getItem(qualityStorageKey) || '{}'); } catch { return {}; }
+      })();
+      const qualityModelChanged = model => Boolean(model?.used && model?.latest) && (
+        (model.usedStandardId || model.used) !== (model.latestStandardId || model.latest) ||
+        (model.usedVersion || model.used) !== (model.latestVersion || model.latest) ||
+        (model.usedRevision || '') !== (model.latestRevision || '')
+      );
       if (projectList && !projectList.dataset.standardEnhanced) {
         projectList.dataset.standardEnhanced = 'true';
         const fields = projectList.querySelectorAll('.filter-card .field');
@@ -6107,8 +6142,19 @@
         head?.children[2]?.insertAdjacentHTML('beforebegin', '<th class="project-standard-summary-head">项目标准</th>');
         projectList.querySelectorAll('table tbody tr').forEach((row, index) => {
           const item = projectStandards[index] || projectStandards[0]; row.dataset.currentStandard = item[0];
-          const changed = item[2] === '已变更';
-          row.children[2]?.insertAdjacentHTML('beforebegin', `<td class="project-standard-summary"><b>当前：${item[0]}</b><span>质检：${item[1]}</span>${changed ? '<em class="project-standard-state changed">● 已变更</em>' : ''}</td>`);
+          const projectName = row.children[1]?.textContent.trim() || `project-${index + 1}`;
+          const modelStandards = storedQualityContexts[projectName] || item[1];
+          const affectedModelCount = modelStandards.filter(qualityModelChanged).length;
+          const needsQualityUpdate = affectedModelCount > 0;
+          row.dataset.modelQualityContexts = JSON.stringify(modelStandards);
+          row.dataset.qualityStandardOutdated = String(needsQualityUpdate);
+          row.querySelectorAll('[data-page-to="projectPage"]').forEach(button => {
+            button.dataset.projectLatestStandard = item[0];
+            button.dataset.projectModelQualityContexts = JSON.stringify(modelStandards);
+            button.dataset.projectQualityOutdated = String(needsQualityUpdate);
+          });
+          const updateTip = `${affectedModelCount} 个模型的当前质检标准与其最新适用标准不一致，需要分别重新发起数据质检。`;
+          row.children[2]?.insertAdjacentHTML('beforebegin', `<td class="project-standard-summary"><b>当前：${item[0]}</b><span>模型质检：按模型分别记录</span>${needsQualityUpdate ? `<em class="project-standard-state pending-qc-update" title="${updateTip}">质检标准待更换</em>` : ''}</td>`);
         });
       }
       document.addEventListener('change', event => {
@@ -6120,17 +6166,17 @@
       // 本期不保留项目标准版本记录或变更人等留痕信息。
 
       const qcModal = document.getElementById('qcModal');
-      if (qcModal && !qcModal.querySelector('.qc-standard-used')) qcModal.querySelector('.modal-body')?.insertAdjacentHTML('afterbegin', '<div class="qc-standard-used">本次质检使用标准：<b>合肥院 BIM 数据标准 V1.0</b><span>（继承项目绑定标准，发起质检时不可另选）</span></div>');
+      if (qcModal && !qcModal.querySelector('.qc-standard-used')) qcModal.querySelector('.modal-body')?.insertAdjacentHTML('afterbegin', '<div class="qc-standard-used">本次模型质检标准：<b>按模型分别记录</b><span>（每个模型记录本次质检实际使用的标准版本）</span></div>');
       const qualityPage = document.getElementById('qualityResultsPage');
-      if (qualityPage && !qualityPage.querySelector('.quality-standard-used')) qualityPage.insertAdjacentHTML('afterbegin', '<div class="quality-standard-used">质检记录标准：<b>合肥院 BIM 数据标准 V1.0</b>　<span>用于识别本次结果的解析与质检口径。</span></div>');
+      if (qualityPage && !qualityPage.querySelector('.quality-standard-used')) qualityPage.insertAdjacentHTML('afterbegin', '<div class="quality-standard-used">模型质检标准：<b>按模型分别记录</b>　<span>用于识别各模型本次质检结果的实际标准版本。</span></div>');
       const qualityButton = projectPage?.querySelector('#startDataQualityCheck');
-      if (qualityButton) qualityButton.title = '使用当前项目绑定标准发起质检';
+      if (qualityButton) qualityButton.title = '按各模型当前最新适用标准发起质检';
 
       const weeklyBody = document.querySelector('#weeklyRequirementModal .modal-body');
       const assetStatisticsRequirement = [...(weeklyBody?.querySelectorAll('.weekly-requirement-section') || [])].find(section => section.querySelector('h3')?.textContent.includes('入库数据统计'));
       assetStatisticsRequirement?.querySelector('ul')?.replaceChildren();
       if (assetStatisticsRequirement?.querySelector('ul')) assetStatisticsRequirement.querySelector('ul').innerHTML = '<li><b>位置：</b>数据资产全览下新增“入库数据统计”二级菜单。</li><li><b>内容：</b>提供构件统计、空间统计两类视图；构件标识/空间名称检索跳转至对应分类结果。</li><li><b>统计口径：</b>仅统计「项目数据管理 → 数据入库」中状态为“已入库”且解析成功的项目模型；待审批、审批中、已驳回、解析失败、已删除项目不纳入。</li><li><b>分类依据：</b>构件、空间、系统的分类与统计均以文件实际使用的解析标准为准；同一项目仅统计最新成功入库版本。</li>';
-      if (weeklyBody && !weeklyBody.querySelector('[data-standard-requirement]')) weeklyBody.insertAdjacentHTML('beforeend', '<section class="weekly-requirement-section" data-standard-requirement><div class="weekly-requirement-section-head"><div><em>09</em><h3>项目标准与质检标准</h3></div></div><ul><li><b>项目绑定：</b>标准数字化 / 数据字典中可设置一项已发布标准为默认标准；新建项目自动带入，项目详情右上角可查看并更换。</li><li><b>标准变更：</b>更换项目标准仅更新后续解析默认值，不自动重新解析已有模型；需要应用新标准时，由用户在对应 IFC 文件的“更多 → 重新转换”中手动处理。不保留标准版本快照及变更留痕。</li><li><b>列表总览：</b>项目列表以单个“项目标准”列紧凑展示当前标准和质检标准；仅两者不一致时显示“已变更”，支持按当前标准筛选。</li><li><b>文件与分类树：</b>每个已解析 IFC 文件展示其实际解析标准；模型浏览保留原始模型树，并新增构件、空间、系统分类树。标准无法匹配的对象按 IFC 类型归入“未定义门 / 未定义墙”等兜底分类。</li><li><b>质检口径：</b>发起质检继承项目绑定标准，不单独选择；质检结果页展示本次使用的质检标准。</li></ul></section>');
+      if (weeklyBody && !weeklyBody.querySelector('[data-standard-requirement]')) weeklyBody.insertAdjacentHTML('beforeend', '<section class="weekly-requirement-section" data-standard-requirement><div class="weekly-requirement-section-head"><div><em>09</em><h3>项目标准与质检标准</h3></div></div><ul><li><b>项目绑定：</b>标准数字化 / 数据字典中可设置一项已发布标准为默认标准；新建项目自动带入，项目详情右上角可查看并更换。</li><li><b>标准变更：</b>更换项目标准仅更新后续解析默认值，不自动重新解析已有模型；需要应用新标准时，由用户在对应 IFC 文件的“更多 → 重新转换”中手动处理。不保留标准版本快照及变更留痕。</li><li><b>列表总览：</b>项目列表展示项目当前标准；只要存在模型的质检使用标准与该模型最新适用标准不一致，即显示“质检标准待更换”。</li><li><b>文件与分类树：</b>每个已解析 IFC 文件展示其实际解析标准；模型浏览保留原始模型树，并新增构件、空间、系统分类树。标准无法匹配的对象按 IFC 类型归入“未定义门 / 未定义墙”等兜底分类。</li><li><b>质检口径：</b>每个 IFC 模型分别记录本次质检实际使用的标准和当前最新适用标准；仅两者不一致的模型显示“需重新质检”，PDF、XLSX 等非模型文件不参与判断。</li></ul></section>');
 
       let defaultProjectStandard = window.defaultProjectStandard || '合肥院 BIM 数据标准 V1.0';
       const mountDefaultStandard = () => {
@@ -6146,7 +6192,7 @@
       if (flowCard && !flowCard.querySelector('.bandwidth-peak-time')) flowCard.insertAdjacentHTML('beforeend', '<small class="bandwidth-peak-time">峰值出现：22:00–22:15</small>');
 
       const style = document.createElement('style');
-      style.textContent = '.project-standard-state{font-size:12px;white-space:nowrap}.project-standard-state.same{color:#238352}.project-standard-state.changed{color:#d37b32}.project-standard-summary-head{width:235px}.project-standard-summary{position:relative;min-width:215px;padding-right:76px!important;line-height:1.45}.project-standard-summary b,.project-standard-summary span{display:block}.project-standard-summary b{color:#415247;font-size:13px;font-weight:600}.project-standard-summary span{margin-top:4px;color:#8b978f;font-size:12px}.project-standard-summary .project-standard-state{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-style:normal}.project-tree-caption{padding:9px 12px;background:#f5f8f6;color:#607267;font-size:12px;font-weight:650;border:1px solid #e3ebe5;border-bottom:0}.standardized-caption{margin-top:14px;background:#eef8f1;color:#28774d}.standardized-project-tree{border:1px solid #d4e8da}.standardized-project-tree .tree-row{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid #eaf1ec;background:#fff;text-align:left;cursor:pointer}.standardized-project-tree .tree-row:last-child{border-bottom:0}.project-standard-history{margin-top:18px;padding-top:14px;border-top:1px solid #e6ece8}.project-standard-history>b{color:#3c5144;font-size:13px}.project-standard-history>p{margin:5px 0 10px;color:#849087;font-size:12px}.project-standard-history table{width:100%;border-collapse:collapse;font-size:12px}.project-standard-history th{padding:8px;background:#f4f7f5;text-align:left;color:#647168}.project-standard-history td{padding:8px;border-bottom:1px solid #edf1ee;color:#526158}.qc-standard-used,.quality-standard-used{margin:0 0 12px;padding:10px 12px;border-left:3px solid #2c9660;background:#f2f9f4;color:#5c6f63;font-size:12px}.qc-standard-used b,.quality-standard-used b{color:#23784c}.qc-standard-used span,.quality-standard-used span{color:#89958e}.default-standard-setting{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:-2px 0 14px;padding:12px 14px;border:1px solid #d7e8dc;background:#f5faf6}.default-standard-setting b,.default-standard-setting span,.default-standard-setting small{display:block}.default-standard-setting b{margin-bottom:4px;color:#315240;font-size:13px}.default-standard-setting span{color:#7d8c82;font-size:12px}.default-standard-setting small{margin-top:6px;color:#278051;font-size:12px;font-weight:650}.default-standard-actions{display:flex;align-items:center;gap:9px;flex:none}.default-standard-setting .select{width:270px}.default-standard-actions .btn{white-space:nowrap}.personal-api-rule{grid-template-columns:repeat(3,1fr)}.bandwidth-peak-time{display:block;margin-top:12px;color:#5c956f;font-size:12px}#dataListPage table{min-width:1120px}#dataListPage .table-card{overflow:auto}';
+      style.textContent = '.project-standard-state{font-size:11px;white-space:nowrap}.project-standard-state.pending-qc-update{padding:2px 6px;border:1px solid #efc894;border-radius:3px;background:#fff6e8;color:#b66a1e;line-height:18px}.project-standard-summary-head{width:255px}.project-standard-summary{position:relative;min-width:235px;padding-right:118px!important;line-height:1.45}.project-standard-summary b,.project-standard-summary span{display:block}.project-standard-summary b{color:#415247;font-size:13px;font-weight:600}.project-standard-summary span{margin-top:4px;color:#8b978f;font-size:12px}.project-standard-summary .project-standard-state{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-style:normal}.project-tree-caption{padding:9px 12px;background:#f5f8f6;color:#607267;font-size:12px;font-weight:650;border:1px solid #e3ebe5;border-bottom:0}.standardized-caption{margin-top:14px;background:#eef8f1;color:#28774d}.standardized-project-tree{border:1px solid #d4e8da}.standardized-project-tree .tree-row{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid #eaf1ec;background:#fff;text-align:left;cursor:pointer}.standardized-project-tree .tree-row:last-child{border-bottom:0}.project-standard-history{margin-top:18px;padding-top:14px;border-top:1px solid #e6ece8}.project-standard-history>b{color:#3c5144;font-size:13px}.project-standard-history>p{margin:5px 0 10px;color:#849087;font-size:12px}.project-standard-history table{width:100%;border-collapse:collapse;font-size:12px}.project-standard-history th{padding:8px;background:#f4f7f5;text-align:left;color:#647168}.project-standard-history td{padding:8px;border-bottom:1px solid #edf1ee;color:#526158}.qc-standard-used,.quality-standard-used{margin:0 0 12px;padding:10px 12px;border-left:3px solid #2c9660;background:#f2f9f4;color:#5c6f63;font-size:12px}.qc-standard-used b,.quality-standard-used b{color:#23784c}.qc-standard-used span,.quality-standard-used span{color:#89958e}.default-standard-setting{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:-2px 0 14px;padding:12px 14px;border:1px solid #d7e8dc;background:#f5faf6}.default-standard-setting b,.default-standard-setting span,.default-standard-setting small{display:block}.default-standard-setting b{margin-bottom:4px;color:#315240;font-size:13px}.default-standard-setting span{color:#7d8c82;font-size:12px}.default-standard-setting small{margin-top:6px;color:#278051;font-size:12px;font-weight:650}.default-standard-actions{display:flex;align-items:center;gap:9px;flex:none}.default-standard-setting .select{width:270px}.default-standard-actions .btn{white-space:nowrap}.personal-api-rule{grid-template-columns:repeat(3,1fr)}.bandwidth-peak-time{display:block;margin-top:12px;color:#5c956f;font-size:12px}#dataListPage table{min-width:1140px}#dataListPage .table-card{overflow:auto}';
       document.head.appendChild(style);
     })();
   </script>
@@ -6506,8 +6552,27 @@
 
       let currentView = 'professional';
       let integrityPassed = false;
+      let hasQualityResult = false;
       let qualityCheckPassed = false;
+      let latestProjectStandard = '合肥院 BIM 数据标准 V1.0';
+      let modelQualityContexts = [
+        {modelId:'civil-ifc',fileName:'联合工房-土建专业模型.ifc',used:'合肥院 BIM 质检规范 V1.0',latest:'工程建设 IFC 质检规范 V1.0',usedStandardId:'qc-civil',latestStandardId:'qc-ifc',usedVersion:'V1.0',latestVersion:'V1.0',usedRevision:'r1',latestRevision:'r1'},
+        {modelId:'mep-ifc',fileName:'联合工房-机电专业模型.ifc',used:'机电 BIM 质检规范 V2.0',latest:'机电 BIM 质检规范 V2.0',usedStandardId:'qc-mep',latestStandardId:'qc-mep',usedVersion:'V2.0',latestVersion:'V2.0',usedRevision:'r1',latestRevision:'r1'}
+      ];
+      let qualityStandardOutdated = false;
+      let qualityResultInvalidated = false;
+      let qualityCheckRunning = false;
+      let currentProjectKey = '白玉兰测试20260203';
       let pendingReuploadRow = null;
+      const qualityStorageKey = 'bimPrototypeModelQualityContextsV3';
+      const qualityStandardOptions = [
+        {key:'qc-civil-v1-r1',standardId:'qc-civil',name:'合肥院 BIM 质检规范',version:'V1.0',revision:'r1',label:'合肥院 BIM 质检规范 V1.0'},
+        {key:'qc-civil-v1-r2',standardId:'qc-civil',name:'合肥院 BIM 质检规范',version:'V1.0',revision:'r2',label:'合肥院 BIM 质检规范 V1.0（内容修订）'},
+        {key:'qc-civil-v12-r2',standardId:'qc-civil',name:'合肥院 BIM 质检规范',version:'V1.2',revision:'r2',label:'合肥院 BIM 质检规范 V1.2'},
+        {key:'qc-ifc-v1-r1',standardId:'qc-ifc',name:'工程建设 IFC 质检规范',version:'V1.0',revision:'r1',label:'工程建设 IFC 质检规范 V1.0'},
+        {key:'qc-mep-v2-r1',standardId:'qc-mep',name:'机电 BIM 质检规范',version:'V2.0',revision:'r1',label:'机电 BIM 质检规范 V2.0'},
+        {key:'qc-mep-v21-r2',standardId:'qc-mep',name:'机电 BIM 质检规范',version:'V2.1',revision:'r2',label:'机电 BIM 质检规范 V2.1'}
+      ];
       const selectedFileRows = () => [...page.querySelectorAll('.restored-file-table tbody .file-row')].filter(row => row.querySelector('[data-file-select]')?.checked);
 
       const showProjectToast = message => {
@@ -6536,6 +6601,145 @@
         if (title) title.textContent = profession || selected.dataset.projectProfession;
       };
 
+      const getVersionLabel = standard => standard.match(/V[\d.]+/i)?.[0] || standard;
+      const getStandardName = standard => standard.replace(/\s*V[\d.]+\s*$/i, '').trim();
+      const getCompactStandard = standard => standard.replace(/\s*数据标准\s*/g, ' ').replace(/\s+/g, ' ').trim();
+      const getStandardChangeText = (used, latest) => getStandardName(used) === getStandardName(latest)
+        ? `${getVersionLabel(used)} → ${getVersionLabel(latest)}`
+        : `${getCompactStandard(used)} → ${getCompactStandard(latest)}`;
+      const hasModelQualityRecord = model => Boolean(model?.used && model?.latest);
+      const hasModelQualityStandardChanged = model => {
+        if (!hasModelQualityRecord(model)) return false;
+        const usedStandardId = model.usedStandardId || getStandardName(model.used);
+        const latestStandardId = model.latestStandardId || getStandardName(model.latest);
+        const usedVersion = model.usedVersion || getVersionLabel(model.used);
+        const latestVersion = model.latestVersion || getVersionLabel(model.latest);
+        const usedRevision = model.usedRevision || '';
+        const latestRevision = model.latestRevision || '';
+        return usedStandardId !== latestStandardId || usedVersion !== latestVersion || usedRevision !== latestRevision;
+      };
+      const getQualityStandardDifferenceMarkup = model => {
+        const usedStandardId = model.usedStandardId || getStandardName(model.used);
+        const latestStandardId = model.latestStandardId || getStandardName(model.latest);
+        const usedVersion = model.usedVersion || getVersionLabel(model.used);
+        const latestVersion = model.latestVersion || getVersionLabel(model.latest);
+        if (usedStandardId !== latestStandardId) return `<em class="file-quality-standard-switch">质检规范已变更</em><span class="file-quality-name">${getStandardName(model.latest)}</span>`;
+        const standardName = getStandardName(model.latest);
+        const changeText = usedVersion !== latestVersion ? `${usedVersion} → ${latestVersion}` : '内容已调整';
+        return `<span class="file-quality-name">${standardName}</span><em class="file-quality-version-change">${changeText}</em>`;
+      };
+      const persistQualityContexts = () => {
+        let stored = {};
+        try { stored = JSON.parse(localStorage.getItem(qualityStorageKey) || '{}'); } catch { stored = {}; }
+        stored[currentProjectKey] = modelQualityContexts;
+        localStorage.setItem(qualityStorageKey, JSON.stringify(stored));
+        const matchingRow = [...document.querySelectorAll('#dataListPage tbody tr')].find(row => row.children[1]?.textContent.trim() === currentProjectKey);
+        if (matchingRow) {
+          const encoded = JSON.stringify(modelQualityContexts);
+          matchingRow.dataset.modelQualityContexts = encoded;
+          matchingRow.querySelectorAll('[data-page-to="projectPage"]').forEach(button => { button.dataset.projectModelQualityContexts = encoded; });
+        }
+      };
+      const standardModal = document.getElementById('modelStandardModal');
+      const ensureQualityStandardEditor = () => {
+        if (!standardModal || standardModal.querySelector('[data-quality-model-choice]')) return;
+        const modalHead = standardModal.querySelector('.modal-head');
+        if (modalHead?.firstChild) modalHead.firstChild.textContent = '项目标准与模型质检规范';
+        const parseField = standardModal.querySelector('[data-standard-choice]')?.closest('.field');
+        parseField?.insertAdjacentHTML('afterend', `<div class="field"><span class="label required">质检模型</span><select class="select" data-quality-model-choice></select></div><div class="field"><span class="label required">当前适用质检规范</span><select class="select" data-quality-standard-choice></select></div>`);
+        const confirm = standardModal.querySelector('[data-confirm-standard-flow]');
+        if (confirm) confirm.textContent = '保存';
+      };
+      const syncQualityStandardChoice = () => {
+        const modelSelect = standardModal?.querySelector('[data-quality-model-choice]');
+        const standardSelect = standardModal?.querySelector('[data-quality-standard-choice]');
+        if (!modelSelect || !standardSelect) return;
+        const model = modelQualityContexts[Number(modelSelect.value)] || modelQualityContexts[0];
+        standardSelect.innerHTML = qualityStandardOptions.map(item => `<option value="${item.key}">${item.label}</option>`).join('');
+        const current = qualityStandardOptions.find(item => item.standardId === model?.latestStandardId && item.version === (model?.latestVersion || getVersionLabel(model?.latest || '')) && item.revision === (model?.latestRevision || 'r1'));
+        if (current) standardSelect.value = current.key;
+      };
+      const openQualityStandardEditor = () => {
+        ensureQualityStandardEditor();
+        const modelSelect = standardModal?.querySelector('[data-quality-model-choice]');
+        if (!modelSelect) return;
+        modelSelect.innerHTML = modelQualityContexts.map((model, index) => `<option value="${index}">${model.fileName || `模型 ${index + 1}`}</option>`).join('');
+        modelSelect.value = '0';
+        syncQualityStandardChoice();
+      };
+      const saveCurrentModelQualityStandard = () => {
+        const modelSelect = standardModal?.querySelector('[data-quality-model-choice]');
+        const standardSelect = standardModal?.querySelector('[data-quality-standard-choice]');
+        if (!modelSelect || !standardSelect) return;
+        const model = modelQualityContexts[Number(modelSelect.value)];
+        const selected = qualityStandardOptions.find(item => item.key === standardSelect.value);
+        if (!model || !selected) return;
+        model.latest = `${selected.name} ${selected.version}`;
+        model.latestStandardId = selected.standardId;
+        model.latestVersion = selected.version;
+        model.latestRevision = selected.revision;
+        persistQualityContexts();
+        qualityStandardOutdated = hasQualityResult && modelQualityContexts.some(hasModelQualityStandardChanged);
+        qualityCheckPassed = hasQualityResult && !qualityStandardOutdated && !qualityResultInvalidated;
+        if (qualityStandardOutdated) window.entryApprovalSubmitted = false;
+        syncApprovalState();
+        showProjectToast(`已保存“${model.fileName}”的当前适用质检规范`);
+      };
+      ensureQualityStandardEditor();
+      const getAffectedModelCount = () => hasQualityResult
+        ? modelQualityContexts.filter(hasModelQualityStandardChanged).length
+        : 0;
+      const getModelQualitySummary = () => {
+        if (!hasQualityResult) return '尚未发起质检';
+        return modelQualityContexts.length === 1 ? modelQualityContexts[0].used : `${modelQualityContexts.length} 个模型质检记录`;
+      };
+
+      const syncQualityStandardState = () => {
+        const affectedModelCount = getAffectedModelCount();
+        qualityStandardOutdated = affectedModelCount > 0;
+        const currentProjectStandard = page.querySelector('[data-current-project-standard]');
+        const currentStandardStatus = page.querySelector('[data-current-standard-status]');
+        const qualityStandardAlert = page.querySelector('[data-quality-standard-alert]');
+        if (currentProjectStandard) currentProjectStandard.textContent = latestProjectStandard;
+        if (currentStandardStatus) currentStandardStatus.hidden = !qualityStandardOutdated;
+        if (qualityStandardAlert) qualityStandardAlert.hidden = !qualityStandardOutdated;
+        page.querySelectorAll('[data-affected-model-count]').forEach(item => { item.textContent = String(affectedModelCount); });
+        let modelIndex = 0;
+        page.querySelectorAll('.restored-file-table tbody .file-row').forEach(row => {
+          const isIfc = row.cells[2]?.textContent.trim().toLowerCase() === 'ifc';
+          if (!isIfc) return;
+          const modelContext = modelQualityContexts[modelIndex++] || null;
+          const modelHasQualityRecord = hasQualityResult && hasModelQualityRecord(modelContext);
+          const modelNeedsQualityUpdate = modelHasQualityRecord && hasModelQualityStandardChanged(modelContext);
+          if (modelContext) {
+            row.dataset.modelQualityStandardUsed = modelContext.used;
+            row.dataset.modelQualityStandardLatest = modelContext.latest;
+          }
+          const parseStandard = row.querySelector('[data-file-parse-standard]');
+          const fileCell = parseStandard?.parentElement || row.cells[1];
+          if (parseStandard) {
+            parseStandard.classList.add('is-hidden');
+            if (fileCell) fileCell.title = parseStandard.textContent.trim();
+          }
+          let qualityInfo = row.querySelector('[data-file-quality-standard]');
+          if (!qualityInfo) {
+            qualityInfo = document.createElement('small');
+            qualityInfo.className = 'file-quality-standard';
+            qualityInfo.dataset.fileQualityStandard = '';
+            fileCell?.appendChild(qualityInfo);
+          }
+          qualityInfo.hidden = !modelHasQualityRecord;
+          qualityInfo.classList.toggle('needs-recheck', modelNeedsQualityUpdate);
+          qualityInfo.innerHTML = modelNeedsQualityUpdate
+            ? `<span class="file-quality-compare" title="上次质检使用：${modelContext.used}\n当前适用规范：${modelContext.latest}">${getQualityStandardDifferenceMarkup(modelContext)}</span>`
+            : `<span>质检规范：${modelContext.used}</span>`;
+        });
+
+        document.querySelectorAll('.qc-standard-used b,.quality-standard-used b').forEach(item => {
+          item.textContent = getModelQualitySummary();
+        });
+      };
+
       const syncApprovalState = () => {
         const button = page.querySelector('#entryApprovalButton');
         const startButton = page.querySelector('#startDataQualityCheck');
@@ -6552,23 +6756,66 @@
           ? '<button class="restored-flow-state" type="button" data-open="integrityResultModal">✓ 已通过</button><button class="btn light restored-integrity-rerun" type="button" id="projectRecheckButton" data-open="integrityResultModal">重新发起</button>'
           : '<button class="btn primary restored-flow-control" type="button" id="projectRecheckButton" data-open="integrityResultModal">完整性检查</button>';
 
-        startButton.disabled = !integrityPassed;
-        startButton.textContent = !integrityPassed ? '待完整性检查' : qualityCheckPassed ? '重新发起数据质检' : '发起数据质检';
-        startButton.className = !integrityPassed ? 'restored-flow-state restored-flow-control' : qualityCheckPassed ? 'btn light restored-flow-control restored-qc-rerun' : 'btn primary restored-flow-control';
-        startButton.title = !integrityPassed ? '请先完成完整性检查' : qualityCheckPassed ? '再次使用当前项目绑定标准发起数据质检' : '使用当前项目绑定标准发起数据质检';
+        startButton.disabled = !integrityPassed || qualityCheckRunning;
+        startButton.textContent = qualityCheckRunning ? '质检中' : !integrityPassed ? '待完整性检查' : hasQualityResult ? '重新发起数据质检' : '发起数据质检';
+        startButton.className = !integrityPassed || qualityCheckRunning
+          ? 'restored-flow-state restored-flow-control'
+          : qualityStandardOutdated || !hasQualityResult
+            ? 'btn primary restored-flow-control'
+            : 'btn light restored-flow-control restored-qc-rerun';
+        startButton.title = qualityCheckRunning
+          ? '正在按各模型当前适用质检规范执行质检'
+          : !integrityPassed
+          ? '请先完成完整性检查'
+          : qualityStandardOutdated
+            ? `${getAffectedModelCount()} 个模型使用旧版质检标准，请按各模型当前最新适用标准重新发起数据质检`
+            : hasQualityResult
+              ? '再次按各模型当前最新适用标准发起数据质检'
+              : '按各模型当前最新适用标准发起数据质检';
 
-        resultButton.disabled = !qualityCheckPassed;
-        resultButton.textContent = qualityCheckPassed ? '数据质检结果' : '暂不可查看';
-        resultButton.className = qualityCheckPassed ? 'btn restored-qc-result-button' : 'restored-flow-state restored-qc-result-button';
+        resultButton.disabled = qualityCheckRunning || !hasQualityResult;
+        resultButton.textContent = qualityCheckRunning ? '质检中' : hasQualityResult ? '数据质检结果' : '暂不可查看';
+        resultButton.className = !qualityCheckRunning && hasQualityResult ? 'btn restored-qc-result-button' : 'restored-flow-state restored-qc-result-button';
 
         button.disabled = !qualityCheckPassed;
-        button.title = !qualityCheckPassed ? '请先完成数据质检' : submitted ? '查看已提交的审批流程' : '';
+        button.title = qualityStandardOutdated ? '质检规范已更新，请重新发起数据质检后再审批' : !qualityCheckPassed ? '请先完成数据质检' : submitted ? '查看已提交的审批流程' : '';
         button.textContent = submitted ? '查看审批流' : qualityCheckPassed ? '审批入库' : '未满足条件';
         button.className = qualityCheckPassed && !submitted
           ? 'btn primary restored-flow-control restored-entry-ready'
-          : submitted
-            ? 'btn light restored-flow-control restored-approval-view'
-            : 'restored-flow-state restored-flow-control';
+            : submitted
+              ? 'btn light restored-flow-control restored-approval-view'
+              : 'restored-flow-state restored-flow-control';
+        syncQualityStandardState();
+      };
+
+      const applyProjectStandardContext = source => {
+        const row = source?.closest('#dataListPage tbody tr');
+        const latestStandard = source?.dataset.projectLatestStandard || row?.dataset.currentStandard;
+        const encodedModelContexts = source?.dataset.projectModelQualityContexts || row?.dataset.modelQualityContexts;
+        if (!latestStandard || !encodedModelContexts) return;
+        let nextModelContexts;
+        try { nextModelContexts = JSON.parse(encodedModelContexts); } catch { return; }
+        latestProjectStandard = latestStandard;
+        modelQualityContexts = nextModelContexts;
+        hasQualityResult = modelQualityContexts.length > 0;
+        qualityStandardOutdated = modelQualityContexts.some(hasModelQualityStandardChanged);
+        integrityPassed = true;
+        qualityCheckPassed = hasQualityResult && !qualityStandardOutdated;
+        qualityResultInvalidated = false;
+        window.entryApprovalSubmitted = false;
+
+        const projectName = row?.cells[1]?.textContent.trim();
+        if (projectName) {
+          currentProjectKey = projectName;
+          const title = page.querySelector('.project-title');
+          const detailName = page.querySelector('[data-project-detail-fields] .info-line span');
+          if (title) title.textContent = `‹ ${projectName}`;
+          if (detailName) detailName.textContent = projectName;
+          const breadcrumb = document.getElementById('breadcrumb');
+          if (breadcrumb) breadcrumb.textContent = `项目数据管理 / 数据治理 / ${projectName}`;
+        }
+        document.dispatchEvent(new CustomEvent('project-standard-context', { detail: { latestStandard } }));
+        syncApprovalState();
       };
 
       const runFileFilter = () => {
@@ -6685,6 +6932,7 @@
           const repeated = integrityPassed;
           integrityPassed = true;
           qualityCheckPassed = false;
+          qualityResultInvalidated = hasQualityResult;
           window.entryApprovalSubmitted = false;
           syncApprovalState();
           showProjectToast(repeated ? '完整性检查已重新发起并完成' : '完整性检查已完成');
@@ -6710,10 +6958,31 @@
         }
 
         if (event.target.closest('#startDataQualityCheck')) {
-          const isRepeatedQualityCheck = qualityCheckPassed;
-          qualityCheckPassed = true;
+          if (qualityCheckRunning) return;
+          const isRepeatedQualityCheck = hasQualityResult;
+          qualityCheckRunning = true;
+          qualityCheckPassed = false;
+          qualityResultInvalidated = true;
+          window.entryApprovalSubmitted = false;
           syncApprovalState();
-          showProjectToast(isRepeatedQualityCheck ? '数据质检已重新发起，可查看最新数据质检结果' : '数据质检已完成，可查看数据质检结果');
+          showProjectToast(isRepeatedQualityCheck ? '数据质检已重新发起，正在生成新结果' : '数据质检已发起，正在生成结果');
+          window.setTimeout(() => {
+            qualityCheckRunning = false;
+            hasQualityResult = true;
+            qualityResultInvalidated = false;
+            modelQualityContexts = modelQualityContexts.map(model => ({
+              ...model,
+              used:model.latest,
+              usedStandardId:model.latestStandardId,
+              usedVersion:model.latestVersion,
+              usedRevision:model.latestRevision
+            }));
+            qualityStandardOutdated = false;
+            qualityCheckPassed = true;
+            persistQualityContexts();
+            syncApprovalState();
+            showProjectToast('数据质检已完成，已生成匹配当前规范的新结果');
+          }, 1800);
           return;
         }
 
@@ -6739,7 +7008,17 @@
         if (event.key === 'Enter' && event.target.closest('[data-project-file-name]')) runFileFilter();
       });
 
+      document.addEventListener('change', event => {
+        if (event.target.matches('[data-quality-model-choice]')) syncQualityStandardChoice();
+      });
+
       document.addEventListener('click', event => {
+        if (event.target.closest('[data-change-project-standard]')) {
+          window.setTimeout(openQualityStandardEditor, 0);
+        }
+        if (event.target.closest('[data-confirm-standard-flow]')) {
+          saveCurrentModelQualityStandard();
+        }
         if (event.target.closest('[data-close-batch-delete]')) {
           document.getElementById('batchDeleteFileModal')?.classList.remove('open');
           return;
@@ -6761,6 +7040,7 @@
           return;
         }
         if (event.target.closest('[data-page-to="projectPage"]')) {
+          applyProjectStandardContext(event.target.closest('[data-page-to="projectPage"]'));
           const selected = page.querySelector('[data-project-profession].active') || page.querySelector('[data-project-profession]');
           showRestoredView('professional', selected, selected?.dataset.projectProfession || '');
         }
@@ -6771,6 +7051,7 @@
             status.className = 'status-tag wait';
           }
           qualityCheckPassed = false;
+          qualityResultInvalidated = hasQualityResult;
           pendingReuploadRow = null;
           syncApprovalState();
           showProjectToast('重新上传成功，请再次发起数据质检');
@@ -6783,17 +7064,32 @@
         showProjectToast('审批已提交');
       });
 
+      document.addEventListener('project-standard-changed', event => {
+        latestProjectStandard = event.detail?.latestStandard || latestProjectStandard;
+        qualityStandardOutdated = hasQualityResult && modelQualityContexts.some(hasModelQualityStandardChanged);
+        qualityCheckPassed = hasQualityResult && !qualityStandardOutdated && !qualityResultInvalidated;
+        if (qualityStandardOutdated) window.entryApprovalSubmitted = false;
+        syncApprovalState();
+      });
+
       const style = document.createElement('style');
       style.id = 'restored-project-page-style';
       style.textContent = `
         #projectPage .restored-project-info{padding:0 14px;margin-bottom:8px}
-        #projectPage .restored-project-summary-row{display:flex;height:56px;align-items:center;justify-content:space-between}
+        #projectPage .restored-project-summary-row{display:grid;min-height:56px;grid-template-columns:minmax(190px,1fr) minmax(0,auto) auto;align-items:center;gap:18px}
         #projectPage .restored-project-info .project-title{margin:0;font-size:16px}
         #projectPage .restored-project-info .info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 18px;padding:11px 0 13px;border-top:1px solid #edf1ee}
         #projectPage .restored-project-info .info-grid[hidden]{display:none!important}
         #projectPage .restored-project-info .info-line{color:#748078;font-size:12px}
         #projectPage .restored-project-info .info-line span{color:#3f4f46}
         #projectPage .restored-standard-link{padding:0;font-size:12px}
+        #projectPage .restored-summary-standard{display:flex;min-width:0;max-width:760px;align-items:center;gap:10px;color:#748078;font-size:12px;white-space:nowrap}
+        #projectPage .restored-standard-compare{display:flex;min-width:0;flex-direction:column;gap:2px}
+        #projectPage .restored-standard-compare small{color:#8a958e;font-size:10px;line-height:13px}
+        #projectPage .restored-standard-compare b{max-width:240px;overflow:hidden;color:#59685f;font-size:12px;font-weight:600;text-overflow:ellipsis}
+        #projectPage .restored-summary-standard>i{width:1px;height:25px;background:#e1e7e3}
+        #projectPage .restored-summary-standard>i[hidden]{display:none!important}
+        #projectPage .restored-summary-standard .restored-standard-link{max-width:240px;overflow:hidden;color:#28734c;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
         #projectPage .restored-info-more{position:static;padding:4px 0;color:#517261;font-size:12px}
         #projectPage .restored-project-data{display:grid;grid-template-columns:184px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);min-height:0;padding:0}
         #projectPage .restored-project-tree{grid-column:1;grid-row:2;padding:8px 8px;border-right:1px solid #edf1ee;background:#fbfcfb}
@@ -6809,6 +7105,11 @@
         #projectPage [data-restored-project-view="project"]{grid-column:1/-1;grid-row:1;padding:0 14px;border-bottom:1px solid #e2e9e4}
         #projectPage .restored-professional-view{grid-column:2;grid-row:2;min-width:0;overflow-x:auto;padding:0 12px 10px}
         #projectPage .restored-view-title{height:36px;border-bottom:1px solid #e7ece9;color:#34483c;font-size:15px;font-weight:650;line-height:36px}
+        #projectPage .restored-quality-alert{display:flex;min-height:34px;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid #f0ddb8;background:#fff9e9;box-sizing:border-box;color:#6f6045;font-size:12px;line-height:20px}
+        #projectPage .restored-quality-alert[hidden]{display:none!important}
+        #projectPage .restored-quality-alert>span{display:inline-flex;width:16px;height:16px;flex:none;align-items:center;justify-content:center;border:1px solid #d7a95f;border-radius:50%;color:#a66b22;font-size:11px;font-weight:600;line-height:14px}
+        #projectPage .restored-quality-alert p{margin:0}
+        #projectPage .restored-quality-alert strong{margin-right:7px;color:#8c5d1f;font-weight:600}
         #projectPage .restored-project-toolbar{display:block;min-height:84px}
         #projectPage .restored-status-row{display:flex;height:30px;align-items:center;border-bottom:1px solid #f0f3f1}
         #projectPage .restored-integrity-state{display:flex;align-items:center;gap:4px;white-space:nowrap;color:#66756c;font-size:12px}
@@ -6863,17 +7164,24 @@
         #projectPage .restored-file-table{width:100%;min-width:980px;margin-top:6px;border:1px solid #e7ece9;table-layout:fixed}
         #projectPage .restored-file-table th{background:#f3f6f4;color:#647169;font-weight:500}
         #projectPage .restored-file-table th:nth-child(1),#projectPage .restored-file-table td:nth-child(1){width:4%;text-align:center}
-        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:21%}
+        #projectPage .restored-file-table th:nth-child(2),#projectPage .restored-file-table td:nth-child(2){width:26%}
         #projectPage .restored-file-table th:nth-child(3),#projectPage .restored-file-table td:nth-child(3){width:6%}
         #projectPage .restored-file-table th:nth-child(4),#projectPage .restored-file-table td:nth-child(4){width:9%}
         #projectPage .restored-file-table th:nth-child(5),#projectPage .restored-file-table td:nth-child(5){width:7%}
         #projectPage .restored-file-table th:nth-child(6),#projectPage .restored-file-table td:nth-child(6){width:9%}
         #projectPage .restored-file-table th:nth-child(7),#projectPage .restored-file-table td:nth-child(7){width:14%}
         #projectPage .restored-file-table th:nth-child(8),#projectPage .restored-file-table td:nth-child(8){width:11%}
-        #projectPage .restored-file-table th:nth-child(9),#projectPage .restored-file-table td:nth-child(9){width:19%}
+        #projectPage .restored-file-table th:nth-child(9),#projectPage .restored-file-table td:nth-child(9){width:14%}
         #projectPage .restored-file-table td:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
         #projectPage .restored-file-table td:nth-child(3),#projectPage .restored-file-table td:nth-child(5),#projectPage .restored-file-table td:nth-child(6),#projectPage .restored-file-table td:nth-child(7),#projectPage .restored-file-table td:nth-child(8),#projectPage .restored-file-table td:nth-child(9){white-space:nowrap}
         #projectPage .restored-file-table .file-row.selected td{background:#f2f8f4}
+        #projectPage .file-quality-standard{display:block;margin:2px 0 0;color:#75837b;font-size:12px;font-weight:400;line-height:18px}
+        #projectPage .file-quality-standard[hidden]{display:none!important}
+        #projectPage .file-quality-standard>span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        #projectPage .file-quality-standard .file-quality-compare{display:flex;min-width:0;align-items:center;gap:5px;overflow:hidden;color:#75837b;font-weight:400;white-space:nowrap;cursor:help}
+        #projectPage .file-quality-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        #projectPage .file-quality-version-change{display:inline-flex;flex:none;align-items:center;height:18px;padding:0 5px;border:1px solid #edc58e;border-radius:3px;background:#fff7ea;color:#a96418;font-size:11px;font-style:normal;font-weight:500;line-height:16px}
+        #projectPage .file-quality-standard-switch{display:inline-flex;flex:none;align-items:center;height:18px;padding:0 5px;border:1px solid #e4b676;border-radius:3px;background:#fff3df;color:#9e5b13;font-size:11px;font-style:normal;font-weight:500;line-height:16px}
         #projectPage .restored-file-table .link+.link{margin-left:8px}
         .restored-batch-modal{width:480px}
         .restored-batch-warning{margin:0;padding:14px;border-left:3px solid #d58a39;background:#fff9ef;color:#5f625e;font-size:13px;line-height:1.7}
@@ -6881,6 +7189,8 @@
         .restored-batch-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
         .restored-danger-button{border-color:#b95445!important;background:#b95445!important}
         @media(max-width:1100px){
+          #projectPage .restored-project-summary-row{grid-template-columns:minmax(0,1fr) auto}
+          #projectPage .restored-summary-standard{grid-column:1/-1;grid-row:2;max-width:none;padding-bottom:8px}
           #projectPage .restored-operation-row{align-items:flex-start;flex-wrap:wrap;padding:10px 0}
           #projectPage .restored-aux-actions{width:100%;margin-left:0}
           #projectPage .restored-professional-toolbar{grid-template-columns:1fr auto;padding:10px 0}
@@ -7096,13 +7406,13 @@
     })();
   </script>
   <script>
-    /* 入库数据统计闭环：构件 / 空间 / 系统统一检索、模型定位与反向追溯 */
+    /* 入库数据统计闭环：构件 / 空间 / 系统统一检索与模型定位 */
     (() => {
       const page = document.getElementById('assetStorageStatisticsPage');
       const viewer = document.getElementById('semanticModelBrowserModal');
       if (!page || !viewer) return;
 
-      const assetState = { type: 'component', keyword: '' };
+      const assetState = { type: 'component', keyword: '', page: 1, pageSize: 3, status: 'ready' };
       const typeMeta = {
         component: { label: '构件', total: '150,496,764', count: '2,300' },
         space: { label: '空间', total: '2,488,587', count: '128' },
@@ -7137,23 +7447,51 @@
         ]
       };
       const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-      const visibleRows = () => {
+      const filteredRows = () => {
         const word = assetState.keyword.trim().toLowerCase();
         return rows[assetState.type].filter(row => !word || Object.values(row).some(value => String(value).toLowerCase().includes(word)));
       };
+      const pageCount = () => Math.max(1, Math.ceil(filteredRows().length / assetState.pageSize));
+      const visibleRows = () => filteredRows().slice((assetState.page - 1) * assetState.pageSize, assetState.page * assetState.pageSize);
       const standardCell = value => value === '—' ? '<span class="asset-standard-empty" title="历史数据未保存解析标准">—</span>' : `<button class="asset-standard-link" type="button" data-view-standard>${safe(value)}</button>`;
+      const requirementModal = document.createElement('div');
+      requirementModal.id = 'assetStatisticsRequirementModal';
+      requirementModal.className = 'modal-mask asset-requirement-mask';
+      requirementModal.innerHTML = `<div class="modal asset-requirement-modal"><div class="modal-head">入库数据统计｜研发需求说明<button class="modal-close" type="button" data-close-asset-requirement>×</button></div><div class="modal-body"><section><h3>一、页面目标与数据范围</h3><ul><li>本页用于查询已完成模型解析并正式入库的构件、空间、系统实例，并定位到实例所在模型。</li><li>统计和列表仅包含当前登录用户有权限查看、未删除、解析成功、正式入库且当前有效版本的数据；草稿、解析失败、已删除及未正式入库数据不计入。</li><li>“未分组”只兼容标准管理中的历史数据，不作为本页第四个统计维度，也不计入构件、空间、系统三类数量。</li></ul></section><section><h3>二、统计口径与联动规则</h3><table><thead><tr><th>区域</th><th>后端口径</th><th>前端行为</th></tr></thead><tbody><tr><td>三类统计卡片</td><td>实例总数按实例唯一标识去重；类型数按正式语义字典 ID 去重。所有数量必须使用同一权限范围和有效版本口径。</td><td>默认选中构件；点击构件、空间或系统后切换当前类型，清空关键词并回到第一页。</td></tr><tr><td>分类数量 TOP5</td><td>在当前类型下按语义字典 ID 分组统计实例数量，按数量降序取前 5；同名不同 ID 不得直接合并。</td><td>随统计卡片同步切换，不单独跳转页面。</td></tr><tr><td>结果列表</td><td>返回当前类型的实例明细和总条数；排序规则固定，建议先按最新入库时间倒序，再按实例唯一标识排序。</td><td>切换类型或翻页时请求列表；原型使用现有 5 条示例数据、每页 3 条演示真实分页。</td></tr><tr><td>关键词</td><td>后端不新增高级搜索接口。</td><td>仅对当前已加载结果按语义字典、实例、模型和项目名称进行前端过滤；点击“筛选”或按 Enter 生效。</td></tr></tbody></table></section><section><h3>三、列表数据契约</h3><p>每条实例至少返回以下业务字段。前端不展示定位技术参数，但跳转时必须完整携带。</p><div class="asset-contract-grid"><dl><dt>展示字段</dt><dd>instanceType：构件/空间/系统</dd><dd>dictionaryId、dictionaryName：语义字典</dd><dd>instanceName：实例名称</dd><dd>standardId、standardName：解析时所属标准</dd><dd>modelFileName、unitName、projectName</dd><dd>majorName：已有时可返回，当前列表不强制展示</dd></dl><dl><dt>定位字段</dt><dd>instanceId/objectId/tagId：模型内唯一实例标识</dd><dd>projectId、unitId、modelFileId</dd><dd>documentId、modelVersionId</dd><dd>sourceSystem、ingestedAt、effectiveVersion</dd><dd>permissionCode：实例查看权限</dd></dl></div><ul><li>历史数据未保存解析标准时，standardId、standardName 返回 null，前端统一显示“—”，不得补造标准。</li><li>标准名称有 standardId 时可进入现有标准管理详情；没有 ID 时仅展示名称，不允许错误跳转。</li></ul></section><section><h3>四、操作闭环</h3><table><thead><tr><th>操作</th><th>接口/跳转要求</th><th>目标状态</th></tr></thead><tbody><tr><td>查看实例</td><td>携带项目、模型文件、文档、版本及实例唯一 ID 加载对应模型。</td><td>模型视角聚焦目标实例并保持明显高亮；同时显示 OBV 原生模型树和业务分类树。</td></tr></tbody></table></section><section><h3>五、接口能力与状态处理</h3><ul><li>统计接口返回三类实例总数、语义字典类型数及各类型 TOP5；列表接口接收 type、page、pageSize，返回 total 和 rows。</li><li>统计、TOP5 和列表必须基于同一数据快照或同一统计更新时间；模型完成入库、版本回退或删除后触发统计更新。</li><li>所有查询必须在后端执行项目数据权限过滤；无权限实例不得出现在数量、TOP5 或列表中。</li><li>大数据量统计使用聚合表或缓存；响应建议返回 statisticsUpdatedAt 供问题追踪。</li><li>加载中、无数据、加载失败和无权限均使用明确状态；失败状态保留重试入口，不能用示例数据代替接口结果。</li></ul><div class="asset-state-demo"><b>异常状态原型验收</b><span>仅用于研发联调演示，不属于正式业务操作。</span><div><button class="btn light" type="button" data-asset-demo-state="loading">加载中</button><button class="btn light" type="button" data-asset-demo-state="empty">无数据</button><button class="btn light" type="button" data-asset-demo-state="error">加载失败</button><button class="btn light" type="button" data-asset-demo-state="forbidden">无权限</button><button class="btn light" type="button" data-asset-demo-state="ready">恢复正常</button></div></div></section><section><h3>六、验收链路</h3><p>模型按语义标准解析并入库 → 三类统计更新 → 选择统计维度 → 加载 TOP5 与实例列表 → 查看语义字典和所属标准 → 查看实例并加载对应模型版本 → 使用实例唯一 ID 聚焦高亮。</p></section></div><div class="modal-foot"><span>原型示例数字仅用于展示，联调时必须以接口返回为准</span><button class="btn light" type="button" data-close-asset-requirement>关闭</button></div></div>`;
+      document.body.appendChild(requirementModal);
       const tableRows = () => visibleRows().map((row,index) => {
         const payload = encodeURIComponent(JSON.stringify({...row,type:assetState.type,index:index+1}));
-        return `<tr><td><span class="asset-type-tag">${typeMeta[assetState.type].label}</span></td><td>${safe(row.dictionary)}</td><td title="${safe(row.name)}">${safe(row.name)}</td><td>${standardCell(row.standard)}</td><td title="${safe(row.model)}">${safe(row.model)}</td><td>${safe(row.unit)}</td><td>${safe(row.project)}</td><td class="asset-closed-actions"><button type="button" data-instance-action="view" data-instance="${payload}">查看实例</button><button type="button" data-instance-action="property" data-instance="${payload}">查看属性</button><span class="asset-more-wrap"><button type="button" data-instance-more>更多⌄</button><span class="asset-more-menu" hidden><button type="button" data-instance-action="unit" data-instance="${payload}">查看单体</button><button type="button" data-instance-action="project" data-instance="${payload}">查看项目</button></span></span></td></tr>`;
+        return `<tr><td><span class="asset-type-tag">${typeMeta[assetState.type].label}</span></td><td>${safe(row.dictionary)}</td><td title="${safe(row.name)}">${safe(row.name)}</td><td>${standardCell(row.standard)}</td><td title="${safe(row.model)}">${safe(row.model)}</td><td>${safe(row.unit)}</td><td>${safe(row.project)}</td><td class="asset-closed-actions"><button type="button" data-instance-action="view" data-instance="${payload}">查看实例</button></td></tr>`;
       }).join('') || '<tr><td colspan="8" class="asset-no-result">未找到匹配的实例数据</td></tr>';
       const categoryChart = () => {
         const items = categoryStatistics[assetState.type];
         const max = Math.max(...items.map(item => item[2]));
         return `<section class="asset-category-chart"><div class="asset-category-chart-head"><h3>${typeMeta[assetState.type].label}分类数量 TOP5</h3><span>按已解析并正式入库的实例数量统计</span></div><div class="asset-category-bars">${items.map(item => `<div class="asset-category-bar"><b title="${safe(item[0])}">${safe(item[0])}</b><div><i style="width:${Math.max(8, Math.round(item[2] / max * 100))}%"></i></div><strong>${safe(item[1])}</strong></div>`).join('')}</div></section>`;
       };
+      const resultState = () => {
+        if (assetState.status === 'ready') return '';
+        const states = {
+          loading:['正在加载入库数据','正在获取统计结果和实例列表，请稍候…','loading'],
+          empty:['暂无入库数据','当前类型暂无已解析并正式入库的数据。','empty'],
+          error:['入库数据加载失败','网络或服务异常，请重新加载。','error'],
+          forbidden:['暂无数据访问权限','您没有当前入库数据的查看权限，请联系管理员授权。','forbidden']
+        };
+        const current = states[assetState.status] || states.error;
+        return `<section class="asset-result-state ${current[2]}"><i></i><b>${current[0]}</b><p>${current[1]}</p>${assetState.status !== 'loading' ? '<button class="btn light" type="button" data-asset-retry>重新加载</button>' : ''}</section>`;
+      };
+      const pager = () => {
+        const total = filteredRows().length; const pages = pageCount(); assetState.page = Math.min(assetState.page,pages);
+        const start = total ? (assetState.page - 1) * assetState.pageSize + 1 : 0; const end = Math.min(assetState.page * assetState.pageSize,total);
+        return `<div class="asset-closed-pager"><span>显示 ${start}-${end} 条，共 ${total} 条示例数据</span><button type="button" data-asset-page="${assetState.page - 1}" ${assetState.page <= 1 ? 'disabled' : ''}>‹</button>${Array.from({length:pages},(_,index) => `<button type="button" class="${assetState.page === index + 1 ? 'active' : ''}" data-asset-page="${index + 1}">${index + 1}</button>`).join('')}<button type="button" data-asset-page="${assetState.page + 1}" ${assetState.page >= pages ? 'disabled' : ''}>›</button></div>`;
+      };
       const render = () => {
         const meta = typeMeta[assetState.type];
-        page.innerHTML = `<div class="asset-closed-page"><header class="asset-closed-head"><h2>入库数据统计</h2><span>仅统计已解析并正式入库的数据</span></header><section class="asset-dimension-grid">${Object.entries(typeMeta).map(([key,item]) => `<button type="button" class="asset-dimension-card ${key === assetState.type ? 'active' : ''}" data-closed-type="${key}"><span>${item.label}统计</span><b>${item.total}</b><small>${item.count} 个${item.label}类型</small><i>查看数据 ›</i></button>`).join('')}</section>${categoryChart()}<section class="asset-closed-results"><div class="asset-closed-toolbar"><div><b>${meta.label}数据</b><span>共 ${meta.total} 条实例</span></div><label><span>关键词</span><input class="input" data-closed-keyword value="${safe(assetState.keyword)}" placeholder="筛选语义字典、实例、模型或项目"><button class="btn light" type="button" data-closed-filter>筛选</button></label></div><div class="asset-closed-table-wrap"><table class="asset-closed-table"><thead><tr><th>类型</th><th>语义字典</th><th>实例名称</th><th>所属标准</th><th>所属模型/模型文件</th><th>所属单体</th><th>所属项目</th><th>操作</th></tr></thead><tbody>${tableRows()}</tbody></table></div><div class="asset-closed-pager"><span>显示 ${visibleRows().length} 条示例数据</span><button type="button" disabled>‹</button><button type="button" class="active">1</button><button type="button" disabled>›</button></div></section></div>`;
+        const normalContent = `${categoryChart()}<section class="asset-closed-results"><div class="asset-closed-toolbar"><div><b>${meta.label}数据</b><span>共 ${meta.total} 条实例</span></div><label><span>关键词</span><input class="input" data-closed-keyword value="${safe(assetState.keyword)}" placeholder="筛选语义字典、实例、模型或项目"><button class="btn light" type="button" data-closed-filter>筛选</button></label></div><div class="asset-closed-table-wrap"><table class="asset-closed-table"><thead><tr><th>类型</th><th>语义字典</th><th>实例名称</th><th>所属标准</th><th>所属模型/模型文件</th><th>所属单体</th><th>所属项目</th><th>操作</th></tr></thead><tbody>${tableRows()}</tbody></table></div>${pager()}</section>`;
+        page.innerHTML = `<div class="asset-closed-page"><header class="asset-closed-head"><h2>入库数据统计</h2><span>仅统计已解析并正式入库的数据</span><button class="btn light asset-requirement-button" type="button" data-open-asset-requirement>研发需求说明</button></header><section class="asset-dimension-grid">${Object.entries(typeMeta).map(([key,item]) => `<button type="button" class="asset-dimension-card ${key === assetState.type ? 'active' : ''}" data-closed-type="${key}" ${assetState.status === 'loading' ? 'disabled' : ''}><span>${item.label}统计</span><b>${item.total}</b><small>${item.count} 个${item.label}类型</small><i>查看数据 ›</i></button>`).join('')}</section>${assetState.status === 'ready' ? normalContent : resultState()}</div>`;
+      };
+      const load = action => {
+        assetState.status = 'loading'; render();
+        setTimeout(() => { action?.(); assetState.status = 'ready'; render(); },350);
       };
       const show = () => {
         document.querySelectorAll('.page').forEach(item => item.classList.remove('active'));
@@ -7208,31 +7546,27 @@
         }
         viewer.classList.add('open');
       };
-      const goProject = (data, unitOnly) => {
-        if (typeof showPage === 'function') showPage('projectPage','data');
-        else document.querySelector('[data-page-to="projectPage"]')?.click();
-        const crumb = document.getElementById('breadcrumb'); if (crumb) crumb.textContent = unitOnly ? `项目数据管理 / ${data.project} / ${data.unit}` : `项目数据管理 / 项目详情 / ${data.project}`;
-        document.querySelector('.project-page-toast')?.remove();
-        const toast = document.createElement('div'); toast.className = 'project-page-toast show'; toast.textContent = unitOnly ? `已进入所属单体：${data.unit}` : `已进入所属项目：${data.project}`; document.body.appendChild(toast); setTimeout(()=>toast.remove(),1800);
-      };
-
       document.addEventListener('click', event => {
+        if (event.target.closest('[data-open-asset-requirement]')) { event.preventDefault(); event.stopImmediatePropagation(); requirementModal.classList.add('open'); return; }
+        if (event.target.closest('[data-close-asset-requirement]') || event.target === requirementModal) { event.preventDefault(); event.stopImmediatePropagation(); requirementModal.classList.remove('open'); return; }
+        const demoState = event.target.closest('[data-asset-demo-state]');
+        if (demoState) { event.preventDefault(); event.stopImmediatePropagation(); requirementModal.classList.remove('open'); if (demoState.dataset.assetDemoState === 'loading') load(); else { assetState.status = demoState.dataset.assetDemoState; render(); } return; }
+        if (event.target.closest('[data-asset-retry]')) { event.preventDefault(); event.stopImmediatePropagation(); load(); return; }
         if (event.target.closest('[data-open-asset-stats-page]')) { event.preventDefault(); event.stopImmediatePropagation(); show(); return; }
         const typeButton = event.target.closest('[data-closed-type]');
-        if (typeButton) { event.preventDefault(); event.stopImmediatePropagation(); assetState.type = typeButton.dataset.closedType; assetState.keyword = ''; render(); return; }
-        if (event.target.closest('[data-closed-filter]')) { event.preventDefault(); event.stopImmediatePropagation(); assetState.keyword = page.querySelector('[data-closed-keyword]')?.value || ''; render(); return; }
-        const more = event.target.closest('[data-instance-more]');
-        if (more) { event.preventDefault(); event.stopImmediatePropagation(); const menu = more.nextElementSibling; page.querySelectorAll('.asset-more-menu').forEach(item => { if (item !== menu) item.hidden = true; }); menu.hidden = !menu.hidden; return; }
+        if (typeButton) { event.preventDefault(); event.stopImmediatePropagation(); load(() => { assetState.type = typeButton.dataset.closedType; assetState.keyword = ''; assetState.page = 1; }); return; }
+        if (event.target.closest('[data-closed-filter]')) { event.preventDefault(); event.stopImmediatePropagation(); const keyword = page.querySelector('[data-closed-keyword]')?.value || ''; load(() => { assetState.keyword = keyword; assetState.page = 1; }); return; }
+        const pageButton = event.target.closest('[data-asset-page]');
+        if (pageButton && !pageButton.disabled) { event.preventDefault(); event.stopImmediatePropagation(); const nextPage = Number(pageButton.dataset.assetPage); load(() => { assetState.page = Math.max(1,Math.min(nextPage,pageCount())); }); return; }
         const action = event.target.closest('[data-instance-action]');
-        if (action) { event.preventDefault(); event.stopImmediatePropagation(); const data = JSON.parse(decodeURIComponent(action.dataset.instance)); const kind = action.dataset.instanceAction; if (kind === 'view' || kind === 'property') selectInViewer(data, kind === 'property'); else goProject(data, kind === 'unit'); return; }
+        if (action) { event.preventDefault(); event.stopImmediatePropagation(); const data = JSON.parse(decodeURIComponent(action.dataset.instance)); selectInViewer(data, false); return; }
         if (event.target.closest('[data-view-standard]')) { event.preventDefault(); event.stopImmediatePropagation(); const standardEntry = [...document.querySelectorAll('#primarySide .primary-item')].find(item => item.textContent.includes('标准数字')); if (standardEntry) standardEntry.click(); return; }
         const tab = event.target.closest('#semanticModelBrowserModal [data-viewer-tab]');
         if (tab && viewer.dataset.assetLocated === 'true') { event.preventDefault(); event.stopImmediatePropagation(); renderViewerBusinessTree(tab.dataset.viewerTab, ''); const building = viewer.querySelector('[data-semantic-building]'); if (building) building.dataset.highlight = tab.dataset.viewerTab; return; }
         const node = event.target.closest('[data-closed-viewer-node]');
         if (node) { event.preventDefault(); event.stopImmediatePropagation(); viewer.querySelectorAll('[data-closed-viewer-node]').forEach(item => item.classList.toggle('selected', item === node)); const building = viewer.querySelector('[data-semantic-building]'); if (building) building.dataset.highlight = node.dataset.nodeType; const hint = viewer.querySelector('.semantic-stage-hint'); if (hint) hint.innerHTML = `<b>已在模型中高亮</b>　${safe(node.dataset.nodeName)}`; return; }
-        page.querySelectorAll('.asset-more-menu').forEach(item => item.hidden = true);
       }, true);
-      document.addEventListener('keydown', event => { if (event.key === 'Enter' && event.target.matches('[data-closed-keyword]')) { assetState.keyword = event.target.value; render(); } });
+      document.addEventListener('keydown', event => { if (event.key === 'Enter' && event.target.matches('[data-closed-keyword]')) { event.preventDefault(); const keyword = event.target.value; load(() => { assetState.keyword = keyword; assetState.page = 1; }); } });
 
       document.querySelectorAll('.asset-search-result-page').forEach(oldPage => oldPage.remove());
       document.querySelectorAll('[data-open-search-result]').forEach(button => button.removeAttribute('data-open-search-result'));
@@ -7253,13 +7587,403 @@
 
       const style = document.createElement('style');
       style.textContent = `
-        .asset-storage-statistics-page{padding:0!important;background:#f5f7f6!important;overflow:auto!important}.asset-closed-page{padding:14px 16px 18px}.asset-closed-head{display:flex;align-items:baseline;gap:12px;height:34px}.asset-closed-head h2{margin:0;color:#2f4236;font-size:19px}.asset-closed-head span{color:#89948d;font-size:12px}.asset-dimension-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:8px 0 10px}.asset-dimension-card{position:relative;height:76px;padding:10px 14px;border:1px solid #dce5df;border-radius:4px;background:#fff;color:#59685f;text-align:left;cursor:pointer}.asset-dimension-card:hover{border-color:#9fc5ac}.asset-dimension-card.active{border-color:#238052;background:#f2f8f4;box-shadow:inset 3px 0 #238052}.asset-dimension-card span,.asset-dimension-card small{display:block;font-size:12px}.asset-dimension-card b{display:block;margin:4px 0 2px;color:#245f41;font-size:21px;line-height:1}.asset-dimension-card small{color:#8a968e}.asset-dimension-card i{position:absolute;right:14px;bottom:10px;color:#237b4e;font-size:12px;font-style:normal}.asset-category-chart{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;min-height:154px;margin-bottom:10px;padding:12px 14px;border:1px solid #dce5df;background:#fff;box-sizing:border-box}.asset-category-chart-head{padding-top:2px}.asset-category-chart-head h3{margin:0 0 8px;color:#35463b;font-size:14px}.asset-category-chart-head span{color:#8a958e;font-size:12px;line-height:1.5}.asset-category-bars{display:grid;gap:7px}.asset-category-bar{display:grid;grid-template-columns:120px minmax(180px,1fr) 86px;gap:10px;align-items:center;min-height:20px;color:#56645c;font-size:12px}.asset-category-bar>b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}.asset-category-bar>div{height:9px;overflow:hidden;border-radius:2px;background:#edf3ef}.asset-category-bar i{display:block;height:100%;border-radius:2px;background:#2a8054}.asset-category-bar:nth-child(2) i{background:#438e65}.asset-category-bar:nth-child(3) i{background:#5e9d76}.asset-category-bar:nth-child(4) i{background:#7aad8b}.asset-category-bar:nth-child(5) i{background:#9dbfa8}.asset-category-bar strong{text-align:right;color:#43564a;font-weight:500;font-variant-numeric:tabular-nums}.asset-closed-results{border:1px solid #dce5df;background:#fff}.asset-closed-toolbar{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 12px;border-bottom:1px solid #e5ebe7}.asset-closed-toolbar>div{display:flex;align-items:center;gap:9px}.asset-closed-toolbar b{color:#35463b;font-size:14px}.asset-closed-toolbar>div span{color:#8a958e;font-size:12px}.asset-closed-toolbar label{display:flex;align-items:center;gap:7px;color:#68766d;font-size:12px}.asset-closed-toolbar .input{width:290px;height:32px}.asset-closed-toolbar .btn{height:32px;border-radius:4px}.asset-closed-table-wrap{overflow:auto}.asset-closed-table{width:100%;min-width:1180px;border-collapse:collapse;table-layout:fixed}.asset-closed-table th{height:38px;padding:0 9px;background:#f2f5f3;color:#4c5951;text-align:left;font-size:12px;font-weight:600}.asset-closed-table td{height:48px;padding:0 9px;border-bottom:1px solid #e9eeeb;color:#56645c;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-closed-table tbody tr:hover{background:#f8fbf9}.asset-closed-table th:nth-child(1){width:68px}.asset-closed-table th:nth-child(2){width:125px}.asset-closed-table th:nth-child(3){width:190px}.asset-closed-table th:nth-child(4){width:185px}.asset-closed-table th:nth-child(5){width:220px}.asset-closed-table th:nth-child(6){width:125px}.asset-closed-table th:nth-child(7){width:165px}.asset-closed-table th:nth-child(8){width:205px}.asset-type-tag{display:inline-block;padding:3px 7px;border-radius:3px;background:#eef6f0;color:#28764d}.asset-standard-link,.asset-closed-actions button{padding:0;border:0;background:transparent;color:#24794d;cursor:pointer;font-size:12px}.asset-standard-link:hover,.asset-closed-actions button:hover{text-decoration:underline}.asset-standard-empty{color:#a3aca6}.asset-closed-actions{overflow:visible!important}.asset-closed-actions>button{margin-right:9px}.asset-more-wrap{position:relative}.asset-more-menu{position:absolute;z-index:8;right:0;top:20px;width:92px;padding:4px;border:1px solid #d9e3dc;background:#fff;box-shadow:0 5px 14px rgba(42,70,51,.12)}.asset-more-menu button{display:block;width:100%;padding:7px;text-align:left}.asset-no-result{height:160px!important;text-align:center;color:#939d97!important}.asset-closed-pager{display:flex;align-items:center;justify-content:flex-end;gap:5px;height:42px;padding:0 10px;color:#7b8880;font-size:12px}.asset-closed-pager button{width:28px;height:27px;border:1px solid #dce4df;background:#fff;color:#65736a}.asset-closed-pager button.active{border-color:#2b8155;background:#edf7f0;color:#23764b}.semantic-viewer-modal.asset-located-viewer .semantic-building{transform:skewY(-8deg) rotateX(9deg) scale(1.08)}.semantic-viewer-modal.asset-located-viewer .semantic-stage-hint{padding:6px 10px;border:1px solid #d9e6dc;background:rgba(255,255,255,.92)}.semantic-viewer-modal.asset-located-viewer .semantic-stage-hint b{color:#23784b}.asset-obv-tree .located{background:#eaf5ed!important;color:#1e764a!important;font-weight:600}.semantic-property-panel.property-open{background:#f7fbf8}.semantic-property-panel.property-open h4{color:#23784b}.semantic-viewer-layout{grid-template-columns:210px 240px minmax(0,1fr) 240px!important}.semantic-viewer-original-tree{width:auto!important;box-sizing:border-box}.file-classification-panel{display:block!important}.semantic-viewer-bar [data-toggle-file-tree]{margin-left:auto}.semantic-viewer-bar label+[data-toggle-file-tree]{margin-left:10px}@media(max-width:1250px){.asset-closed-toolbar{height:auto;min-height:48px;flex-wrap:wrap;padding:7px 10px}.asset-category-chart{grid-template-columns:170px minmax(0,1fr)}.asset-category-bar{grid-template-columns:100px minmax(150px,1fr) 78px}.semantic-viewer-layout{grid-template-columns:180px 210px minmax(420px,1fr) 220px!important}.semantic-viewer-modal{overflow:auto}.asset-dimension-card i{display:none}}
+        .asset-storage-statistics-page{padding:0!important;background:#f5f7f6!important;overflow:auto!important}.asset-closed-page{padding:14px 16px 18px}.asset-closed-head{display:flex;align-items:baseline;gap:12px;height:34px}.asset-closed-head h2{margin:0;color:#2f4236;font-size:19px}.asset-closed-head span{color:#89948d;font-size:12px}.asset-requirement-button{height:30px;margin-left:auto;padding:0 11px;font-size:12px}.asset-dimension-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:8px 0 10px}.asset-dimension-card{position:relative;height:76px;padding:10px 14px;border:1px solid #dce5df;border-radius:4px;background:#fff;color:#59685f;text-align:left;cursor:pointer}.asset-dimension-card:hover{border-color:#9fc5ac}.asset-dimension-card.active{border-color:#238052;background:#f2f8f4;box-shadow:inset 3px 0 #238052}.asset-dimension-card span,.asset-dimension-card small{display:block;font-size:12px}.asset-dimension-card b{display:block;margin:4px 0 2px;color:#245f41;font-size:21px;line-height:1}.asset-dimension-card small{color:#8a968e}.asset-dimension-card i{position:absolute;right:14px;bottom:10px;color:#237b4e;font-size:12px;font-style:normal}.asset-category-chart{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;min-height:154px;margin-bottom:10px;padding:12px 14px;border:1px solid #dce5df;background:#fff;box-sizing:border-box}.asset-category-chart-head{padding-top:2px}.asset-category-chart-head h3{margin:0 0 8px;color:#35463b;font-size:14px}.asset-category-chart-head span{color:#8a958e;font-size:12px;line-height:1.5}.asset-category-bars{display:grid;gap:7px}.asset-category-bar{display:grid;grid-template-columns:120px minmax(180px,1fr) 86px;gap:10px;align-items:center;min-height:20px;color:#56645c;font-size:12px}.asset-category-bar>b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}.asset-category-bar>div{height:9px;overflow:hidden;border-radius:2px;background:#edf3ef}.asset-category-bar i{display:block;height:100%;border-radius:2px;background:#2a8054}.asset-category-bar:nth-child(2) i{background:#438e65}.asset-category-bar:nth-child(3) i{background:#5e9d76}.asset-category-bar:nth-child(4) i{background:#7aad8b}.asset-category-bar:nth-child(5) i{background:#9dbfa8}.asset-category-bar strong{text-align:right;color:#43564a;font-weight:500;font-variant-numeric:tabular-nums}.asset-closed-results{border:1px solid #dce5df;background:#fff}.asset-closed-toolbar{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 12px;border-bottom:1px solid #e5ebe7}.asset-closed-toolbar>div{display:flex;align-items:center;gap:9px}.asset-closed-toolbar b{color:#35463b;font-size:14px}.asset-closed-toolbar>div span{color:#8a958e;font-size:12px}.asset-closed-toolbar label{display:flex;align-items:center;gap:7px;color:#68766d;font-size:12px}.asset-closed-toolbar .input{width:290px;height:32px}.asset-closed-toolbar .btn{height:32px;border-radius:4px}.asset-closed-table-wrap{overflow:auto}.asset-closed-table{width:100%;min-width:1180px;border-collapse:collapse;table-layout:fixed}.asset-closed-table th{height:38px;padding:0 9px;background:#f2f5f3;color:#4c5951;text-align:left;font-size:12px;font-weight:600}.asset-closed-table td{height:48px;padding:0 9px;border-bottom:1px solid #e9eeeb;color:#56645c;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-closed-table tbody tr:hover{background:#f8fbf9}.asset-closed-table th:nth-child(1){width:68px}.asset-closed-table th:nth-child(2){width:125px}.asset-closed-table th:nth-child(3){width:190px}.asset-closed-table th:nth-child(4){width:185px}.asset-closed-table th:nth-child(5){width:220px}.asset-closed-table th:nth-child(6){width:125px}.asset-closed-table th:nth-child(7){width:165px}.asset-closed-table th:nth-child(8){width:205px}.asset-type-tag{display:inline-block;padding:3px 7px;border-radius:3px;background:#eef6f0;color:#28764d}.asset-standard-link,.asset-closed-actions button{padding:0;border:0;background:transparent;color:#24794d;cursor:pointer;font-size:12px}.asset-standard-link:hover,.asset-closed-actions button:hover{text-decoration:underline}.asset-standard-empty{color:#a3aca6}.asset-closed-actions{overflow:visible!important}.asset-closed-actions>button{margin-right:9px}.asset-more-wrap{position:relative}.asset-more-menu{position:absolute;z-index:8;right:0;top:20px;width:92px;padding:4px;border:1px solid #d9e3dc;background:#fff;box-shadow:0 5px 14px rgba(42,70,51,.12)}.asset-more-menu button{display:block;width:100%;padding:7px;text-align:left}.asset-no-result{height:160px!important;text-align:center;color:#939d97!important}.asset-closed-pager{display:flex;align-items:center;justify-content:flex-end;gap:5px;height:42px;padding:0 10px;color:#7b8880;font-size:12px}.asset-closed-pager button{width:28px;height:27px;border:1px solid #dce4df;background:#fff;color:#65736a}.asset-closed-pager button.active{border-color:#2b8155;background:#edf7f0;color:#23764b}.semantic-viewer-modal.asset-located-viewer .semantic-building{transform:skewY(-8deg) rotateX(9deg) scale(1.08)}.semantic-viewer-modal.asset-located-viewer .semantic-stage-hint{padding:6px 10px;border:1px solid #d9e6dc;background:rgba(255,255,255,.92)}.semantic-viewer-modal.asset-located-viewer .semantic-stage-hint b{color:#23784b}.asset-obv-tree .located{background:#eaf5ed!important;color:#1e764a!important;font-weight:600}.semantic-property-panel.property-open{background:#f7fbf8}.semantic-property-panel.property-open h4{color:#23784b}.semantic-viewer-layout{grid-template-columns:210px 240px minmax(0,1fr) 240px!important}.semantic-viewer-original-tree{width:auto!important;box-sizing:border-box}.file-classification-panel{display:block!important}.semantic-viewer-bar [data-toggle-file-tree]{margin-left:auto}.semantic-viewer-bar label+[data-toggle-file-tree]{margin-left:10px}.asset-requirement-modal{width:min(1040px,calc(100vw - 64px));max-height:calc(100vh - 64px);display:flex;flex-direction:column}.asset-requirement-modal>.modal-body{overflow:auto;padding:14px 20px}.asset-requirement-modal>.modal-foot>span{margin-right:auto;color:#8a958e;font-size:12px}.asset-requirement-modal section{margin-bottom:18px}.asset-requirement-modal section:last-child{margin-bottom:2px}.asset-requirement-modal h3{margin:0 0 9px;padding-left:9px;border-left:3px solid #2b8054;color:#35473b;font-size:14px}.asset-requirement-modal p,.asset-requirement-modal li{color:#5f6d64;font-size:12px;line-height:1.65}.asset-requirement-modal ul{margin:0;padding-left:20px}.asset-requirement-modal li{margin:4px 0}.asset-requirement-modal table{width:100%;border-collapse:collapse;table-layout:fixed}.asset-requirement-modal th,.asset-requirement-modal td{padding:8px 10px;border:1px solid #e1e8e3;color:#58665d;text-align:left;font-size:11px;line-height:1.55;vertical-align:top}.asset-requirement-modal th{background:#f2f6f3;color:#3f5145}.asset-requirement-modal th:first-child{width:150px}.asset-contract-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.asset-contract-grid dl{margin:0;padding:10px 12px;border:1px solid #e1e8e3;background:#fafcfb}.asset-contract-grid dt{margin-bottom:7px;color:#2b704a;font-size:12px;font-weight:600}.asset-contract-grid dd{margin:4px 0;color:#657269;font-size:11px;line-height:1.5}@media(max-width:1250px){.asset-closed-toolbar{height:auto;min-height:48px;flex-wrap:wrap;padding:7px 10px}.asset-category-chart{grid-template-columns:170px minmax(0,1fr)}.asset-category-bar{grid-template-columns:100px minmax(150px,1fr) 78px}.semantic-viewer-layout{grid-template-columns:180px 210px minmax(420px,1fr) 220px!important}.semantic-viewer-modal{overflow:auto}.asset-dimension-card i{display:none}}
       `;
       document.head.appendChild(style);
       const compactFix = document.createElement('style');
-      compactFix.textContent = '.asset-closed-table th:nth-child(1){width:72px}.asset-closed-table th:first-child,.asset-closed-table td:first-child{text-align:center}.asset-type-tag{min-width:34px;padding:3px 5px!important;text-align:center;white-space:nowrap}';
+      compactFix.textContent = '.asset-closed-table th:nth-child(1){width:72px}.asset-closed-table th:first-child,.asset-closed-table td:first-child{text-align:center}.asset-type-tag{min-width:34px;padding:3px 5px!important;text-align:center;white-space:nowrap}.asset-result-state{display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:340px;border:1px solid #dce5df;background:#fff;text-align:center}.asset-result-state>i{display:block;width:34px;height:34px;margin-bottom:13px;border-radius:50%;background:#edf3ef}.asset-result-state>b{color:#405047;font-size:15px}.asset-result-state>p{margin:8px 0 14px;color:#8a958e;font-size:12px}.asset-result-state.loading>i{box-sizing:border-box;border:3px solid #dce9e0;border-top-color:#2d8256;background:transparent;animation:asset-loading .8s linear infinite}.asset-result-state.error>i{background:#fff0ef}.asset-result-state.forbidden>i{background:#fff7e8}.asset-state-demo{margin-top:12px;padding:11px 12px;border:1px dashed #bfcfc4;background:#f8fbf9}.asset-state-demo>b,.asset-state-demo>span{display:block}.asset-state-demo>b{color:#405047;font-size:12px}.asset-state-demo>span{margin:4px 0 9px;color:#8a958e;font-size:11px}.asset-state-demo>div{display:flex;gap:7px;flex-wrap:wrap}.asset-state-demo .btn{height:28px;padding:0 9px;font-size:11px}@keyframes asset-loading{to{transform:rotate(360deg)}}';
+      compactFix.textContent += '.asset-closed-table{min-width:1080px}.asset-closed-table th:nth-child(8){width:86px}';
       document.head.appendChild(compactFix);
     })();
   </script>
+  <script>
+    /* 控制台最小闭环：选数车提交后生成工单，五类个人资源统一管理 */
+    (() => {
+      const page = document.getElementById('personalConsolePage');
+      const workbenchButton = document.querySelector('.top-btn[data-top="workbench"]');
+      const modal = document.getElementById('consoleActionModal');
+      if (!page || !workbenchButton || !modal) return;
+
+      const state = {
+        active:'ticket',
+        cart:[
+          {id:'DATA-001',name:'白玉兰测试20260203 · 土建专业模型数据',type:'模型数据',project:'白玉兰测试20260203',time:'2026-09-12 09:20'},
+          {id:'DATA-002',name:'联合工房 · 机电系统实例数据',type:'系统数据',project:'联合工房数字化项目',time:'2026-09-12 09:26'}
+        ],
+        tickets:[
+          {no:'f62831dda66e45c7bb6b0e75ee847ca5',name:'合规性检查',time:'2026-09-14 09:30:22',status:'已同意',kind:'active',applicant:'李糖糖',dept:'糖糖科技',reason:'服务能力使用申请',approver:'王处',items:['合规性检查'],result:'审批已通过，订阅能力已开通'},
+          {no:'9fc3ca32d1ce49dab04d915eafb7f242',name:'模型对比-IFC',time:'2026-09-14 09:26:58',status:'已同意',kind:'active',applicant:'李糖糖',dept:'糖糖科技',reason:'临时模拟',approver:'郭处',items:['模型对比-IFC'],result:'审批已通过，订阅能力已开通'},
+          {no:'ac137abf8d5a4d949899721ffa081193',name:'API鉴权',time:'2026-09-14 09:26:58',status:'已同意',kind:'active',applicant:'李糖糖',dept:'糖糖科技',reason:'临时模拟',approver:'郭处',items:['API鉴权'],result:'审批已通过，订阅能力已开通'},
+          {no:'f093c5b889bf40fca6b38dfa2b2371d9',name:'扩展属性挂接',time:'2026-09-14 09:26:58',status:'已同意',kind:'active',applicant:'李糖糖',dept:'糖糖科技',reason:'临时模拟',approver:'总工',items:['扩展属性挂接'],result:'审批已通过，订阅能力已开通'},
+          {no:'6efeace1c0814e21a18f89952f9bb767',name:'基点一致性检查',time:'2026-09-14 09:26:19',status:'已同意',kind:'active',applicant:'李糖糖',dept:'糖糖科技',reason:'历史模拟',approver:'总工',items:['基点一致性检查'],result:'审批已通过，订阅能力已开通'},
+          {no:'c2af5580093b415f818210e9fb305ff0',name:'如来',time:'2026-09-14 09:25:51',status:'已同意',kind:'active',applicant:'李糖糖',dept:'糖糖科技',reason:'临时测试',approver:'王处',items:['如来'],result:'审批已通过，订阅能力已开通'},
+          {no:'091f26c49fa945129ac41d515d09633c',name:'项目数据接入',time:'2026-09-11 16:28:28',status:'待审批',kind:'wait',applicant:'超级管理员',dept:'数字化处',reason:'sss',approver:'王处',items:['项目数据接入'],result:'等待审批人处理'},
+          {no:'0e160aacad004895aa6029bdcbb190f7',name:'ceshi002',time:'2026-09-11 16:28:11',status:'待审批',kind:'wait',applicant:'超级管理员',dept:'数字化处',reason:'ddd',approver:'郭处',items:['ceshi002'],result:'等待审批人处理'}
+        ],
+        subscriptions:[
+          {name:'哪儿',type:'项目数据服务',time:'2026-08-26 13:42:51',status:'已订阅',kind:'active',reason:'dfdsaf'},
+          {name:'紫荆城',type:'项目数据服务',time:'2026-08-20 15:14:43',status:'已订阅',kind:'active',reason:'猜你喜欢'},
+          {name:'白玉兰审批测试',type:'项目数据服务',time:'2026-07-10 09:57:16',status:'已订阅',kind:'active',reason:'测试'},
+          {name:'轻量化展示',type:'轻量化引擎',time:'2026-04-23 15:16:11',status:'已订阅',kind:'active',reason:'申请'},
+          {name:'合标性检查',type:'模型质量',time:'2026-04-23 15:15:59',status:'已订阅',kind:'active',reason:'申请'},
+          {name:'白玉兰（非插件）',type:'项目数据服务',time:'2026-04-22 15:22:21',status:'已订阅',kind:'active',reason:'234'},
+          {name:'测试项目12',type:'项目数据服务',time:'2026-04-14 14:36:48',status:'已订阅',kind:'active',reason:'test'},
+          {name:'白玉兰测试20260228',type:'项目数据服务',time:'2026-04-01 14:16:02',status:'已订阅',kind:'active',reason:'申请订阅'}
+        ],
+        sceneTypes:[
+          {id:'review',name:'项目模型协同审查',description:'用于汇集已入库项目模型，开展跨专业协同审查。',projectIds:['P001','P002']},
+          {id:'quality',name:'模型质量交付检查',description:'集中查看交付项目及其子模型，辅助质量核验。',projectIds:['P002']},
+          {id:'operation',name:'设备运维巡检',description:'按运维场景组织已入库项目模型。',projectIds:['P003']}
+        ],
+        activeSceneId:'review',
+        ingestedProjects:[
+          {id:'P001',name:'白玉兰测试20260203',no:'122113',stage:'设计阶段',time:'2026-09-12 14:30',models:[{name:'白玉兰-土建模型',major:'土建专业',format:'IFC'},{name:'白玉兰-机电模型',major:'机电专业',format:'IFC'}]},
+          {id:'P002',name:'联合工房数字化项目',no:'HF-BIM-2026-008',stage:'施工阶段',time:'2026-09-10 10:18',models:[{name:'联合工房-建筑子模型',major:'建筑专业',format:'RVT'},{name:'联合工房-暖通子模型',major:'暖通专业',format:'IFC'},{name:'联合工房-电气子模型',major:'电气专业',format:'IFC'}]},
+          {id:'P003',name:'智慧园区一期项目',no:'HF-BIM-2026-015',stage:'运维阶段',time:'2026-09-06 16:12',models:[{name:'智慧园区-设备子模型',major:'设备专业',format:'IFC'},{name:'智慧园区-室外管网',major:'市政专业',format:'RVT'}]}
+        ],
+        pendingApprover:''
+      };
+      const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const notice = document.createElement('div'); notice.className = 'minimal-console-notice'; document.body.appendChild(notice);
+      const toast = text => { notice.textContent = text; notice.classList.add('show'); setTimeout(() => notice.classList.remove('show'),2200); };
+      const openModal = (title,body,foot='<button class="btn primary" type="button" data-minimal-console-close>关闭</button>') => {
+        modal.querySelector('[data-console-modal-title]').textContent = title;
+        modal.querySelector('[data-console-modal-body]').innerHTML = body;
+        modal.querySelector('[data-console-modal-foot]').innerHTML = foot;
+        modal.classList.add('open');
+      };
+      const status = (text,kind) => `<em class="console-status ${kind}">${text}</em>`;
+      const activeSubscriptions = () => state.subscriptions.filter(item => item.status === '已订阅');
+      const activeScene = () => state.sceneTypes.find(item => item.id === state.activeSceneId) || state.sceneTypes[0];
+      const pageNames = {ticket:'我的工单',subscription:'我的订阅',scene:'我的场景',app:'我的应用',cart:'我的选数车'};
+      const side = active => {
+        document.getElementById('primarySide').innerHTML = '<div class="primary-item" data-workbench-primary><span class="primary-icon">▦</span><span>工作台</span></div><div class="primary-item active" data-console-primary><span class="primary-icon">▣</span><span>控制台</span></div>';
+        document.getElementById('secondarySide').innerHTML = Object.entries(pageNames).map(([key,label]) => `<button class="sub-btn ${active === key ? 'active' : ''}" type="button" data-minimal-console-page="${key}">◩ ${label}${key === 'cart' && state.cart.length ? `<em>${state.cart.length}</em>` : ''}</button>`).join('');
+      };
+      const shell = (title,description,content,action='') => `<section class="console-page minimal-console-page"><div class="console-head"><div><h2>${title}</h2><p>${description}</p></div>${action}</div>${content}</section>`;
+      const tickets = () => shell('我的工单','统一查看 BIM 公共服务订阅申请及审批处理记录。',`<section class="console-table-card public-record-card"><div class="minimal-list-toolbar"><span>共 ${state.tickets.length} 条工单</span><div><input class="input" data-minimal-ticket-keyword placeholder="请输入关键词搜索"><select class="select" data-minimal-ticket-filter><option value="">全部状态</option><option>待审批</option><option>已同意</option><option>已撤销</option></select><button class="btn primary" type="button" data-minimal-ticket-search>搜索</button></div></div><div class="public-record-table-wrap"><table class="public-workorder-table"><thead><tr><th>序号</th><th>名称</th><th>工单编号</th><th>状态</th><th>申请人</th><th>所属单位</th><th>申请原因</th><th>申请时间</th><th>操作</th></tr></thead><tbody>${state.tickets.map((item,index) => `<tr data-minimal-ticket-row data-ticket-status="${item.status}"><td>${index + 1}</td><td>${safe(item.name)}</td><td title="${safe(item.no)}">${safe(item.no)}</td><td>${status(item.status,item.kind)}</td><td>${safe(item.applicant)}</td><td>${safe(item.dept)}</td><td>${safe(item.reason)}</td><td>${safe(item.time)}</td><td>${item.status === '待审批' ? `<button class="link" type="button" data-minimal-ticket-cancel="${item.no}">撤销申请</button><button class="link" type="button" data-minimal-ticket-approve="${item.no}">审批</button>` : ''}<button class="link" type="button" data-minimal-ticket-detail="${item.no}">详情</button></td></tr>`).join('')}</tbody></table></div></section>`);
+      const subscriptions = () => shell('我的订阅','统一管理从 BIM 公共服务申请的个人订阅资源。',`<section class="console-table-card public-record-card"><div class="minimal-list-toolbar"><span>共 ${state.subscriptions.length} 条订阅</span><div><input class="input" data-minimal-sub-keyword placeholder="请输入关键词搜索"><select class="select" data-minimal-sub-type><option value="">全部资源</option><option>项目数据服务</option><option>模型质量</option><option>轻量化引擎</option><option>BIM公共服务</option></select><button class="btn primary" type="button" data-minimal-sub-search>搜索</button></div></div><div class="public-record-table-wrap"><table class="public-subscription-table"><thead><tr><th>序号</th><th>名称</th><th>状态</th><th>申请原因</th><th>申请时间</th><th>操作</th></tr></thead><tbody>${state.subscriptions.map((item,index) => `<tr data-minimal-sub-row data-sub-type="${safe(item.type)}"><td>${index + 1}</td><td>${safe(item.name)}</td><td>${status(item.status,item.kind || (item.status === '已订阅' ? 'active' : 'wait'))}</td><td>${safe(item.reason)}</td><td>${safe(item.time)}</td><td><button class="link" type="button" data-minimal-subscription-view="${index}">详情</button>${item.status === '已订阅' ? `<button class="link" type="button" data-minimal-subscription-cancel="${index}">取消订阅</button>` : item.status === '待审批' ? `<button class="link" type="button" data-minimal-subscription-cancel="${index}">撤销申请</button>` : ''}</td></tr>`).join('')}</tbody></table></div></section>`);
+      const scenes = () => {
+        const scene = activeScene(); const selectedIds = scene?.projectIds || [];
+        const selectedProjects = state.ingestedProjects.filter(project => selectedIds.includes(project.id));
+        const models = selectedProjects.flatMap(project => project.models.map(model => ({...model,project:project.name,projectId:project.id})));
+        return shell('我的场景','按场景类型组织已入库项目，并集中查看场景内的全部子模型。',`
+          <section class="scene-type-strip"><div>${state.sceneTypes.map(item => `<button class="${item.id === scene?.id ? 'active' : ''}" type="button" data-minimal-scene-type="${item.id}">${safe(item.name)}<small>${item.projectIds.length} 个项目</small></button>`).join('')}</div></section>
+          <section class="scene-current-head"><div><h3>${safe(scene?.name || '未命名场景')}</h3><p>${safe(scene?.description || '暂无场景描述')}</p></div><div class="scene-current-actions"><span>包含 ${selectedProjects.length} 个项目 · ${models.length} 个子模型</span><button class="btn light" type="button" data-minimal-scene-edit>编辑场景</button></div></section>
+          <section class="console-table-card scene-project-card"><div class="console-card-head"><b>场景项目</b><span>当前场景已添加的项目</span></div><table><thead><tr><th>项目名称</th><th>项目编号</th><th>项目阶段</th><th>入库时间</th><th>子模型数</th><th>操作</th></tr></thead><tbody>${selectedProjects.length ? selectedProjects.map(project => `<tr><td>${safe(project.name)}</td><td>${safe(project.no)}</td><td>${safe(project.stage)}</td><td>${safe(project.time)}</td><td>${project.models.length}</td><td><button class="link" type="button" data-minimal-scene-view-project="${project.id}">查看项目</button></td></tr>`).join('') : '<tr><td colspan="6" class="console-empty">当前场景尚未添加项目，请通过“编辑场景”进行配置</td></tr>'}</tbody></table></section>
+          <section class="console-table-card scene-model-card"><div class="console-card-head"><b>子模型提取</b><span>当前场景所含项目的全部子模型</span></div><table><thead><tr><th>子模型名称</th><th>所属项目</th><th>专业</th><th>文件格式</th><th>操作</th></tr></thead><tbody>${models.length ? models.map((model,index) => `<tr><td>${safe(model.name)}</td><td>${safe(model.project)}</td><td>${safe(model.major)}</td><td>${safe(model.format)}</td><td><button class="link" type="button" data-minimal-scene-model="${index}">查看模型</button></td></tr>`).join('') : '<tr><td colspan="5" class="console-empty">当前场景尚未添加项目，暂无可提取子模型</td></tr>'}</tbody></table></section>`, '<button class="btn primary" type="button" data-minimal-scene-create>新增场景类型</button>');
+      };
+      const subscribedServices = [
+        {title:'基点一致性检查',type:'模型质检',tags:['质检','基点','一致性'],description:'用于检查IFC模型坐标系和高程是否满足合肥市《建筑信息模型数据存储标准》SJG 114-2022 及《合肥市建筑工程信息模型（BIM）建模手册》中的相关要求；同时检查同一项目模型基点的一致性。'},
+        {title:'轻量化展示',type:'轻量化引擎',tags:['引擎','可视化'],description:'轻量化展示主要提供在WEB端和移动端展示二维图形及三维模型的能力，并提供常用的三维模型浏览工具。'},
+        {title:'API鉴权',type:'开放服务',tags:['API','开放','鉴权'],description:'API开放平台调用鉴权对接方式。'}
+      ];
+      const serviceIcon = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 7v10M18 7h12v10H18zM11 27h10v10H11zM27 27h10v10H27zM19 22h10M16 22v5M32 22v5M24 17v10M19 27h10v10H19z"/></svg>';
+      const apps = () => { const items = subscribedServices; const types = [...new Set(items.map(item => item.type))]; return shell('我的应用','仅展示当前用户已订阅的服务。',`<section class="my-app-market"><div class="my-app-search"><div><input class="input" data-minimal-app-keyword placeholder="搜索服务名称"><button class="btn primary" type="button" data-minimal-app-search>搜索</button></div><nav class="my-app-categories"><button class="active" type="button" data-minimal-app-type="">全部</button>${types.map(type => `<button type="button" data-minimal-app-type="${safe(type)}">${safe(type)}</button>`).join('')}</nav></div><div class="my-app-section-title"><b>已订阅服务</b><span>共 ${items.length} 项</span></div><div class="my-app-service-grid" data-minimal-app-grid>${items.map(item => `<article class="my-app-service-card" data-minimal-app-card data-app-type="${safe(item.type)}"><div class="my-app-service-icon">${serviceIcon}</div><h3>${safe(item.title)}</h3><div class="my-app-service-tags">${item.tags.map((tag,index) => `<span class="tag-${index + 1}">${safe(tag)}</span>`).join('')}<span class="tag-more">⋮</span></div><p>${safe(item.description)}</p><div class="my-app-service-foot"><span class="my-app-subscribed">✓ 已订阅</span></div></article>`).join('')}</div><div class="console-empty my-app-filter-empty" data-minimal-app-empty hidden>未找到匹配的已订阅服务</div></section>`); };
+      const applyAppFilter = () => { const keyword = (page.querySelector('[data-minimal-app-keyword]')?.value || '').trim().toLowerCase(); const type = page.querySelector('[data-minimal-app-type].active')?.dataset.minimalAppType || ''; let visible = 0; page.querySelectorAll('[data-minimal-app-card]').forEach(card => { const matched = (!type || card.dataset.appType === type) && (!keyword || card.textContent.toLowerCase().includes(keyword)); card.hidden = !matched; if (matched) visible += 1; }); const empty = page.querySelector('[data-minimal-app-empty]'); if (empty) empty.hidden = visible !== 0; };
+      const cart = () => shell('我的选数车','统一提交已选择的数据，提交后自动生成数据申请工单。',`<section class="console-table-card"><div class="console-cart-tip">当前共选择 <b>${state.cart.length}</b> 项数据；同一批数据仅选择一位审批人并生成一张工单。</div><table><thead><tr><th>数据名称</th><th>数据类型</th><th>所属项目</th><th>加入时间</th><th>操作</th></tr></thead><tbody>${state.cart.length ? state.cart.map((item,index) => `<tr><td>${safe(item.name)}</td><td>${safe(item.type)}</td><td>${safe(item.project)}</td><td>${safe(item.time)}</td><td><button class="console-danger" type="button" data-minimal-cart-remove="${index}">移除</button></td></tr>`).join('') : '<tr><td colspan="5" class="console-empty">选数车暂无数据</td></tr>'}</tbody></table><div class="console-cart-submit"><label>审批人</label><select class="select" data-minimal-cart-approver><option value="">请选择审批人</option><option>王处</option><option>郭处</option><option>总工</option></select><button class="btn primary" type="button" data-minimal-cart-submit ${state.cart.length ? '' : 'disabled'}>提交数据申请</button></div></section>`, '<button class="btn light" type="button" data-minimal-go-data>继续选数</button>');
+      const render = active => {
+        state.active = active || 'ticket';
+        document.querySelector('.layout')?.classList.remove('homepage-mode');
+        document.querySelectorAll('.top-btn').forEach(button => button.classList.toggle('active',button === workbenchButton));
+        document.querySelectorAll('.page').forEach(item => item.classList.remove('active')); page.classList.add('active'); side(state.active);
+        const crumb = document.getElementById('breadcrumb'); if (crumb) crumb.textContent = `工作台 / 控制台${state.active ? ` / ${pageNames[state.active]}` : ''}`;
+        page.innerHTML = state.active === 'subscription' ? subscriptions() : state.active === 'scene' ? scenes() : state.active === 'app' ? apps() : state.active === 'cart' ? cart() : tickets();
+      };
+      window.openPersonalConsole = render;
+
+      document.addEventListener('click',event => {
+        const primary = event.target.closest('[data-console-primary]');
+        const route = event.target.closest('[data-minimal-console-page]');
+        const oldRoute = event.target.closest('[data-console-page]');
+        if (primary || route || oldRoute) { event.preventDefault(); event.stopImmediatePropagation(); render(route?.dataset.minimalConsolePage || oldRoute?.dataset.consolePage || 'ticket'); return; }
+        if (!event.target.closest('#personalConsolePage') && !event.target.closest('#consoleActionModal')) return;
+        const remove = event.target.closest('[data-minimal-cart-remove]'); if (remove) { event.stopImmediatePropagation(); state.cart.splice(Number(remove.dataset.minimalCartRemove),1); render('cart'); return; }
+        if (event.target.closest('[data-minimal-cart-submit]')) {
+          event.stopImmediatePropagation(); const approver = page.querySelector('[data-minimal-cart-approver]')?.value; if (!approver) return toast('请选择一位审批人'); state.pendingApprover = approver;
+          openModal('提交数据申请',`<div class="minimal-submit-confirm"><b>确认提交 ${state.cart.length} 项数据申请</b><p>审批人：${safe(approver)}</p><ul>${state.cart.map(item => `<li>${safe(item.name)}</li>`).join('')}</ul><small>提交后将自动生成一张数据申请工单，可在“我的工单”查看状态。</small></div>`,'<button class="btn light" type="button" data-minimal-console-close>取消</button><button class="btn primary" type="button" data-minimal-cart-confirm>确认提交</button>'); return;
+        }
+        if (event.target.closest('[data-minimal-cart-confirm]')) {
+          event.stopImmediatePropagation(); const selected = state.cart.map(item => item.name); const no = `WO-20260912-${String(state.tickets.length + 1).padStart(3,'0')}`;
+          state.tickets.unshift({no,name:'选数车数据使用申请',time:'刚刚',status:'待审批',kind:'wait',applicant:'admin',dept:'数据管理部',reason:'选数车统一数据申请',approver:state.pendingApprover,items:selected,result:'等待审批人处理'}); state.cart.splice(0); modal.classList.remove('open'); render('ticket'); toast(`已生成工单 ${no}`); return;
+        }
+        const detail = event.target.closest('[data-minimal-ticket-detail]'); if (detail) {
+          event.stopImmediatePropagation(); const item = state.tickets.find(ticket => ticket.no === detail.dataset.minimalTicketDetail); if (!item) return;
+          openModal('工单详情',`<div class="minimal-ticket-detail"><div class="minimal-ticket-meta"><span>工单编号<b>${safe(item.no)}</b></span><span>名称<b>${safe(item.name)}</b></span><span>当前状态${status(item.status,item.kind)}</span><span>申请人<b>${safe(item.applicant)}</b></span><span>所属单位<b>${safe(item.dept)}</b></span><span>审批人<b>${safe(item.approver)}</b></span></div><h4>申请原因</h4><p>${safe(item.reason)}</p><h4>申请资源</h4><ul>${(item.items || []).map(name => `<li>${safe(name)}</li>`).join('')}</ul><h4>处理结果</h4><p>${safe(item.result)}</p></div>`); return;
+        }
+        const ticketCancel = event.target.closest('[data-minimal-ticket-cancel]'); if (ticketCancel) { event.stopImmediatePropagation(); const item = state.tickets.find(ticket => ticket.no === ticketCancel.dataset.minimalTicketCancel); if (!item) return; item.status = '已撤销'; item.kind = 'done'; item.result = '申请人已撤销本次申请'; (item.items || []).forEach(name => { const subscription = state.subscriptions.find(sub => sub.name === name && sub.status === '待审批'); if (subscription) { subscription.status = '已撤销'; subscription.kind = 'done'; } }); render('ticket'); toast('工单已撤销'); return; }
+        const ticketApprove = event.target.closest('[data-minimal-ticket-approve]'); if (ticketApprove) { event.stopImmediatePropagation(); const item = state.tickets.find(ticket => ticket.no === ticketApprove.dataset.minimalTicketApprove); if (!item) return; item.status = '已同意'; item.kind = 'active'; item.result = '审批已通过，订阅能力已开通'; (item.items || []).forEach(name => { const subscription = state.subscriptions.find(sub => sub.name === name && sub.status === '待审批'); if (subscription) { subscription.status = '已订阅'; subscription.kind = 'active'; } else { state.subscriptions.unshift({name,type:'BIM公共服务',time:item.time,status:'已订阅',kind:'active',reason:item.reason}); } }); render('ticket'); toast('审批已通过，相关订阅已开通'); return; }
+        if (event.target.closest('[data-minimal-ticket-search]')) { event.stopImmediatePropagation(); const keyword = (page.querySelector('[data-minimal-ticket-keyword]')?.value || '').trim().toLowerCase(); const filter = page.querySelector('[data-minimal-ticket-filter]')?.value || ''; page.querySelectorAll('[data-minimal-ticket-row]').forEach(row => { row.hidden = (Boolean(filter) && row.dataset.ticketStatus !== filter) || (Boolean(keyword) && !row.textContent.toLowerCase().includes(keyword)); }); return; }
+        if (event.target.closest('[data-minimal-sub-search]')) { event.stopImmediatePropagation(); const keyword = (page.querySelector('[data-minimal-sub-keyword]')?.value || '').trim().toLowerCase(); const type = page.querySelector('[data-minimal-sub-type]')?.value || ''; page.querySelectorAll('[data-minimal-sub-row]').forEach(row => { row.hidden = (Boolean(type) && row.dataset.subType !== type) || (Boolean(keyword) && !row.textContent.toLowerCase().includes(keyword)); }); return; }
+        const viewSubscription = event.target.closest('[data-minimal-subscription-view]'); if (viewSubscription) { event.stopImmediatePropagation(); const item = state.subscriptions[Number(viewSubscription.dataset.minimalSubscriptionView)]; openModal(item.status === '已订阅' ? '订阅详情' : '订阅申请',`<div class="console-detail-list"><p><b>名称：</b>${safe(item.name)}</p><p><b>状态：</b>${safe(item.status)}</p><p><b>资源类型：</b>${safe(item.type)}</p><p><b>申请原因：</b>${safe(item.reason)}</p><p><b>申请时间：</b>${safe(item.time)}</p></div>`); return; }
+        const cancel = event.target.closest('[data-minimal-subscription-cancel]'); if (cancel) { event.stopImmediatePropagation(); const item = state.subscriptions[Number(cancel.dataset.minimalSubscriptionCancel)]; if (!item) return; const pending = item.status === '待审批'; item.status = pending ? '已撤销' : '已取消'; item.kind = 'done'; render('subscription'); toast(pending ? '订阅申请已撤销' : '订阅已取消'); return; }
+        const sceneType = event.target.closest('[data-minimal-scene-type]'); if (sceneType) { event.stopImmediatePropagation(); state.activeSceneId = sceneType.dataset.minimalSceneType; render('scene'); return; }
+        if (event.target.closest('[data-minimal-scene-edit]')) { event.stopImmediatePropagation(); const scene = activeScene(); if (!scene) return; openModal('编辑场景',`<div class="console-form-row"><label>场景名称</label><input class="input" data-minimal-scene-edit-name value="${safe(scene.name)}"></div><div class="console-form-row"><label>场景描述</label><textarea class="input" data-minimal-scene-edit-description placeholder="请输入该场景的用途说明">${safe(scene.description)}</textarea></div><div class="console-form-row"><label>添加项目</label><div class="scene-project-picker"><div class="scene-project-search"><input class="input" data-minimal-scene-project-search placeholder="请输入项目名称或项目编号"><span data-minimal-scene-selected-count>已选择 ${scene.projectIds.length} 个项目</span></div><div class="scene-project-selector">${state.ingestedProjects.map(project => `<label data-minimal-scene-project-row><input type="checkbox" value="${project.id}" data-minimal-scene-edit-project ${scene.projectIds.includes(project.id) ? 'checked' : ''}><span><b>${safe(project.name)}</b><small>${safe(project.no)} · ${safe(project.stage)} · ${project.models.length} 个子模型</small></span></label>`).join('')}<div class="scene-project-search-empty" data-minimal-scene-project-empty hidden>未找到匹配项目</div></div></div></div>`,'<button class="btn light" type="button" data-minimal-console-close>取消</button><button class="btn primary" type="button" data-minimal-scene-edit-confirm>保存</button>'); return; }
+        if (event.target.closest('[data-minimal-scene-edit-confirm]')) { event.stopImmediatePropagation(); const scene = activeScene(); if (!scene) return; const name = modal.querySelector('[data-minimal-scene-edit-name]')?.value.trim(); if (!name) return toast('请输入场景名称'); scene.name = name; scene.description = modal.querySelector('[data-minimal-scene-edit-description]')?.value.trim() || '暂无场景描述'; scene.projectIds = [...modal.querySelectorAll('[data-minimal-scene-edit-project]:checked')].map(input => input.value); modal.classList.remove('open'); render('scene'); toast('场景已更新'); return; }
+        if (event.target.closest('[data-minimal-scene-create]')) { event.stopImmediatePropagation(); openModal('新增场景类型',`<div class="console-form-row"><label>场景名称</label><input class="input" data-minimal-scene-name placeholder="请输入场景类型名称"></div><div class="console-form-row"><label>场景描述</label><textarea class="input" data-minimal-scene-description placeholder="请输入该场景的用途说明"></textarea></div>`,'<button class="btn light" type="button" data-minimal-console-close>取消</button><button class="btn primary" type="button" data-minimal-scene-confirm>确定新增</button>'); return; }
+        if (event.target.closest('[data-minimal-scene-confirm]')) { event.stopImmediatePropagation(); const name = modal.querySelector('[data-minimal-scene-name]')?.value.trim(); const description = modal.querySelector('[data-minimal-scene-description]')?.value.trim(); if (!name) return toast('请输入场景类型名称'); const id = `scene-${Date.now()}`; state.sceneTypes.push({id,name,description:description || '暂无场景描述',projectIds:[]}); state.activeSceneId = id; modal.classList.remove('open'); render('scene'); toast('场景类型已新增，可继续添加项目'); return; }
+        const sceneProject = event.target.closest('[data-minimal-scene-view-project]'); if (sceneProject) { event.stopImmediatePropagation(); const project = state.ingestedProjects.find(item => item.id === sceneProject.dataset.minimalSceneViewProject); if (!project) return; if (typeof showPage === 'function') showPage('projectPage','data'); else document.querySelector('[data-page-to="projectPage"]')?.click(); const crumb = document.getElementById('breadcrumb'); if (crumb) crumb.textContent = `项目数据管理 / 项目详情 / ${project.name}`; toast(`已进入项目：${project.name}`); return; }
+        const sceneModel = event.target.closest('[data-minimal-scene-model]'); if (sceneModel) { event.stopImmediatePropagation(); const scene = activeScene(); const selectedProjects = state.ingestedProjects.filter(project => scene?.projectIds.includes(project.id)); const models = selectedProjects.flatMap(project => project.models.map(model => ({...model,project:project.name}))); const model = models[Number(sceneModel.dataset.minimalSceneModel)]; if (!model) return; openModal('查看子模型',`<div class="console-service-open"><b>${safe(model.name)}</b><p>所属项目：${safe(model.project)}</p><p>专业：${safe(model.major)}　文件格式：${safe(model.format)}</p><p>已从当前场景中提取并打开该子模型（原型演示）。</p></div>`); return; }
+        const appType = event.target.closest('[data-minimal-app-type]'); if (appType) { event.stopImmediatePropagation(); page.querySelectorAll('[data-minimal-app-type]').forEach(button => button.classList.toggle('active',button === appType)); applyAppFilter(); return; }
+        if (event.target.closest('[data-minimal-app-search]')) { event.stopImmediatePropagation(); applyAppFilter(); return; }
+        if (event.target.closest('[data-minimal-console-close]') || event.target === modal) { event.stopImmediatePropagation(); modal.classList.remove('open'); return; }
+        if (event.target.closest('[data-minimal-go-data]')) { event.stopImmediatePropagation(); const dataButton = [...document.querySelectorAll('.top-btn')].find(button => button.textContent.includes('BIM数据管理')); dataButton?.click(); }
+      },true);
+      document.addEventListener('input',event => {
+        if (event.target.matches('[data-minimal-app-keyword]')) { applyAppFilter(); return; }
+        if (!event.target.matches('[data-minimal-scene-project-search]')) return;
+        const keyword = event.target.value.trim().toLowerCase();
+        const rows = [...modal.querySelectorAll('[data-minimal-scene-project-row]')];
+        let visibleCount = 0;
+        rows.forEach(row => { const matched = !keyword || row.textContent.toLowerCase().includes(keyword); row.hidden = !matched; if (matched) visibleCount += 1; });
+        const empty = modal.querySelector('[data-minimal-scene-project-empty]'); if (empty) empty.hidden = visibleCount !== 0;
+      },true);
+      document.addEventListener('change',event => {
+        if (!event.target.matches('[data-minimal-scene-edit-project]')) return;
+        const count = modal.querySelectorAll('[data-minimal-scene-edit-project]:checked').length;
+        const label = modal.querySelector('[data-minimal-scene-selected-count]'); if (label) label.textContent = `已选择 ${count} 个项目`;
+      },true);
+      document.addEventListener('console-subscription-submitted',event => {
+        const detail = event.detail || {}; const names = Array.isArray(detail.names) ? detail.names : []; if (!names.length) return;
+        names.forEach(name => state.subscriptions.unshift({name,type:'BIM公共服务',time:detail.time || '刚刚',status:'待审批',kind:'wait',reason:detail.reason || '申请使用 BIM 公共服务能力'}));
+        const no = `WO-${Date.now().toString().slice(-14)}`;
+        state.tickets.unshift({no,name:names.length === 1 ? names[0] : `${names.length} 项 BIM公共服务订阅申请`,time:detail.time || '刚刚',status:'待审批',kind:'wait',applicant:'admin',dept:'数字化处',reason:detail.reason || '申请使用 BIM 公共服务能力',approver:detail.approver || '—',items:names,result:'等待审批人处理'});
+        if (page.classList.contains('active')) render(state.active); toast('订阅申请已同步到控制台');
+      });
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .minimal-console-page{padding:0}.minimal-user-strip{display:flex;align-items:center;gap:28px;height:44px;padding:0 16px;margin-bottom:12px;border:1px solid #dfe8e2;background:#fff;color:#76847b;font-size:12px}.minimal-user-strip b{color:#285f42;font-size:14px}.minimal-console-summary{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:10px!important}.minimal-console-summary button{padding:15px 17px;border:1px solid #dfe8e2;border-radius:0;background:#fff;text-align:left;cursor:pointer}.minimal-console-summary button:hover{border-color:#88b79a;background:#f7fbf8}.minimal-console-summary span,.minimal-console-summary small{display:block;color:#849087;font-size:12px}.minimal-console-summary b{display:block;margin:6px 0;color:#246f4a;font-size:25px}.minimal-console-overview{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}.minimal-latest-ticket{display:grid;grid-template-columns:minmax(0,1fr) 80px 50px;align-items:center;padding:16px}.minimal-latest-ticket b,.minimal-latest-ticket span{display:block}.minimal-latest-ticket b{color:#405147;font-size:13px}.minimal-latest-ticket span{margin-top:5px;color:#8a958e;font-size:11px}.minimal-overview-cart{padding:6px 16px 10px}.minimal-overview-cart p{display:flex;justify-content:space-between;margin:0;padding:10px 0;border-bottom:1px solid #edf1ee;color:#4d5d53;font-size:12px}.minimal-overview-cart small{color:#8b968f}.minimal-list-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #e5ebe7;color:#748178;font-size:12px}.minimal-list-toolbar>div{display:flex;align-items:center;gap:8px}.minimal-list-toolbar .input{width:220px;height:32px;box-sizing:border-box}.minimal-list-toolbar .select{width:130px;height:32px}.public-record-card{overflow:hidden}.public-record-table-wrap{width:100%;overflow-x:auto}.public-record-table-wrap table{table-layout:fixed}.public-workorder-table{min-width:1180px}.public-subscription-table{min-width:850px}.public-workorder-table th:nth-child(1){width:55px}.public-workorder-table th:nth-child(2){width:140px}.public-workorder-table th:nth-child(3){width:245px}.public-workorder-table th:nth-child(4){width:82px}.public-workorder-table th:nth-child(5){width:90px}.public-workorder-table th:nth-child(6){width:110px}.public-workorder-table th:nth-child(7){width:160px}.public-workorder-table th:nth-child(8){width:160px}.public-workorder-table th:nth-child(9){width:150px}.public-subscription-table th:nth-child(1){width:60px}.public-subscription-table th:nth-child(2){width:220px}.public-subscription-table th:nth-child(3){width:100px}.public-subscription-table th:nth-child(4){width:260px}.public-subscription-table th:nth-child(5){width:170px}.public-subscription-table th:nth-child(6){width:155px}.public-record-table-wrap td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.public-record-table-wrap td:last-child{overflow:visible;white-space:nowrap}.public-record-table-wrap td:last-child .link{margin-right:9px}.minimal-resource-grid article{min-height:128px!important}.subscription-app-grid article{position:relative;padding-left:58px}.subscription-app-icon{position:absolute;left:18px;top:19px;display:grid;place-items:center;width:28px;height:28px;border:1px solid #cfe3d5;background:#edf7f0;color:#287b50}.subscription-app-grid article>span{margin:9px 0 0}.scene-type-strip{display:flex;align-items:center;min-height:48px;margin-bottom:10px;border:1px solid #dfe8e2;background:#fff;overflow-x:auto}.scene-type-strip>div{display:flex;align-self:stretch}.scene-type-strip button{min-width:180px;padding:7px 18px;border:0;border-right:1px solid #e5ebe7;background:#fff;color:#526158;text-align:left;cursor:pointer}.scene-type-strip button.active{box-shadow:inset 0 -3px #2b8155;background:#f2f8f4;color:#236d48}.scene-type-strip small{display:block;margin-top:4px;color:#8a958e;font-size:11px}.scene-current-head{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;margin-bottom:10px;border-left:3px solid #2d8054;background:#fff}.scene-current-head h3{margin:0 0 5px;color:#34483b;font-size:15px}.scene-current-head p{margin:0;color:#78857d;font-size:12px}.scene-current-head>span,.scene-project-card .console-card-head span,.scene-model-card .console-card-head span{color:#87938b;font-size:12px}.scene-project-card{margin-bottom:10px}.scene-project-card th:nth-child(1){width:26%}.scene-project-card th:nth-child(2){width:18%}.scene-project-card th:nth-child(3){width:13%}.scene-project-card th:nth-child(4){width:20%}.scene-project-card th:nth-child(5){width:10%}.scene-project-card th:nth-child(6){width:13%}.scene-model-card th:nth-child(1){width:28%}.scene-model-card th:nth-child(2){width:28%}.scene-model-card th:nth-child(3){width:16%}.scene-model-card th:nth-child(4){width:14%}.scene-model-card th:nth-child(5){width:14%}.scene-remove-link{color:#8b6b52!important}.minimal-submit-confirm>b{display:block;padding:12px 14px;background:#f1f8f3;color:#276b47}.minimal-submit-confirm p{color:#64736a}.minimal-submit-confirm ul,.minimal-ticket-detail ul{margin:10px 0;padding:0;list-style:none;border:1px solid #e3e9e5}.minimal-submit-confirm li,.minimal-ticket-detail li{padding:9px 11px;border-bottom:1px solid #edf1ee;color:#526158;font-size:12px}.minimal-submit-confirm li:last-child,.minimal-ticket-detail li:last-child{border:0}.minimal-submit-confirm small{color:#849087}.minimal-ticket-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.minimal-ticket-meta span{padding:10px;background:#f5f8f6;color:#7a877f;font-size:11px}.minimal-ticket-meta b{display:block;margin-top:5px;color:#405147;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.minimal-ticket-detail h4{margin:18px 0 8px;color:#35473b}.minimal-ticket-detail>p{padding:11px;background:#f4faf6;color:#40604d}.minimal-console-notice{position:fixed;z-index:160;top:76px;left:50%;padding:10px 16px;border-radius:4px;background:#253b2f;color:#fff;font-size:13px;opacity:0;transform:translate(-50%,-8px);pointer-events:none;transition:.2s}.minimal-console-notice.show{opacity:1;transform:translate(-50%,0)}#secondarySide .sub-btn em{display:inline-grid;place-items:center;min-width:17px;height:17px;margin-left:auto;border-radius:9px;background:#2e8c5d;color:#fff;font-size:10px;font-style:normal}@media(max-width:1200px){.minimal-console-summary{grid-template-columns:repeat(3,1fr)!important}.minimal-console-overview{grid-template-columns:1fr}.minimal-user-strip{gap:14px}.minimal-list-toolbar{align-items:flex-start;gap:8px;flex-direction:column}.minimal-list-toolbar>div{width:100%}.scene-current-head{align-items:flex-start;gap:8px;flex-direction:column}}
+      `;
+      style.textContent += '.scene-current-actions{display:flex;align-items:center;gap:12px}.scene-current-actions>span{color:#87938b;font-size:12px}.scene-current-actions .btn{height:30px}.scene-project-selector{max-height:260px;overflow:auto;border:1px solid #dfe8e2}.scene-project-selector>label{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #edf1ee;cursor:pointer}.scene-project-selector>label:last-child{border-bottom:0}.scene-project-selector input{margin:0}.scene-project-selector span,.scene-project-selector b,.scene-project-selector small{display:block}.scene-project-selector span{min-width:0}.scene-project-selector b{color:#405147;font-size:13px}.scene-project-selector small{margin-top:4px;color:#89958e;font-size:11px}@media(max-width:1200px){.scene-current-actions{width:100%;justify-content:space-between}}';
+      style.textContent += '.scene-project-picker{min-width:0}.scene-project-search{display:flex;align-items:center;gap:10px;margin-bottom:8px}.scene-project-search .input{flex:1;min-width:0;height:34px}.scene-project-search>span{flex:0 0 auto;color:#7d8a82;font-size:12px;white-space:nowrap}.scene-project-search-empty{padding:32px 12px;text-align:center;color:#929d96;font-size:12px}';
+      style.textContent += '.my-app-market{min-height:500px}.my-app-search{padding:14px 16px;margin-bottom:14px;border:1px solid #dfe8e2;background:#fff}.my-app-search>div{display:flex;justify-content:center}.my-app-search .input{width:360px;height:34px;border-radius:4px 0 0 4px}.my-app-search .btn{height:34px;border-radius:0 4px 4px 0}.my-app-categories{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:13px;flex-wrap:wrap}.my-app-categories button{padding:5px 9px;border:0;background:transparent;color:#68756d;cursor:pointer;font-size:12px}.my-app-categories button.active{background:#eaf2ff;color:#4d7dc5}.my-app-section-title{display:flex;align-items:center;justify-content:space-between;padding:10px 4px 12px;border-bottom:1px solid #e4e7eb}.my-app-section-title b{padding-left:9px;border-left:3px solid #4094ef;color:#35383d;font-size:15px}.my-app-section-title span{color:#8e939b;font-size:12px}.my-app-service-grid{display:grid;grid-template-columns:repeat(3,minmax(250px,1fr));gap:24px;padding-top:18px}.my-app-service-card{display:flex;flex-direction:column;min-height:360px;padding:30px 30px 18px;box-sizing:border-box;border:1px solid #d9dee7;border-radius:12px;background:#fff}.my-app-service-icon{display:grid;place-items:center;width:102px;height:102px;margin:0 auto 14px;border:1px solid #9dcbff;border-radius:50%;background:#edf6ff;color:#4098f7}.my-app-service-icon svg{width:48px;height:48px;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}.my-app-service-card h3{margin:0 0 13px;color:#303237;font-size:20px;line-height:1.35;text-align:center}.my-app-service-tags{display:flex;align-items:center;justify-content:center;gap:9px;min-height:31px}.my-app-service-tags span{display:inline-grid;place-items:center;min-width:58px;height:30px;padding:0 12px;box-sizing:border-box;border-radius:3px;color:#fff;font-size:14px}.my-app-service-tags .tag-1{background:#ffadb5}.my-app-service-tags .tag-2{background:#71d0bf}.my-app-service-tags .tag-3{background:#7d83ed}.my-app-service-tags .tag-more{min-width:30px;width:30px;padding:0;background:#d4d5d9;font-size:23px;line-height:1}.my-app-service-card p{display:-webkit-box;flex:1;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden;margin:22px 0 12px;color:#8b8f96;font-size:15px;line-height:1.72;text-align:left}.my-app-service-foot{display:flex;align-items:center;justify-content:flex-end;min-height:36px}.my-app-subscribed{display:inline-flex;align-items:center;height:36px;padding:0 13px;border-radius:4px;background:#55a7f8;color:#fff;font-size:15px}.my-app-filter-empty{padding:70px 20px}@media(max-width:1200px){.my-app-service-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.my-app-service-card{min-height:330px;padding:24px 20px 16px}.my-app-service-icon{width:84px;height:84px}.my-app-service-icon svg{width:40px;height:40px}.my-app-service-card h3{font-size:17px}.my-app-service-tags{gap:6px}.my-app-service-tags span{min-width:48px;height:26px;padding:0 8px;font-size:12px}.my-app-service-tags .tag-more{min-width:26px;width:26px}.my-app-service-card p{font-size:13px}}';
+      document.head.appendChild(style);
+    })();
+  </script>
+  <script>
+    /* 项目版本管理：快照差异、任意版本对比、历史模型追溯与安全回退 */
+    (() => {
+      const listPage = document.getElementById('dataListPage');
+      if (!listPage || document.getElementById('projectVersionModal')) return;
+
+      const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const baseVersions = [
+        {
+          id:'v1', version:'V1.0', source:'项目管理系统', time:'2026-02-03 14:37:28', operator:'admin', note:'首次同步入库',
+          info:{'项目名称':'白玉兰测试20260203','项目编号':'122113','项目阶段':'方案设计','合同编号':'1223','当前标准':'合肥院 BIM 数据标准 V1.0'},
+          files:[
+            {id:'civil-ifc',name:'联合工房-土建专业模型.ifc',size:'19.82 MB',hash:'civil-100',model:true},
+            {id:'floor-pdf',name:'1F建筑平面图.pdf',size:'1.72 MB',hash:'floor-100'},
+            {id:'electric-pdf',name:'电气系统图.pdf',size:'701.20 KB',hash:'electric-100'}
+          ]
+        },
+        {
+          id:'v2', version:'V1.1', source:'BIM协同平台', time:'2026-03-18 09:26:10', operator:'张伟', note:'补充机电模型及设备明细',
+          info:{'项目名称':'白玉兰测试20260203','项目编号':'122113','项目阶段':'方案设计','合同编号':'1223','当前标准':'合肥院 BIM 数据标准 V1.0'},
+          files:[
+            {id:'civil-ifc',name:'联合工房-土建专业模型.ifc',size:'19.82 MB',hash:'civil-100',model:true},
+            {id:'mep-ifc',name:'联合工房-机电专业模型.ifc',size:'17.95 MB',hash:'mep-110',model:true},
+            {id:'floor-pdf',name:'1F建筑平面图.pdf',size:'1.72 MB',hash:'floor-100'},
+            {id:'electric-pdf',name:'电气系统图.pdf',size:'701.20 KB',hash:'electric-100'},
+            {id:'device-xlsx',name:'设备明细.xlsx',size:'322.4 KB',hash:'device-110'}
+          ]
+        },
+        {
+          id:'v3', version:'V1.2', source:'BIM协同平台', time:'2026-04-21 10:18:42', operator:'李敏', note:'施工图阶段模型更新',
+          info:{'项目名称':'白玉兰测试20260203','项目编号':'122113','项目阶段':'施工图设计','合同编号':'1223','当前标准':'合肥院 BIM 数据标准 V1.0'},
+          files:[
+            {id:'civil-ifc',name:'联合工房-土建专业模型.ifc',size:'20.68 MB',hash:'civil-120',model:true},
+            {id:'mep-ifc',name:'联合工房-机电专业模型.ifc',size:'18.42 MB',hash:'mep-120',model:true},
+            {id:'floor-pdf',name:'1F建筑平面图.pdf',size:'1.86 MB',hash:'floor-120'},
+            {id:'electric-pdf',name:'电气系统图.pdf',size:'726.25 KB',hash:'electric-120'},
+            {id:'device-xlsx',name:'设备明细.xlsx',size:'348.6 KB',hash:'device-120'}
+          ]
+        },
+        {
+          id:'v4', version:'V1.3', source:'数据治理平台', time:'2026-04-23 14:39:32', operator:'admin', note:'质检整改后重新入库', current:true,
+          info:{'项目名称':'白玉兰测试20260203','项目编号':'122113','项目阶段':'设计阶段','合同编号':'1223','当前标准':'合肥院 BIM 数据标准 V1.0'},
+          files:[
+            {id:'civil-ifc',name:'联合工房-土建专业模型.ifc',size:'21.46 MB',hash:'civil-130',model:true},
+            {id:'mep-ifc',name:'联合工房-机电专业模型.ifc',size:'18.42 MB',hash:'mep-120',model:true},
+            {id:'floor-pdf',name:'1F建筑平面图.pdf',size:'1.86 MB',hash:'floor-120'},
+            {id:'electric-pdf',name:'电气系统图.pdf',size:'726.25 KB',hash:'electric-120'},
+            {id:'device-xlsx',name:'设备明细.xlsx',size:'348.6 KB',hash:'device-120'},
+            {id:'quality-pdf',name:'数据质检报告.pdf',size:'2.14 MB',hash:'quality-130'}
+          ]
+        }
+      ];
+      const state = {project:'白玉兰测试20260203', versions:baseVersions.map(item => ({...item,info:{...item.info},files:item.files.map(file => ({...file}))})), from:'v3', to:'v4', rollbackId:''};
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-mask';
+      modal.id = 'projectVersionModal';
+      modal.innerHTML = '<div class="modal project-version-modal"><div class="modal-head"><span data-project-version-title>项目版本</span><button class="modal-close" type="button" data-close-project-version>×</button></div><div class="modal-body" data-project-version-body></div></div>';
+      const rollbackModal = document.createElement('div');
+      rollbackModal.className = 'modal-mask';
+      rollbackModal.id = 'projectRollbackModal';
+      rollbackModal.innerHTML = '<div class="modal project-rollback-modal"><div class="modal-head">回退模型数据<button class="modal-close" type="button" data-close-project-rollback>×</button></div><div class="modal-body" data-project-rollback-body></div><div class="modal-foot"><button class="btn light" type="button" data-close-project-rollback>取消</button><button class="btn primary" type="button" data-confirm-project-rollback>确认生成新版本</button></div></div>';
+      document.body.append(modal, rollbackModal);
+
+      const body = modal.querySelector('[data-project-version-body]');
+      const versionById = id => state.versions.find(item => item.id === id);
+      const previousOf = version => state.versions[state.versions.indexOf(version) - 1] || version;
+      const diff = (from, to) => {
+        const info = Object.keys({...from.info,...to.info}).filter(key => from.info[key] !== to.info[key]).map(key => ({field:key,before:from.info[key] || '—',after:to.info[key] || '—'}));
+        const oldMap = new Map(from.files.map(file => [file.id,file]));
+        const newMap = new Map(to.files.map(file => [file.id,file]));
+        const files = [];
+        newMap.forEach((file,id) => {
+          if (!oldMap.has(id)) files.push({type:'新增',name:file.name,before:'—',after:file.size});
+          else if (oldMap.get(id).hash !== file.hash) files.push({type:'修改',name:file.name,before:oldMap.get(id).size,after:file.size});
+        });
+        oldMap.forEach((file,id) => { if (!newMap.has(id)) files.push({type:'删除',name:file.name,before:file.size,after:'—'}); });
+        return {info,files,added:files.filter(item => item.type === '新增').length,removed:files.filter(item => item.type === '删除').length,changed:files.filter(item => item.type === '修改').length};
+      };
+      const changeText = (version, index) => {
+        if (!index) return {info:'初始版本',files:`${version.files.length} 个文件`};
+        const result = diff(state.versions[index - 1],version);
+        return {info:result.info.length ? `修改 ${result.info.length} 项` : '无变化',files:`新增 ${result.added} / 删除 ${result.removed} / 修改 ${result.changed}`};
+      };
+      const options = selected => state.versions.map(item => `<option value="${item.id}" ${item.id === selected ? 'selected' : ''}>${item.version}</option>`).join('');
+
+      const renderList = () => {
+        modal.querySelector('[data-project-version-title]').textContent = `${state.project} · 项目版本`;
+        body.innerHTML = `
+          <div class="project-version-summary"><div><span>当前版本</span><b>${escapeHtml(state.versions.find(item => item.current)?.version || '—')}</b><small>历史版本文件采用不可变快照保存</small></div><div class="project-version-compare"><label>版本对比</label><select class="select" data-project-compare-from>${options(state.from)}</select><span>与</span><select class="select" data-project-compare-to>${options(state.to)}</select><button class="btn primary" type="button" data-run-project-compare>对比查看</button></div></div>
+          <table class="project-version-table"><thead><tr><th>版本</th><th>来源系统</th><th>同步时间</th><th>项目基本信息</th><th>项目文件变化</th><th>模型文件</th><th>状态</th><th>操作</th></tr></thead><tbody>${state.versions.slice().reverse().map(version => { const index = state.versions.indexOf(version); const changes = changeText(version,index); return `<tr><td><b>${version.version}</b>${version.rollbackFrom ? `<small>基于 ${version.rollbackFrom} 回退生成</small>`:''}</td><td>${escapeHtml(version.source)}</td><td>${escapeHtml(version.time)}</td><td>${changes.info}</td><td>${changes.files}</td><td>${version.files.filter(file => file.model).length} 个</td><td>${version.current ? '<span class="status-tag pass">当前版本</span>' : '<span class="status-tag">历史版本</span>'}</td><td><button class="link" type="button" data-project-change-detail="${version.id}">变更详情</button><button class="link" type="button" data-project-model-history="${version.id}">查看模型</button>${version.current ? '' : `<button class="link" type="button" data-project-rollback="${version.id}">回退</button>`}</td></tr>`; }).join('')}</tbody></table>
+          <div class="project-model-history"><div class="project-version-section-title"><b>模型版本历史</b><span>历史模型可直接加载查看，回退不会覆盖原版本</span></div>${state.versions.slice().reverse().map(version => `<div><span><b>${version.version}</b>${escapeHtml(version.files.filter(file=>file.model).map(file=>file.name).join('、') || '无模型文件')}</span><small>${escapeHtml(version.time)}　${escapeHtml(version.operator)}</small><button class="link" type="button" data-project-model-history="${version.id}">加载该版本模型</button></div>`).join('')}</div>
+          <div class="project-version-actions"><button class="btn light" type="button" data-close-project-version>关闭</button></div>`;
+      };
+      const renderDiff = (from,to,title) => {
+        const result = diff(from,to);
+        modal.querySelector('[data-project-version-title]').textContent = `${state.project} · ${title}`;
+        body.innerHTML = `
+          <div class="project-diff-head"><button class="link" type="button" data-back-project-versions>‹ 返回版本记录</button><div><b>${from.version}</b><span>对比</span><b>${to.version}</b></div><small>${escapeHtml(from.time)} → ${escapeHtml(to.time)}</small></div>
+          <div class="project-diff-summary"><span>基本信息变更<b>${result.info.length}</b></span><span>新增文件<b>${result.added}</b></span><span>删除文件<b>${result.removed}</b></span><span>修改文件<b>${result.changed}</b></span></div>
+          <div class="project-version-section-title"><b>项目基本信息变化</b></div>
+          <table class="project-diff-table"><thead><tr><th>字段</th><th>${from.version}</th><th>${to.version}</th><th>变化</th></tr></thead><tbody>${result.info.length ? result.info.map(item => `<tr><td>${escapeHtml(item.field)}</td><td>${escapeHtml(item.before)}</td><td>${escapeHtml(item.after)}</td><td><span class="project-change-tag changed">修改</span></td></tr>`).join('') : '<tr><td colspan="4" class="project-diff-empty">项目基本信息无变化</td></tr>'}</tbody></table>
+          <div class="project-version-section-title"><b>项目文件变化</b><span>依据文件唯一标识与文件 Hash 判断</span></div>
+          <table class="project-diff-table"><thead><tr><th>变化类型</th><th>文件名称</th><th>${from.version} 文件大小</th><th>${to.version} 文件大小</th></tr></thead><tbody>${result.files.length ? result.files.map(item => `<tr><td><span class="project-change-tag ${item.type === '新增' ? 'added' : item.type === '删除' ? 'removed' : 'changed'}">${item.type}</span></td><td>${escapeHtml(item.name)}</td><td>${escapeHtml(item.before)}</td><td>${escapeHtml(item.after)}</td></tr>`).join('') : '<tr><td colspan="4" class="project-diff-empty">项目文件无变化</td></tr>'}</tbody></table>
+          <div class="project-version-actions"><button class="btn light" type="button" data-back-project-versions>返回</button></div>`;
+      };
+      const openHistoricalModel = version => {
+        const viewer = document.getElementById('semanticModelBrowserModal');
+        if (!viewer) return;
+        let note = viewer.querySelector('[data-project-history-model-note]');
+        if (!note) {
+          note = document.createElement('div'); note.dataset.projectHistoryModelNote = 'true'; note.className = 'project-history-model-note';
+          viewer.querySelector('.semantic-viewer-bar')?.insertAdjacentElement('afterend',note);
+        }
+        const model = version.files.find(file => file.model);
+        const modelName = viewer.querySelector('.semantic-viewer-bar b'); if (modelName) modelName.textContent = model?.name || '当前版本无模型文件';
+        note.innerHTML = `<b>历史版本 ${version.version}</b><span>${escapeHtml(version.time)}　来源：${escapeHtml(version.source)}</span><em>只读查看</em>`;
+        const hint = viewer.querySelector('.semantic-stage-hint'); if (hint) hint.textContent = `已加载 ${version.version} 历史模型快照，可查看该时刻模型数据`;
+        modal.classList.remove('open'); viewer.classList.add('open');
+      };
+
+      listPage.querySelectorAll('tbody tr').forEach(row => {
+        const operation = row.cells[row.cells.length - 1];
+        if (!operation || operation.querySelector('[data-open-project-version]')) return;
+        const projectName = row.cells[1]?.textContent.trim() || '当前项目';
+        const button = document.createElement('button'); button.className = 'link'; button.type = 'button'; button.dataset.openProjectVersion = projectName; button.textContent = '项目版本';
+        operation.insertBefore(button, operation.querySelector('.link:nth-last-child(2)') || null);
+      });
+
+      document.addEventListener('click', event => {
+        const opener = event.target.closest('[data-open-project-version]');
+        if (opener) { state.project = opener.dataset.openProjectVersion; state.versions.forEach(version => { version.info['项目名称'] = state.project; }); renderList(); modal.classList.add('open'); return; }
+        if (event.target.closest('[data-close-project-version]') || event.target === modal) { modal.classList.remove('open'); return; }
+        if (event.target.closest('[data-back-project-versions]')) { renderList(); return; }
+        const detail = event.target.closest('[data-project-change-detail]');
+        if (detail) { const to = versionById(detail.dataset.projectChangeDetail); renderDiff(previousOf(to),to,'变更详情'); return; }
+        if (event.target.closest('[data-run-project-compare]')) {
+          state.from = body.querySelector('[data-project-compare-from]').value; state.to = body.querySelector('[data-project-compare-to]').value;
+          const from = versionById(state.from); const to = versionById(state.to);
+          if (from.id === to.id) { alert('请选择两个不同的项目版本进行对比'); return; }
+          renderDiff(from,to,'版本对比'); return;
+        }
+        const model = event.target.closest('[data-project-model-history]'); if (model) { openHistoricalModel(versionById(model.dataset.projectModelHistory)); return; }
+        const rollback = event.target.closest('[data-project-rollback]');
+        if (rollback) {
+          state.rollbackId = rollback.dataset.projectRollback; const target = versionById(state.rollbackId); const current = state.versions.find(item => item.current);
+          rollbackModal.querySelector('[data-project-rollback-body]').innerHTML = `<div class="project-rollback-warning"><b>将 ${state.project} 回退到 ${target.version}</b><p>系统不会删除或覆盖 ${current.version} 等历史版本，而是基于 ${target.version} 的项目基本信息、文件清单和模型快照生成一个新的当前版本。</p></div><dl><dt>当前版本</dt><dd>${current.version}</dd><dt>目标历史版本</dt><dd>${target.version}</dd><dt>生成方式</dt><dd>创建新版本并切换当前版本指针</dd></dl>`;
+          rollbackModal.classList.add('open'); return;
+        }
+        if (event.target.closest('[data-close-project-rollback]') || event.target === rollbackModal) { rollbackModal.classList.remove('open'); return; }
+        if (event.target.closest('[data-confirm-project-rollback]')) {
+          const target = versionById(state.rollbackId); const current = state.versions.find(item => item.current); if (!target || !current) return;
+          current.current = false;
+          const nextNumber = Math.max(...state.versions.map(item => Number(item.version.replace('V1.','')) || 0)) + 1;
+          const next = {id:`v${Date.now()}`,version:`V1.${nextNumber}`,source:'版本回退',time:'2026-09-11 16:30:00',operator:'admin',note:`基于 ${target.version} 回退生成`,rollbackFrom:target.version,current:true,info:{...target.info},files:target.files.map(file => ({...file}))};
+          state.versions.push(next); state.from = current.id; state.to = next.id; rollbackModal.classList.remove('open'); renderList();
+          let toast = document.querySelector('.project-version-toast'); if (!toast) { toast = document.createElement('div'); toast.className = 'project-version-toast'; document.body.appendChild(toast); }
+          toast.textContent = `已基于 ${target.version} 生成 ${next.version}，历史版本均已保留`; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'),2600);
+        }
+      });
+
+      const style = document.createElement('style');
+      style.textContent = `
+        .project-version-modal{width:min(1180px,calc(100vw - 64px));max-height:calc(100vh - 70px);display:flex;flex-direction:column}.project-version-modal>.modal-body{overflow:auto;padding:18px 20px}.project-version-summary{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;margin-bottom:14px;border:1px solid #dfe8e2;background:#f7faf8}.project-version-summary>div:first-child{display:flex;align-items:baseline;gap:10px}.project-version-summary span,.project-version-summary small{color:#718078;font-size:12px}.project-version-summary b{color:#1f754a;font-size:20px}.project-version-compare{display:flex;align-items:center;gap:8px}.project-version-compare .select{width:100px;height:32px}.project-version-compare .btn{height:32px}.project-version-table,.project-diff-table{width:100%;border-collapse:collapse;table-layout:fixed}.project-version-table th,.project-diff-table th{height:38px;padding:0 10px;background:#f1f5f2;color:#536158;text-align:left;font-size:12px;font-weight:600}.project-version-table td,.project-diff-table td{padding:12px 10px;border-bottom:1px solid #e6ece8;color:#536158;font-size:12px;vertical-align:middle}.project-version-table th:nth-child(1){width:88px}.project-version-table th:nth-child(2){width:110px}.project-version-table th:nth-child(3){width:142px}.project-version-table th:nth-child(4){width:100px}.project-version-table th:nth-child(5){width:165px}.project-version-table th:nth-child(6){width:72px}.project-version-table th:nth-child(7){width:80px}.project-version-table th:nth-child(8){width:205px}.project-version-table td:first-child b,.project-version-table td:first-child small{display:block}.project-version-table td:first-child b{color:#2c4737;font-size:14px}.project-version-table td:first-child small{margin-top:4px;color:#8b968f;font-size:10px}.project-version-table .link+.link{margin-left:10px}.project-version-section-title{display:flex;align-items:center;gap:10px;margin:19px 0 9px;color:#34473b;font-size:14px}.project-version-section-title span{color:#89948d;font-size:11px}.project-model-history{margin-top:18px;border:1px solid #e1e8e3}.project-model-history>.project-version-section-title{height:40px;margin:0;padding:0 12px;background:#f7f9f8}.project-model-history>div:not(.project-version-section-title){display:grid;grid-template-columns:minmax(0,1fr) 220px 110px;align-items:center;min-height:45px;padding:0 12px;border-top:1px solid #edf1ee;color:#536158;font-size:12px}.project-model-history>div span b{display:inline-block;min-width:42px;margin-right:8px;color:#266f49}.project-model-history small{color:#89948d}.project-version-actions{display:flex;justify-content:flex-end;margin-top:16px}.project-diff-head{display:grid;grid-template-columns:180px 1fr 260px;align-items:center;margin-bottom:14px}.project-diff-head>div{text-align:center}.project-diff-head>div span{margin:0 15px;color:#8d9891}.project-diff-head>div b{color:#246f49;font-size:16px}.project-diff-head>small{text-align:right;color:#8b968f}.project-diff-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.project-diff-summary span{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border:1px solid #e0e7e2;background:#fafcfb;color:#65736a;font-size:12px}.project-diff-summary b{color:#26734c;font-size:19px}.project-diff-table th:first-child{width:150px}.project-change-tag{display:inline-block;min-width:36px;padding:3px 7px;border-radius:3px;text-align:center}.project-change-tag.added{background:#e8f5ec;color:#218153}.project-change-tag.removed{background:#fff0ef;color:#c75a54}.project-change-tag.changed{background:#fff5e5;color:#b77725}.project-diff-empty{height:72px;text-align:center;color:#98a19b!important}.project-rollback-modal{width:580px}.project-rollback-warning{padding:14px 16px;border-left:3px solid #d99b36;background:#fff8ec;color:#6e5b37}.project-rollback-warning b{color:#76531e}.project-rollback-warning p{margin:7px 0 0;line-height:1.7}.project-rollback-modal dl{display:grid;grid-template-columns:120px 1fr;margin:16px 0 0}.project-rollback-modal dt,.project-rollback-modal dd{margin:0;padding:9px;border-bottom:1px solid #edf0ee;font-size:13px}.project-rollback-modal dt{color:#89948d}.project-rollback-modal dd{color:#425249}.project-history-model-note{display:flex;align-items:center;gap:12px;padding:8px 18px;border-bottom:1px solid #dbe7df;background:#f0f7f2;color:#586b5f;font-size:12px}.project-history-model-note b{color:#1f774a}.project-history-model-note em{margin-left:auto;padding:3px 7px;background:#e4eee7;color:#567060;font-style:normal}.project-version-toast{position:fixed;z-index:150;top:74px;left:50%;padding:11px 18px;border-radius:4px;background:#253b2f;color:#fff;font-size:13px;opacity:0;transform:translate(-50%,-10px);pointer-events:none;transition:.2s}.project-version-toast.show{opacity:1;transform:translate(-50%,0)}@media(max-width:1200px){.project-version-table{min-width:1050px}.project-version-modal>.modal-body{overflow:auto}.project-model-history{min-width:900px}}
+      `;
+      document.head.appendChild(style);
+    })();
+  </script>
+  <script>
+    /* 企业工作台最小项目动态闭环：沿用现有布局，仅增强右侧项目状态区 */
+    (() => {
+      const page = document.getElementById('leadershipProjectPage');
+      if (!page) return;
+      const dynamics = [
+        {id:'P001',name:'白玉兰测试20260203',stage:'数据质检',progress:72,updated:'2026-09-14 10:20',latest:'数据质检任务已完成，正在复核检查结果。',events:[['2026-09-14 10:20','数据质检完成','模型数据质检完成，检查结果已生成。'],['2026-09-12 15:30','数据质检专题会召开','完成问题确认并明确本轮整改责任。'],['2026-09-10 16:30','模型资料归集完成','土建、机电专业模型及相关资料完成归集。'],['2026-09-01 09:15','项目进入设计阶段','项目阶段更新为设计阶段。']]},
+        {id:'P002',name:'联调测试-0910-02',stage:'完整性检查完成',progress:56,updated:'2026-09-13 16:45',latest:'完整性检查已通过，等待发起数据质检。',events:[['2026-09-13 16:45','完整性检查通过','项目上传文件满足当前标准要求。'],['2026-09-11 11:31','项目模型更新','土建专业模型完成重新上传。'],['2026-09-08 09:40','项目创建','完成项目基础信息登记。']]},
+        {id:'P003',name:'AFDASFD',stage:'模型入库',progress:90,updated:'2026-09-13 14:10',latest:'审批已通过，模型数据完成入库。',events:[['2026-09-13 14:10','审批入库完成','项目模型数据已进入正式数据资产库。'],['2026-09-12 10:25','审批申请提交','项目完成质检并提交入库审批。'],['2026-09-09 17:20','数据质检通过','本轮数据质检未发现阻断问题。']]}
+      ];
+      const approvals = [
+        ['项目数据接入','teng','2026-09-11 16:28:28','待审批'],
+        ['ceshi002','teng','2026-09-11 16:28:11','待审批'],
+        ['东风23','李糖糖','2026-09-11 11:33:30','待审批'],
+        ['联调测试-0910-02','李才哥','2026-09-11 11:31:04','待审批'],
+        ['项目3dtiles数据获取','teng','2026-09-11 11:20:39','待审批'],
+        ['如来','teng','2026-09-11 11:19:48','待审批'],
+        ['如来','fg','2026-09-04 14:22:36','已通过']
+      ];
+      const safe = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const latestGroups = [
+        {stage:'未开始',kind:'gray',projects:['大时代2013','testtsl','联调测试-092-1788319001165']},
+        {stage:'完整性检查完成',kind:'orange',projects:['联调测试-0910-02','DEBUGA','AFDASFD']},
+        {stage:'数据质检完成',kind:'green',projects:['AFDASFD','联调测试-0910-02','hlw-test-勿动']}
+      ];
+      const latestRows = () => latestGroups.map(group => `<section class="wb-latest-group"><div class="wb-latest-title"><span class="wb-stage-dot ${group.kind}"></span>${safe(group.stage)}</div>${group.projects.map(name => `<div class="wb-latest-item"><span>${safe(name)}</span><button class="link" type="button" data-workbench-latest-view="${safe(name)}" data-workbench-latest-stage="${safe(group.stage)}">查看</button></div>`).join('')}</section>`).join('');
+      page.innerHTML = `
+        <div class="wb-stat-grid"><button type="button" data-lead-list="uploaded"><span>我上传的项目数</span><b>96</b><small>查看项目列表 ›</small></button><button type="button" data-lead-list="followed"><span>我关注的项目数</span><b>7</b><small>查看项目列表 ›</small></button></div>
+        <div class="wb-main-grid">
+          <section class="wb-panel wb-approval-panel"><div class="wb-panel-head"><b>我的审批</b><div><button class="active" type="button">我的申请</button><button type="button">待我审批</button></div></div><div class="wb-approval-list">${approvals.map(item => `<div><span><b>${safe(item[0])}</b><small>审批人：${safe(item[1])} · 时间：${safe(item[2])}</small></span><em class="${item[3] === '已通过' ? 'pass' : ''}">${item[3]}</em><button class="link" type="button">查看详情</button></div>`).join('')}</div></section>
+          <section class="wb-panel wb-latest-panel"><div class="wb-panel-head"><b>项目最新状态</b></div><div class="wb-latest-list">${latestRows()}</div></section>
+        </div>`;
+      const modal = document.createElement('div'); modal.className = 'modal-mask'; modal.id = 'workbenchDynamicModal';
+      modal.innerHTML = '<div class="modal wb-dynamic-modal"><div class="modal-head"><span data-wb-dynamic-title>项目动态</span><button class="modal-close" type="button" data-close-wb-dynamic>×</button></div><div class="modal-body" data-wb-dynamic-body></div><div class="modal-foot"><button class="btn light" type="button" data-close-wb-dynamic>关闭</button><button class="btn primary" type="button" data-wb-project-detail>查看项目详情</button></div></div>';
+      document.body.appendChild(modal);
+      const timelineRequirement = `<details class="wb-timeline-requirement"><summary>研发需求说明｜项目历史时间节点定义</summary><div><p><b>记录原则：</b>节点由真实业务动作或上游接口状态变更生成，按事件发生时间倒序展示；同一业务二次发起时新增节点，不覆盖历史记录。</p><table><thead><tr><th>时间节点</th><th>定义与触发条件</th></tr></thead><tbody><tr><td>项目创建</td><td>项目基础信息首次保存成功并生成项目唯一 ID 时记录。</td></tr><tr><td>项目阶段变更</td><td>项目阶段字段变更并保存成功时记录，保留变更前后阶段。</td></tr><tr><td>模型/文件上传或更新</td><td>文件上传、重新上传成功且形成有效版本时记录；批量操作按同一批次合并展示。</td></tr><tr><td>完整性检查</td><td>每次检查任务完成并生成结果时记录，通过与未通过均保留；重新检查产生新节点。</td></tr><tr><td>数据质检</td><td>质检任务发起、完成或失败时分别记录；二次发起质检产生新的任务节点。</td></tr><tr><td>整改反馈</td><td>整改反馈提交，或关联问题的模型重新上传成功时记录，并关联原质检任务。</td></tr><tr><td>重要会议</td><td>由具备权限的项目人员维护会议名称、召开时间和会议摘要后记录。</td></tr><tr><td>审批入库</td><td>审批申请提交以及通过、驳回、撤回等结果发生时分别记录，并关联审批实例。</td></tr><tr><td>入库/发布/版本回退</td><td>项目数据正式入库、发布或版本回退执行成功后记录，并保留对应版本号。</td></tr></tbody></table><p><b>时间口径：</b>展示业务事件实际发生时间；系统写入时间单独保存用于审计。每条记录至少包含项目 ID、事件类型、事件时间、来源业务、操作人及关联业务对象 ID。</p></div></details>`;
+      const openDynamic = (item,name,stage) => {
+        const currentName = item?.name || name; const currentStage = stage || item?.stage || '—'; const hasProgress = Number.isFinite(item?.progress); const events = item?.events || [];
+        modal.dataset.projectName = currentName;
+        modal.querySelector('[data-wb-dynamic-title]').textContent = `${currentName} · 项目状态`;
+        modal.querySelector('[data-wb-dynamic-body]').innerHTML = `<div class="wb-modal-summary"><span>当前阶段<b>${safe(currentStage)}</b></span><span>项目进度<b>${hasProgress ? `${item.progress}%` : '—'}</b></span><span>最近更新<b>${safe(item?.updated || '—')}</b></span></div>${hasProgress ? `<div class="wb-modal-progress"><i style="width:${item.progress}%"></i></div>` : ''}<h4 class="wb-timeline-title">项目历史时间轴</h4>${events.length ? `<div class="wb-timeline">${events.map((event,index) => `<div class="${index === 0 ? 'latest' : ''}"><i></i><time>${safe(event[0])}</time><section><b>${safe(event[1])}</b><p>${safe(event[2])}</p></section></div>`).join('')}</div>` : '<div class="wb-timeline-empty">暂无项目历史动态</div>'}${timelineRequirement}`;
+        modal.classList.add('open');
+      };
+      window.addEventListener('click', event => {
+        const view = event.target.closest('[data-workbench-latest-view]'); if (view) { const name = view.dataset.workbenchLatestView; const item = dynamics.find(dynamic => dynamic.name === name); openDynamic(item,name,view.dataset.workbenchLatestStage); }
+        if (event.target.closest('[data-wb-project-detail]')) { const name = modal.dataset.projectName || '项目详情'; modal.classList.remove('open'); if (typeof showPage === 'function') showPage('projectPage','data'); else document.querySelector('[data-page-to="projectPage"]')?.click(); const crumb = document.getElementById('breadcrumb'); if (crumb) crumb.textContent = `项目数据管理 / 项目详情 / ${name}`; }
+      },true);
+      document.addEventListener('click', event => { if (event.target.closest('[data-close-wb-dynamic]') || event.target === modal) modal.classList.remove('open'); });
+      const style = document.createElement('style'); style.textContent = `
+        .leadership-project-page{padding:0!important}.wb-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}.wb-stat-grid button{position:relative;min-height:84px;padding:15px 18px;border:1px solid #e4e9e6;background:#fff;color:#617067;text-align:left;cursor:pointer}.wb-stat-grid button:hover{border-color:#8fbaa0}.wb-stat-grid span,.wb-stat-grid b,.wb-stat-grid small{display:block}.wb-stat-grid b{margin-top:5px;color:#3978d4;font-size:25px}.wb-stat-grid small{position:absolute;right:18px;top:34px;color:#3978d4}.wb-main-grid{display:grid;grid-template-columns:minmax(600px,2fr) minmax(330px,1fr);gap:14px}.wb-panel{min-height:640px;border:1px solid #e4e9e6;background:#fff}.wb-panel-head{display:flex;align-items:center;justify-content:space-between;height:55px;padding:0 16px;border-bottom:1px solid #edf0ee}.wb-panel-head>b{padding-left:9px;border-left:3px solid #2e8054;color:#3b4940}.wb-panel-head>div{align-self:stretch;display:flex}.wb-panel-head>div button{padding:0 18px;border:0;border-bottom:2px solid transparent;background:#fff;color:#6d7971;cursor:pointer}.wb-panel-head>div button.active{border-color:#3978d4;color:#3978d4}.wb-approval-list>div{display:grid;grid-template-columns:minmax(0,1fr) 70px 70px;align-items:center;min-height:61px;padding:0 16px;border-bottom:1px solid #edf0ee}.wb-approval-list span b,.wb-approval-list span small{display:block}.wb-approval-list span b{color:#425148;font-size:13px}.wb-approval-list span small{margin-top:6px;color:#9aa39d;font-size:11px}.wb-approval-list em{justify-self:center;padding:3px 7px;border:1px solid #efd3a9;color:#c5872d;font-size:11px;font-style:normal}.wb-approval-list em.pass{border-color:#b8ddc4;color:#39945c}.wb-dynamic-list{padding:0 16px}.wb-dynamic-item{padding:15px 0;border-bottom:1px solid #edf0ee}.wb-dynamic-row{display:flex;align-items:center;gap:7px}.wb-dynamic-row b{color:#59665e;font-size:12px}.wb-dynamic-row .link{margin-left:auto}.wb-stage-dot{width:7px;height:7px;border-radius:50%;background:#aeb6b1}.wb-stage-dot.wait{background:#e5a038}.wb-stage-dot.progress{background:#35a867}.wb-stage-dot.done{background:#2e8054}.wb-dynamic-item>strong{display:block;margin:9px 0 5px;color:#3c4b42;font-size:13px}.wb-dynamic-item>p{margin:0 0 10px;color:#77837b;font-size:12px;line-height:1.45}.wb-progress{height:5px;overflow:hidden;background:#edf1ee}.wb-progress i{display:block;height:100%;background:#43a36a}.wb-dynamic-item>small{display:block;margin-top:6px;color:#9aa39d;font-size:10px}.wb-dynamic-modal{width:720px}.wb-modal-summary{display:grid;grid-template-columns:1fr .7fr 1fr;gap:10px}.wb-modal-summary span{padding:10px 12px;background:#f5f8f6;color:#849088;font-size:11px}.wb-modal-summary b{display:block;margin-top:5px;color:#34463b;font-size:13px}.wb-modal-progress{height:6px;margin:12px 0 18px;background:#edf1ee}.wb-modal-progress i{display:block;height:100%;background:#30915c}.wb-timeline>div{position:relative;display:grid;grid-template-columns:14px 138px 1fr;gap:10px;padding-bottom:18px}.wb-timeline>div:not(:last-child):before{position:absolute;left:5px;top:10px;bottom:0;width:1px;background:#dce5df;content:''}.wb-timeline i{z-index:1;width:11px;height:11px;border:2px solid #fff;border-radius:50%;background:#aeb8b1;box-sizing:border-box}.wb-timeline .latest i{background:#2fa262}.wb-timeline time{color:#929d96;font-size:12px}.wb-timeline section b{color:#405047;font-size:13px}.wb-timeline section p{margin:5px 0 0;color:#6e7a72;font-size:12px;line-height:1.5}@media(max-width:1200px){.wb-main-grid{grid-template-columns:1fr}.wb-panel{min-height:auto}.wb-dynamic-panel{min-height:420px}}
+      `;
+      style.textContent += '.wb-latest-list{padding:14px 16px}.wb-latest-group{margin-bottom:18px}.wb-latest-title{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:#4f5c54;font-size:12px;font-weight:600}.wb-stage-dot.gray{background:#aeb6b1}.wb-stage-dot.orange{background:#e5a038}.wb-stage-dot.green{background:#45bd54}.wb-latest-item{display:flex;align-items:center;justify-content:space-between;min-height:37px;margin-bottom:7px;padding:0 10px;border:1px solid #edf0ee;border-radius:3px;color:#7b857f;font-size:12px}.wb-latest-item .link{flex:0 0 auto;margin-left:10px}.wb-dynamic-modal>.modal-body{max-height:calc(100vh - 220px);overflow:auto}.wb-timeline-title{margin:18px 0 13px;color:#405047;font-size:14px}.wb-timeline-empty{padding:34px 12px;border:1px solid #edf0ee;background:#fafbfa;color:#99a29c;text-align:center;font-size:12px}.wb-timeline-requirement{margin-top:14px;border:1px solid #dfe7e2;background:#fbfcfb}.wb-timeline-requirement summary{padding:11px 13px;color:#3f5b4a;font-size:13px;font-weight:600;cursor:pointer}.wb-timeline-requirement>div{padding:0 13px 12px;border-top:1px solid #e8ede9}.wb-timeline-requirement p{margin:11px 0;color:#68756d;font-size:12px;line-height:1.65}.wb-timeline-requirement table{width:100%;border-collapse:collapse;table-layout:fixed}.wb-timeline-requirement th,.wb-timeline-requirement td{padding:8px 9px;border:1px solid #e4e9e5;color:#5d6a62;text-align:left;font-size:11px;line-height:1.5;vertical-align:top}.wb-timeline-requirement th{background:#f3f6f4;color:#405047}.wb-timeline-requirement th:first-child{width:132px}';
+      document.head.appendChild(style);
+    })();
+  </script>
+<script>document.querySelector('[data-operations-entry]').addEventListener('click', () => { window.location.href = 'operations.html'; });</script>
 </body>
 </html>
