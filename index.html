@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
+  <script>if (!new URLSearchParams(location.search).has("view") && !location.hash) location.replace("operations.html");</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>合肥中台-数据质检推送审批流原型</title>
   <style>
@@ -2484,7 +2485,7 @@
       <button class="top-btn" data-top="home">首页</button>
       <button class="top-btn active" data-top="workbench">工作台</button>
       <button class="top-btn" data-top="data">BIM数据管理</button>
-      <button class="top-btn">智慧运维</button>
+      <button class="top-btn" data-operations-entry>智慧运维</button>
       <button class="top-btn">BIM模型展示</button>
       <button class="top-btn">BIM公共服务</button>
       <button class="top-btn">后台管理</button>
@@ -7983,5 +7984,6 @@
       document.head.appendChild(style);
     })();
   </script>
+<script>document.querySelector('[data-operations-entry]').addEventListener('click', () => { window.location.href = 'operations.html'; });</script>
 </body>
 </html>
