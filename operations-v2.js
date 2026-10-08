@@ -25,12 +25,12 @@
   }
   function solar() {
     const unit = state.solar && units[state.solar];
-    return `${img('solar-clean.png', 'solar-image', '光伏板及屋顶 BIM 参考视角')}<div class="solar-wash"></div>
-      ${heading('PHOTOVOLTAIC & STORAGE', unit ? unit.name : '光储系统', unit ? '设备详情 · 固定视角' : '园区屋顶光伏固定视角')}
+    return `${img('campus-clean.png', 'solar-campus-image', '园区 B 楼、A 楼和光伏幕墙 BIM 参考视角')}<div class="solar-wash"></div>
+      ${heading('PHOTOVOLTAIC & STORAGE', unit ? unit.name : '光储系统', unit ? '设备详情 · 固定视角' : 'B楼、A楼与光伏幕墙发电位置')}
       ${unit ? '<button class="scene-back" data-solar-back>返回光储总览</button>' : ''}
-      <div class="solar-hotspots ${unit ? 'detail-open' : ''}" aria-label="模型位置数据">${Object.entries(units).map(([key, item]) => `<button class="solar-marker marker-${key} ${state.solar === key ? 'selected' : ''}" data-solar="${key}" aria-label="查看${item.name}详情"><span>${item.name}</span><strong>今日累计发电 ${item.today} kWh</strong></button>`).join('')}</div>
+      <div class="solar-hotspots ${unit ? 'detail-open' : ''}" aria-label="模型位置数据">${['b', 'a', 'curtain'].map(key => { const item = units[key]; const label = key === 'curtain' ? '幕墙发电' : key.toUpperCase() + '楼发电'; return `<button class="solar-marker marker-${key} ${state.solar === key ? 'selected' : ''}" data-solar="${key}" aria-label="查看${item.name}详情"><span>${label}</span><strong>今日累计 ${item.today} kWh</strong></button>`; }).join('')}</div>
       <aside class="data-panel solar-left"><h2>储能系统</h2>${metric('电池电量', '98%')}${metric('电池温度', '29 ℃')}${metric('健康度', '100%')}<div class="weather-slot"><span>园区天气</span><b>待接入</b><small>预留气象站或天气接口配置</small></div></aside>
-      <aside class="data-panel solar-right">${unit ? `<h2>${unit.name} · 设备详情</h2>${metric('今日累计发电量', unit.today + ' <small>kWh</small>', true)}${metric('实时发电功率', '暂无数据')}${metric('位置', unit.location)}<p class="data-hint">点击返回，可查看各楼栋的单项概览数据。</p>` : `<h2>光伏发电总览</h2>${metric('今日累计发电量', '23.2 <small>kWh</small>', true)}${metric('累计发电量', '191,083.52 <small>kWh</small>')}${metric('楼栋分布', 'A楼 · B楼 · 幕墙')}<p class="data-hint">点击模型旁的数值，查看对应设备详情。</p>`}</aside>
+      <aside class="data-panel solar-right ${unit ? 'solar-detail-panel' : 'solar-overview-panel'}">${unit ? `<h2>${unit.name} · 设备详情</h2>${metric('今日累计发电量', unit.today + ' <small>kWh</small>', true)}${metric('实时发电功率', '暂无数据')}${metric('位置', unit.location)}<p class="data-hint">点击返回，可查看各楼栋的单项概览数据。</p>` : `<h2>光伏发电总览</h2>${metric('今日累计发电量', '23.2 <small>kWh</small>', true)}<p class="data-hint">点击模型位置旁的数值，查看对应设备详情。</p>`}</aside>
       ${note('发电数据取自既有原型截图；实时功率与天气未接入')}`;
   }
   function building() {
