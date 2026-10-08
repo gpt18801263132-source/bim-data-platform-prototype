@@ -48,11 +48,11 @@
       ${note('空值和缺测时段不绘制为 0；数据示例以正式平台接口为准')}`;
   }
   function safety() {
-    return `${img('campus-clean.png', 'campus-image', '园区 BIM 模型参考视角')}<div class="scene-shade safety-shade"></div>
-      ${heading('ELECTRICAL SAFETY', '用电安全', 'A楼配电间 · 楼梯下方预设视角待模型配置')}
-      <div class="safety-location"><b>A楼配电间</b><span>烟感 · 水浸 · 线缆温度</span></div>
-      <aside class="data-panel safety-panel"><h2>配电间安全监测</h2><div class="safety-grid"><div><span>烟雾</span><strong>0</strong><small>未触发</small></div><div><span>水浸</span><strong>0</strong><small>未触发</small></div><div><span>环境温度</span><strong>22.9 ℃</strong></div><div><span>环境湿度</span><strong>73.3 %</strong></div></div>${metric('线缆温度监测', '76 个 · 全部正常')}${metric('漏电监测', '76 个监测点')}<p class="data-hint">设备点位需在正式 BIM 模型中完成定位和视角绑定。</p></aside>
-      ${note('安全状态为既有原型示例，不代表当前实时告警状态')}`;
+    return `${img('safety-stairwell-clean.png', 'safety-image', '北走廊楼梯下方配电房 BIM 参考视角')}<div class="scene-shade safety-shade"></div>
+      ${heading('ELECTRICAL SAFETY', '用电安全', '北走廊 · 楼梯下方配电房固定视角')}
+      <div class="safety-location"><b>配电房安全监测</b><span>楼梯下方 · 烟感 / 水浸</span></div>
+      <aside class="data-panel safety-panel"><h2>配电房安全监测</h2><div class="safety-grid"><div><span>烟感</span><strong>无烟感</strong><small>参考截图状态</small></div><div><span>水浸</span><strong>无水浸</strong><small>参考截图状态</small></div><div><span>环境温度</span><strong>暂无数据</strong></div><div><span>环境湿度</span><strong>暂无数据</strong></div></div>${metric('线缆温度监测', '76 个监测点')}${metric('漏电监测', '76 个监测点')}<p class="data-hint">正式模型仍需将配电房点位绑定到该视角。</p></aside>
+      ${note('视角依据客户截图还原；状态为截图示例，不代表当前实时告警')}`;
   }
   function security() {
     return `<div class="future-scene">${heading('FUTURE MODULE', '园区安防', '模块入口预留')}<div><b>当前未接入安防数据</b><p>待摄像头、门禁或告警接口接入后，可配置独立场景与数据面板。</p></div></div>`;
