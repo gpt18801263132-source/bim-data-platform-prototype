@@ -5436,9 +5436,12 @@
       };
       window.openDownloadManagement = showDownloadPage;
       const openDetail = user => {
-        const rows = records.filter(item => item.user === user); const fallback = rows.length ? rows : [{user, time:'2026-09-01 10:42:24',status:'成功',flow:'184.61 GB',type:'项目文件下载',project:'所有项目汇总'}];
+        const rows = records.filter(item => item.user === user);
         detailModal.querySelector('[data-download-user-meta]').innerHTML = `<div><span>用户名</span><b>${user}</b></div><div><span>统计范围</span><b>全部项目文件</b></div><div><span>日志保留</span><b>7 天</b></div>`;
-        detailModal.querySelector('[data-download-detail-body]').innerHTML = fallback.map(item => `<tr><td>${item.time}</td><td><span class="download-status ${item.status === '成功' ? 'success' : 'interrupted'}">● ${item.status}</span></td><td>${item.flow}</td><td>${item.type}</td><td>${item.project}</td></tr>`).join(''); detailModal.classList.add('open');
+        detailModal.querySelector('[data-download-detail-body]').innerHTML = rows.length
+          ? rows.map(item => `<tr><td>${item.time}</td><td><span class="download-status ${item.status === '成功' ? 'success' : 'interrupted'}">● ${item.status}</span></td><td>${item.flow}</td><td>${item.type}</td><td>${item.project}</td></tr>`).join('')
+          : '<tr><td colspan="5" class="download-empty">暂无下载明细</td></tr>';
+        detailModal.classList.add('open');
       };
       document.addEventListener('click', event => {
         const detail = event.target.closest('[data-download-detail]'); if (detail) openDetail(detail.dataset.downloadDetail);
@@ -6519,15 +6522,6 @@
           setTimeout(() => { document.querySelectorAll('[data-viewer-standard]').forEach(item => item.textContent = `解析标准：${window.currentFileParseStandard}`); const panel = document.querySelector('.file-classification-panel'); if (panel) panel.hidden = true; }, 0);
         }
       }, true);
-
-      document.querySelectorAll('#downloadDetailModal').forEach(item => item.remove());
-      const removeDownloadDetail = () => document.querySelectorAll('.flow-ranking-table').forEach(table => {
-        if (table.dataset.detailRemoved) return;
-        table.querySelectorAll('tr').forEach(row => row.lastElementChild?.remove());
-        table.dataset.detailRemoved = 'true';
-        const title = table.closest('.flow-ranking-card')?.querySelector('.flow-ranking-head h3'); if (title) title.textContent = '用户下载统计';
-      });
-      removeDownloadDetail();
 
       const style = document.createElement('style');
       style.textContent = `
