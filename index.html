@@ -5225,7 +5225,7 @@
     })();
   </script>
   <script>
-    /* API Key 管理：默认单 Key、流量控制与防盗链配置 */
+    /* API Key 管理：默认单 Key 与流量控制；IP 名单由管理员独立维护。 */
     (() => {
       const content = document.querySelector('.content');
       const state = { owner: '当前账号（admin）', key: 'bim_sk_7Qx9••••••••••••••••••••••••K8v2', visible: false, status: '生效中', minute: '不限', daily: '不限', single: '不限', dialogOnly: false };
@@ -5377,7 +5377,7 @@
         const items = card.querySelectorAll('.api-requirement-item p');
         items[0].textContent = '用户创建时自动生成且仅保留 1 个有效 Key；后台禁用后立即拒绝调用。不支持重置 Key；数据库仅保存不可逆摘要与加密密文。';
         items[1].innerHTML = '默认不限制调用频率、每日下载流量和单文件大小；管理员可手动填写限制值。按 Key 跨项目累计所有项目文件下载的实际响应字节数；每日额度按平台时区 00:00 重置。超过频率或流量额度返回 <code>429</code>。';
-        items[3].innerHTML = '保留 Key 创建、禁用、配置变更及调用失败审计，日志禁止记录完整 Key，留存 <b>7 天</b>。鉴权失败返回 <code>401</code>，已禁用或来源不符合规则返回 <code>403</code>。';
+        items[3].innerHTML = '保留 Key 创建、禁用、配置变更及调用失败审计，日志禁止记录完整 Key，留存 <b>7 天</b>。平台 IP 访问名单由管理员独立维护并记录增删操作。';
         card.querySelector('.api-requirement-note').innerHTML = '<b>下载流量统一口径：</b>模型、图纸、文档、快照、附件和压缩包等所有项目文件均纳入统计；支持断点续传时按实际返回分片字节累计，重复下载重复计量，下载中断也累计已实际下发的字节。经 CDN 下发的文件须回传同一 Key 流量计数器。';
       };
       // 与 API 页面同一次显式刷新执行，无需持续监听页面变更。
