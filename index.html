@@ -8084,6 +8084,11 @@
       page.id = 'ipAccessPage';
       page.className = 'page ip-access-page';
       content.appendChild(page);
+      const dialog = document.createElement('div');
+      dialog.id = 'ipRuleModal';
+      dialog.className = 'modal-mask';
+      dialog.innerHTML = '<div class="modal ip-rule-modal"><div class="modal-head">新增 IP 规则<button class="modal-close" type="button" data-ip-rule-close>×</button></div><div class="modal-body"><div class="ip-rule-field"><label for="ipRuleType">名单类型</label><select class="select" id="ipRuleType" data-ip-rule-type><option value="白名单">白名单</option><option value="黑名单">黑名单</option></select></div><div class="ip-rule-field"><label for="ipRuleInput">IP 地址</label><input class="input" id="ipRuleInput" data-ip-rule-input placeholder="请输入 IPv4 地址" autocomplete="off"></div><div class="ip-rule-feedback" data-ip-rule-feedback role="alert"></div></div><div class="modal-foot"><button class="btn light" type="button" data-ip-rule-close>取消</button><button class="btn primary" type="button" data-ip-rule-save>确定</button></div></div>';
+      document.body.appendChild(dialog);
       const storageKey = 'bim-platform-ip-access-rules-v1';
       const defaults = [
         { ip: '192.168.10.20', type: '白名单' },
@@ -8111,7 +8116,7 @@
         body.innerHTML = rules.length ? rules.map((item, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(item.ip)}</td><td><span class="ip-rule-type ${item.type === '白名单' ? 'allow' : 'deny'}">${item.type}</span></td><td><button class="link" type="button" data-ip-rule-delete="${index}">删除</button></td></tr>`).join('') : '<tr><td class="ip-rule-empty" colspan="4">暂无 IP 访问规则</td></tr>';
       };
       const feedback = (message, error = false) => {
-        const target = page.querySelector('[data-ip-rule-feedback]');
+        const target = dialog.querySelector('[data-ip-rule-feedback]');
         target.textContent = message;
         target.classList.toggle('error', error);
       };
@@ -8126,7 +8131,7 @@
         document.querySelectorAll('.page').forEach(item => item.classList.remove('active'));
         page.classList.add('active');
         document.getElementById('breadcrumb').textContent = '后台管理 / 权限管理 / IP 访问控制';
-        page.innerHTML = '<div class="ip-access-head"><h2>IP 访问控制</h2></div><section class="ip-access-card"><div class="ip-access-tools"><select class="select" data-ip-rule-type><option value="白名单">白名单</option><option value="黑名单">黑名单</option></select><input class="input" data-ip-rule-input placeholder="请输入 IPv4 地址" aria-label="IP 地址"><button class="btn primary" type="button" data-ip-rule-add>添加</button></div><div class="ip-rule-feedback" data-ip-rule-feedback role="status"></div><table class="ip-access-table"><thead><tr><th>序号</th><th>IP 地址</th><th>名单类型</th><th>操作</th></tr></thead><tbody data-ip-rule-rows></tbody></table><div class="ip-access-note">白名单优先于黑名单；仅支持 IPv4 地址，不支持域名。规则由管理员统一维护，不随单个 API Key 配置。</div></section>';
+        page.innerHTML = '<div class="ip-access-head"><h2>IP 访问控制</h2><button class="btn primary" type="button" data-ip-rule-open>＋ 新增 IP 规则</button></div><section class="ip-access-card"><table class="ip-access-table"><thead><tr><th>序号</th><th>IP 地址</th><th>名单类型</th><th>操作</th></tr></thead><tbody data-ip-rule-rows></tbody></table><div class="ip-access-note">白名单优先于黑名单；仅支持 IPv4 地址，不支持域名。规则由管理员统一维护，不随单个 API Key 配置。</div></section>';
         renderRows();
       };
       window.openBackendIpAccess = open;
@@ -8139,17 +8144,29 @@
           open();
           return;
         }
-        if (event.target.closest('[data-ip-rule-add]')) {
-          const input = page.querySelector('[data-ip-rule-input]');
+        if (event.target.closest('[data-ip-rule-open]')) {
+          dialog.querySelector('[data-ip-rule-type]').value = '白名单';
+          dialog.querySelector('[data-ip-rule-input]').value = '';
+          feedback('');
+          dialog.classList.add('open');
+          dialog.querySelector('[data-ip-rule-input]').focus();
+          return;
+        }
+        if (event.target === dialog || event.target.closest('[data-ip-rule-close]')) {
+          dialog.classList.remove('open');
+          return;
+        }
+        if (event.target.closest('[data-ip-rule-save]')) {
+          const input = dialog.querySelector('[data-ip-rule-input]');
           const ip = input.value.trim();
-          const type = page.querySelector('[data-ip-rule-type]').value;
+          const type = dialog.querySelector('[data-ip-rule-type]').value;
           if (!validIp(ip)) return feedback('请输入有效的 IPv4 地址。', true);
           if (rules.some(item => item.ip === ip)) return feedback('该 IP 地址已在名单中，请勿重复添加。', true);
           rules.push({ ip, type });
           save();
-          input.value = '';
           renderRows();
-          feedback('已添加到' + type + '。');
+          dialog.classList.remove('open');
+          return;
         }
         const deleteButton = event.target.closest('[data-ip-rule-delete]');
         if (deleteButton) {
@@ -8158,11 +8175,17 @@
           rules.splice(index, 1);
           save();
           renderRows();
-          feedback('已删除该 IP 访问规则。');
         }
       }, true);
+      dialog.addEventListener('keydown', event => {
+        if (event.key === 'Escape') dialog.classList.remove('open');
+        if (event.key === 'Enter' && event.target.matches('[data-ip-rule-input]')) {
+          event.preventDefault();
+          dialog.querySelector('[data-ip-rule-save]').click();
+        }
+      });
       const style = document.createElement('style');
-      style.textContent = '.ip-access-page{padding:0}.ip-access-head{margin-bottom:16px}.ip-access-head h2{margin:0;color:#35473b;font-size:21px}.ip-access-card{border:1px solid #e2e9e4;background:#fff}.ip-access-tools{display:flex;gap:10px;align-items:center;padding:14px 16px;border-bottom:1px solid #edf1ee}.ip-access-tools .select{width:130px}.ip-access-tools .input{width:250px}.ip-rule-feedback{min-height:0;padding:0 16px;color:#27784d;font-size:12px}.ip-rule-feedback:not(:empty){padding:9px 16px}.ip-rule-feedback.error{color:#b04f43}.ip-access-table{width:100%;border-collapse:collapse}.ip-access-table th{padding:12px 16px;background:#f5f8f6;color:#657168;font-size:12px;text-align:left}.ip-access-table td{padding:14px 16px;border-top:1px solid #edf1ee;color:#48574d;font-size:13px}.ip-access-table th:first-child{width:90px}.ip-access-table th:last-child{width:100px}.ip-rule-type{color:#27774e}.ip-rule-type.deny{color:#a85b4d}.ip-rule-empty{text-align:center;color:#929c96!important}.ip-access-note{padding:12px 16px;border-top:1px solid #edf1ee;color:#8a958d;font-size:12px}';
+      style.textContent = '.ip-access-page{padding:0}.ip-access-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.ip-access-head h2{margin:0;color:#35473b;font-size:21px}.ip-access-card{border:1px solid #e2e9e4;background:#fff}.ip-access-table{width:100%;border-collapse:collapse}.ip-access-table th{padding:12px 16px;background:#f5f8f6;color:#657168;font-size:12px;text-align:left}.ip-access-table td{padding:14px 16px;border-top:1px solid #edf1ee;color:#48574d;font-size:13px}.ip-access-table th:first-child{width:90px}.ip-access-table th:last-child{width:100px}.ip-rule-type{color:#27774e}.ip-rule-type.deny{color:#a85b4d}.ip-rule-empty{text-align:center;color:#929c96!important}.ip-access-note{padding:12px 16px;border-top:1px solid #edf1ee;color:#8a958d;font-size:12px}.ip-rule-modal{width:500px}.ip-rule-modal .modal-body{padding:22px 24px}.ip-rule-field{display:grid;grid-template-columns:80px 1fr;align-items:center;gap:12px;margin-bottom:15px}.ip-rule-field label{color:#526359;font-size:13px;text-align:right}.ip-rule-field .input,.ip-rule-field .select{width:100%;box-sizing:border-box}.ip-rule-feedback{min-height:0;margin-left:92px;color:#b04f43;font-size:12px}.ip-rule-feedback:not(:empty){min-height:18px}';
       document.head.appendChild(style);
     })();
   </script>
