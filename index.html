@@ -8051,7 +8051,25 @@
         page.innerHTML = `<section class="pwb-flow"><div class="pwb-section-title">BIM 创新工作流程</div><div class="pwb-flow-grid">${phaseHtml()}</div></section>
           <section class="pwb-stat-grid"><article><span>数据治理阶段</span><b>177</b><small>项目</small><i>治</i></article><article><span>数据入库阶段</span><b>5</b><small>项目</small><i>入</i></article><article><span>已发布数据</span><b>2</b><small>项目</small><i>发</i></article></section>
           <div class="pwb-main"><section class="pwb-card"><div class="pwb-card-head"><b>待入库审批</b></div><div class="pwb-approval-list">${approvals.map(item => `<div><section><b>${safe(item[0])}</b><small>申请人：${safe(item[1])} ｜ 申请时间：${safe(item[2])}</small></section><em class="${item[3] === '已通过' ? 'pass' : ''}">${safe(item[3])}</em><button class="link" type="button" data-pwb-view-project>查看</button></div>`).join('')}</div></section>
-          <section class="pwb-card pwb-history-card"><div class="pwb-card-head"><div class="pwb-history-tabs" role="tablist" aria-label="项目动态"><button type="button" role="tab" data-pwb-tab="reminders" aria-selected="${activeTab === 'reminders'}" class="${activeTab === 'reminders' ? 'active' : ''}">实时动态提醒</button><button type="button" role="tab" data-pwb-tab="history" aria-selected="${activeTab === 'history'}" class="${activeTab === 'history' ? 'active' : ''}">项目历史动态</button></div>${activeTab === 'history' ? `<div class="pwb-history-tools"><select class="select" data-pwb-project aria-label="选择项目">${projects.map(item => `<option value="${item.id}" ${item.id === project.id ? 'selected' : ''}>${safe(item.name)}</option>`).join('')}</select><button class="link" type="button" data-pwb-view-project>查看项目详情</button></div>` : ''}</div>${activeTab === 'history' ? `<div role="tabpanel" aria-label="项目历史动态"><div class="pwb-history-summary"><span>当前阶段：<b>${safe(project.phase)}</b></span><span>项目进度：<b>${project.progress}%</b></span><span>最近更新：<b>${safe(project.updated)}</b></span></div><div class="pwb-timeline">${timelineHtml(project)}</div></div>` : `<div class="pwb-reminder-list" role="tabpanel" aria-label="实时动态提醒">${remindersHtml()}</div>`}</section></div>`;
+          <section class="pwb-card pwb-history-card"><div class="pwb-card-head"><div class="pwb-history-tabs" role="tablist" aria-label="项目动态"><button type="button" role="tab" data-pwb-tab="reminders" aria-selected="${activeTab === 'reminders'}" class="${activeTab === 'reminders' ? 'active' : ''}">实时动态提醒</button><button type="button" role="tab" data-pwb-tab="history" aria-selected="${activeTab === 'history'}" class="${activeTab === 'history' ? 'active' : ''}">项目历史动态</button></div></div>${activeTab === 'history' ? `<div role="tabpanel" aria-label="项目历史动态"><div class="pwb-project-switcher"><label for="pwbProjectSearch">项目</label><div class="pwb-project-picker" data-pwb-project-picker><input class="input" id="pwbProjectSearch" type="search" role="combobox" aria-autocomplete="list" aria-controls="pwbProjectOptions" aria-expanded="false" data-pwb-project-search value="${safe(project.name)}" placeholder="搜索项目名称或编号" autocomplete="off"><div class="pwb-project-options" id="pwbProjectOptions" role="listbox" data-pwb-project-options hidden></div></div><button class="link" type="button" data-pwb-view-project>查看项目详情</button></div><div class="pwb-history-summary"><span>当前阶段：<b>${safe(project.phase)}</b></span><span>项目进度：<b>${project.progress}%</b></span><span>最近更新：<b>${safe(project.updated)}</b></span></div><div class="pwb-timeline">${timelineHtml(project)}</div></div>` : `<div class="pwb-reminder-list" role="tabpanel" aria-label="实时动态提醒">${remindersHtml()}</div>`}</section></div>`;
+      };
+      const renderProjectOptions = (keyword = '') => {
+        const options = page.querySelector('[data-pwb-project-options]');
+        const input = page.querySelector('[data-pwb-project-search]');
+        if (!options || !input) return;
+        const term = keyword.trim().toLocaleLowerCase();
+        const matches = projects.filter(project => project.name.toLocaleLowerCase().includes(term) || project.id.toLocaleLowerCase().includes(term));
+        options.innerHTML = matches.length ? matches.map(project => `<button type="button" role="option" aria-selected="${project.id === page.dataset.projectId}" data-pwb-project-option="${safe(project.id)}"><span>${safe(project.name)}</span><small>${safe(project.id)}</small></button>`).join('') : '<div class="pwb-project-no-match">未找到匹配项目</div>';
+        options.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+      };
+      const closeProjectOptions = () => {
+        const input = page.querySelector('[data-pwb-project-search]');
+        const options = page.querySelector('[data-pwb-project-options]');
+        if (!input || !options) return;
+        input.value = projects.find(project => project.id === page.dataset.projectId)?.name || '';
+        input.setAttribute('aria-expanded', 'false');
+        options.hidden = true;
       };
       const activate = projectName => {
         const project = projects.find(item => item.name === projectName || item.id === projectName) || projects[0];
@@ -8072,12 +8090,32 @@
         if (sub?.textContent.includes('企业工作台')) { event.preventDefault(); event.stopImmediatePropagation(); window.openEnterpriseWorkbench?.(); return; }
         if (event.target.closest('[data-pwb-view-project]')) { if (typeof showPage === 'function') showPage('projectPage','data'); }
       },true);
-      page.addEventListener('change', event => { if (event.target.matches('[data-pwb-project]')) render(event.target.value); });
       page.addEventListener('click', event => {
+        const option = event.target.closest('[data-pwb-project-option]');
+        if (option) { render(option.dataset.pwbProjectOption); return; }
         const tab = event.target.closest('[data-pwb-tab]');
-        if (!tab) return;
-        activeTab = tab.dataset.pwbTab;
-        render(page.dataset.projectId);
+        if (tab) { activeTab = tab.dataset.pwbTab; render(page.dataset.projectId); return; }
+        if (event.target.closest('[data-pwb-project-picker]')) renderProjectOptions();
+      });
+      page.addEventListener('focusin', event => {
+        if (!event.target.matches('[data-pwb-project-search]')) return;
+        event.target.value = '';
+        renderProjectOptions();
+      });
+      page.addEventListener('input', event => {
+        if (event.target.matches('[data-pwb-project-search]')) renderProjectOptions(event.target.value);
+      });
+      page.addEventListener('keydown', event => {
+        if (!event.target.matches('[data-pwb-project-search]')) return;
+        if (event.key === 'Escape') { closeProjectOptions(); event.target.blur(); }
+        if (event.key === 'ArrowDown') { event.preventDefault(); page.querySelector('[data-pwb-project-option]')?.focus(); }
+        if (event.key === 'Enter') { event.preventDefault(); page.querySelector('[data-pwb-project-option]')?.click(); }
+      });
+      document.addEventListener('click', event => {
+        if (!event.target.closest('[data-pwb-project-picker]')) closeProjectOptions();
+      });
+      document.addEventListener('focusin', event => {
+        if (!event.target.closest('[data-pwb-project-picker]')) closeProjectOptions();
       });
       render(projects[0].id);
 
@@ -8088,6 +8126,10 @@
       const tabStyle = document.createElement('style');
       tabStyle.textContent = '.pwb-history-tabs{display:flex;align-self:stretch;gap:14px;min-width:0}.pwb-history-tabs button{padding:0 2px;border:0;border-bottom:2px solid transparent;background:transparent;color:#718077;font-size:12px;white-space:nowrap;cursor:pointer}.pwb-history-tabs button.active{border-bottom-color:#2e8054;color:#246c46;font-weight:600}.pwb-history-card .pwb-history-tools .select{width:140px}.pwb-reminder-list{max-height:330px;overflow:auto;padding:13px 18px}.pwb-reminder-item{display:grid;grid-template-columns:9px minmax(0,1fr);gap:10px;align-items:start;padding:9px 0}.pwb-reminder-item i{width:8px;height:8px;margin-top:5px;border-radius:50%;background:#aab7ae}.pwb-reminder-item i.upload{background:#3e83d8}.pwb-reminder-item i.quality,.pwb-reminder-item i.check,.pwb-reminder-item i.publish{background:#2ca362}.pwb-reminder-item i.approval{background:#e49a31}.pwb-reminder-item b{display:block;overflow:hidden;color:#4b584f;font-size:12px;font-weight:500;text-overflow:ellipsis;white-space:nowrap}.pwb-reminder-item small{display:block;margin-top:4px;color:#9ba49e;font-size:11px}@media(max-width:1200px){.pwb-history-card .pwb-history-tools .select{width:150px}}';
       document.head.appendChild(tabStyle);
+      const pickerStyle = document.createElement('style');
+      pickerStyle.textContent = '.pwb-project-switcher{display:flex;align-items:center;gap:10px;padding:10px 15px;border-bottom:1px solid #edf1ee}.pwb-project-switcher>label{flex:none;color:#718077;font-size:12px}.pwb-project-switcher>.link{flex:none;white-space:nowrap}.pwb-project-picker{position:relative;flex:1;min-width:0}.pwb-project-picker:after{position:absolute;right:12px;top:7px;content:"⌄";color:#9ba59e;font-size:17px;pointer-events:none}.pwb-project-picker>.input{box-sizing:border-box;width:100%;height:32px;padding-right:30px;font-size:12px}.pwb-project-options{position:absolute;z-index:30;top:36px;left:0;right:0;max-height:205px;overflow:auto;border:1px solid #dce6df;background:#fff;box-shadow:0 5px 12px rgba(26,58,40,.12)}.pwb-project-options[hidden]{display:none}.pwb-project-options button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:9px 11px;border:0;border-bottom:1px solid #edf1ee;background:#fff;color:#425448;text-align:left;cursor:pointer}.pwb-project-options button:last-child{border-bottom:0}.pwb-project-options button:hover,.pwb-project-options button:focus-visible{background:#eef7f1}.pwb-project-options button span{overflow:hidden;font-size:12px;text-overflow:ellipsis;white-space:nowrap}.pwb-project-options button small{flex:none;color:#97a29a;font-size:11px}.pwb-project-no-match{padding:15px 10px;color:#9aa49d;text-align:center;font-size:12px}@media(max-width:900px){.pwb-project-switcher{flex-wrap:wrap}.pwb-project-picker{flex-basis:calc(100% - 34px)}}';
+      pickerStyle.textContent += '.pwb-project-options button[aria-selected="true"]{background:#f5faf6;color:#246f49}';
+      document.head.appendChild(pickerStyle);
     })();
   </script>
   <script>
