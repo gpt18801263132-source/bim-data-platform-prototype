@@ -105,7 +105,7 @@
   <script>
     (() => {
       const app = document.getElementById('mobileMessageApp');
-      const messages = [
+      const defaultMessages = [
         {id:1,read:false,important:true,sender:'BIM 数据管理平台',time:'2026-09-14 10:20',subject:'白玉兰测试20260203 数据质检已完成',content:'项目数据质检任务已完成，请进入质检结果查看本次检查情况。'},
         {id:2,read:false,important:false,sender:'项目负责人 · 张伟',time:'2026-09-14 09:35',subject:'联合工房项目模型资料已更新',content:'联合工房土建专业模型资料已更新，请及时查看最新版本。'},
         {id:3,read:false,important:false,sender:'审批中心',time:'2026-09-13 16:48',subject:'项目数据入库申请待审批',content:'您有一条项目数据入库申请待处理，请在审批中心完成审批。'},
@@ -114,6 +114,21 @@
         {id:6,read:true,important:false,sender:'审批中心',time:'2026-09-11 11:28',subject:'模型数据使用申请已同意',content:'您提交的模型数据使用申请已审批通过。'},
         {id:7,read:true,important:false,sender:'项目负责人 · 李敏',time:'2026-09-10 17:05',subject:'机电专业文件重新上传完成',content:'机电专业模型文件已重新上传，可重新执行相关检查。'}
       ];
+      const storageKey = 'hfyc-mobile-message-center-v1';
+      const loadMessages = () => {
+        try {
+          const saved = JSON.parse(window.localStorage.getItem(storageKey));
+          return Array.isArray(saved) && saved.every(item => item && Number.isInteger(item.id))
+            ? saved
+            : defaultMessages.map(item => ({...item}));
+        } catch (error) {
+          return defaultMessages.map(item => ({...item}));
+        }
+      };
+      const messages = loadMessages();
+      const persistMessages = () => {
+        try { window.localStorage.setItem(storageKey, JSON.stringify(messages)); } catch (error) { /* 原型在无存储权限时仍可正常演示 */ }
+      };
       const state = {tab:'unread',managing:false,selected:new Set(),pendingDelete:[]};
       const list = app.querySelector('[data-message-list]');
       const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -157,16 +172,16 @@
         if(tab){state.tab=tab.dataset.tab;resetSelection();render();return;}
         if(event.target.closest('[data-manage]')){state.managing=!state.managing;state.selected.clear();render();return;}
         const important = event.target.closest('[data-toggle-important]');
-        if(important){const item=messages.find(message=>message.id===Number(important.dataset.toggleImportant));if(item)item.important=!item.important;render();return;}
+        if(important){const item=messages.find(message=>message.id===Number(important.dataset.toggleImportant));if(item){item.important=!item.important;persistMessages();}render();return;}
         const open = event.target.closest('[data-open-message]');
-        if(open && !state.managing){const item=messages.find(message=>message.id===Number(open.dataset.openMessage));if(!item)return;item.read=true;app.querySelector('[data-detail-content]').innerHTML=`<h3>${escapeHtml(item.subject)}</h3><div class="detail-meta"><span><b>发送者</b>${escapeHtml(item.sender)}</span><span><b>发送时间</b>${escapeHtml(item.time)}</span>${item.important?'<span><b>消息标记</b>重要</span>':''}</div><p>${escapeHtml(item.content)}</p>`;app.querySelector('[data-detail-mask]').hidden=false;render();return;}
+        if(open && !state.managing){const item=messages.find(message=>message.id===Number(open.dataset.openMessage));if(!item)return;item.read=true;persistMessages();app.querySelector('[data-detail-content]').innerHTML=`<h3>${escapeHtml(item.subject)}</h3><div class="detail-meta"><span><b>发送者</b>${escapeHtml(item.sender)}</span><span><b>发送时间</b>${escapeHtml(item.time)}</span>${item.important?'<span><b>消息标记</b>重要</span>':''}</div><p>${escapeHtml(item.content)}</p>`;app.querySelector('[data-detail-mask]').hidden=false;render();return;}
         const singleDelete = event.target.closest('[data-delete-one]');
         if(singleDelete){requestDelete([Number(singleDelete.dataset.deleteOne)]);return;}
-        if(event.target.closest('[data-batch-mark]')){messages.forEach(item=>{if(state.selected.has(item.id))item.important=true;});resetSelection();render();return;}
+        if(event.target.closest('[data-batch-mark]')){messages.forEach(item=>{if(state.selected.has(item.id))item.important=true;});persistMessages();resetSelection();render();return;}
         if(event.target.closest('[data-batch-delete]')){requestDelete([...state.selected]);return;}
         if(event.target.closest('[data-close-detail]') || event.target === app.querySelector('[data-detail-mask]')){app.querySelector('[data-detail-mask]').hidden=true;return;}
         if(event.target.closest('[data-cancel-delete]') || event.target === app.querySelector('[data-confirm-mask]')){app.querySelector('[data-confirm-mask]').hidden=true;state.pendingDelete=[];return;}
-        if(event.target.closest('[data-confirm-delete]')){state.pendingDelete.forEach(id=>{const index=messages.findIndex(item=>item.id===id);if(index>=0)messages.splice(index,1);});state.pendingDelete=[];app.querySelector('[data-confirm-mask]').hidden=true;resetSelection();render();}
+        if(event.target.closest('[data-confirm-delete]')){state.pendingDelete.forEach(id=>{const index=messages.findIndex(item=>item.id===id);if(index>=0)messages.splice(index,1);});persistMessages();state.pendingDelete=[];app.querySelector('[data-confirm-mask]').hidden=true;resetSelection();render();}
       });
       app.addEventListener('change',event => {
         if(event.target.matches('[data-select-message]')){const id=Number(event.target.dataset.selectMessage);event.target.checked?state.selected.add(id):state.selected.delete(id);render();}
