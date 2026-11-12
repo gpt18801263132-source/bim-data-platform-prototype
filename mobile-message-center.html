@@ -159,7 +159,7 @@
                 <div class="message-subject">${item.read ? '' : '<i class="unread-dot"></i>'}<span>${escapeHtml(item.subject)}</span>${item.important ? '<em class="important-label">重要</em>' : ''}</div>
                 <div class="message-meta"><span><b>发送者</b>${escapeHtml(item.sender)}</span><span><b>发送时间</b>${escapeHtml(item.time)}</span></div>
               </button>
-              ${state.tab === 'unread' ? `<button class="card-action ${item.important ? 'important' : ''}" type="button" data-toggle-important="${item.id}" aria-label="${item.important ? '取消重要标记' : '标记重要'}">★</button>` : `<button class="card-action delete" type="button" data-delete-one="${item.id}" aria-label="删除消息">删除</button>`}
+              ${state.tab === 'unread' ? `<button class="card-action ${item.important ? 'important' : ''}" type="button" data-toggle-important="${item.id}" aria-label="${item.important ? '取消重要标记' : '标记重要'}" title="${item.important ? '取消重要标记' : '标记重要'}">${item.important ? '★' : '☆'}</button>` : `<button class="card-action delete" type="button" data-delete-one="${item.id}" aria-label="删除消息">删除</button>`}
             </div>
           </article>`).join('') : `<div class="empty">暂无${state.tab === 'unread' ? '待阅' : '已阅'}消息</div>`;
       }
