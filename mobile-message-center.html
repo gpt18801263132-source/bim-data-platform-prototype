@@ -10,6 +10,7 @@
     button{font:inherit}
     .mobile-app{position:relative;width:100%;max-width:430px;min-height:100vh;margin:0 auto;background:#f7f8fa;overflow:hidden}
     .app-header{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:44px 1fr 62px;align-items:center;height:48px;padding-top:env(safe-area-inset-top);border-bottom:1px solid #ebeeec;background:#fff}
+    .app-header.no-manage{grid-template-columns:44px 1fr 44px}
     .app-header h1{margin:0;text-align:center;font-size:17px;font-weight:500;color:#202a24}
     .header-button{height:48px;border:0;background:transparent;color:#1a8a57;font-size:14px;cursor:pointer}
     .header-button.back{font-size:25px;color:#303b34}
@@ -24,6 +25,7 @@
     .select-all input,.message-select input{width:17px;height:17px;margin:0;accent-color:#1a8a57}
     .manage-strip span{color:#87938b}
     .message-list{padding:12px 12px 82px}
+    .mobile-app:not(.is-managing) .message-list{padding-bottom:18px}
     .message-card{position:relative;margin-bottom:10px;border:1px solid #e8ece9;border-radius:7px;background:#fff;overflow:hidden}
     .message-card.important{border-color:#ead9ad}
     .message-card-main{display:grid;grid-template-columns:1fr 40px;min-height:116px}
@@ -85,7 +87,6 @@
     <section class="message-list" data-message-list></section>
     <footer class="batch-bar" data-batch-bar hidden>
       <span data-batch-summary>请选择消息</span>
-      <button class="batch-action primary" type="button" data-batch-mark disabled>标记重要</button>
       <button class="batch-action danger" type="button" data-batch-delete disabled>删除</button>
     </footer>
     <section class="sheet-mask" data-detail-mask hidden>
@@ -135,24 +136,27 @@
       const visibleMessages = () => messages.filter(item => state.tab === 'unread' ? !item.read : item.read).sort((a,b) => Number(b.important) - Number(a.important));
 
       function render(){
+        const canManage = state.tab === 'read';
+        const managingRead = canManage && state.managing;
         const current = visibleMessages();
         app.querySelectorAll('[data-tab]').forEach(button => button.classList.toggle('active',button.dataset.tab === state.tab));
         app.querySelector('[data-unread-count]').textContent = messages.filter(item => !item.read).length;
         app.querySelector('[data-read-count]').textContent = messages.filter(item => item.read).length;
-        app.querySelector('[data-manage]').textContent = state.managing ? '完成' : '管理';
-        app.querySelector('[data-manage-strip]').hidden = !state.managing;
-        app.querySelector('[data-batch-bar]').hidden = !state.managing;
-        app.querySelector('[data-batch-mark]').hidden = state.tab !== 'unread';
-        app.querySelector('[data-batch-delete]').hidden = state.tab !== 'read';
+        const manageButton = app.querySelector('[data-manage]');
+        manageButton.hidden = !canManage;
+        manageButton.textContent = managingRead ? '完成' : '管理';
+        app.querySelector('.app-header').classList.toggle('no-manage', !canManage);
+        app.classList.toggle('is-managing', managingRead);
+        app.querySelector('[data-manage-strip]').hidden = !managingRead;
+        app.querySelector('[data-batch-bar]').hidden = !managingRead;
         app.querySelector('[data-selected-label]').textContent = `已选择 ${state.selected.size} 条`;
         app.querySelector('[data-batch-summary]').textContent = state.selected.size ? `已选择 ${state.selected.size} 条消息` : '请选择消息';
-        app.querySelector('[data-batch-mark]').disabled = state.selected.size === 0;
         app.querySelector('[data-batch-delete]').disabled = state.selected.size === 0;
         const selectAll = app.querySelector('[data-select-all]');
         selectAll.checked = current.length > 0 && current.every(item => state.selected.has(item.id));
         selectAll.disabled = current.length === 0;
         list.innerHTML = current.length ? current.map(item => `
-          <article class="message-card ${item.important ? 'important' : ''} ${state.managing ? 'managing' : ''}" data-message-id="${item.id}">
+          <article class="message-card ${item.important ? 'important' : ''} ${managingRead ? 'managing' : ''}" data-message-id="${item.id}">
             <div class="message-card-main">
               <label class="message-select" aria-label="选择消息"><input type="checkbox" data-select-message="${item.id}" ${state.selected.has(item.id) ? 'checked' : ''}></label>
               <button class="message-open" type="button" data-open-message="${item.id}">
@@ -170,14 +174,13 @@
       app.addEventListener('click',event => {
         const tab = event.target.closest('[data-tab]');
         if(tab){state.tab=tab.dataset.tab;resetSelection();render();return;}
-        if(event.target.closest('[data-manage]')){state.managing=!state.managing;state.selected.clear();render();return;}
+        if(event.target.closest('[data-manage]') && state.tab === 'read'){state.managing=!state.managing;state.selected.clear();render();return;}
         const important = event.target.closest('[data-toggle-important]');
         if(important){const item=messages.find(message=>message.id===Number(important.dataset.toggleImportant));if(item){item.important=!item.important;persistMessages();}render();return;}
         const open = event.target.closest('[data-open-message]');
         if(open && !state.managing){const item=messages.find(message=>message.id===Number(open.dataset.openMessage));if(!item)return;item.read=true;persistMessages();app.querySelector('[data-detail-content]').innerHTML=`<h3>${escapeHtml(item.subject)}</h3><div class="detail-meta"><span><b>发送者</b>${escapeHtml(item.sender)}</span><span><b>发送时间</b>${escapeHtml(item.time)}</span>${item.important?'<span><b>消息标记</b>重要</span>':''}</div><p>${escapeHtml(item.content)}</p>`;app.querySelector('[data-detail-mask]').hidden=false;render();return;}
         const singleDelete = event.target.closest('[data-delete-one]');
         if(singleDelete){requestDelete([Number(singleDelete.dataset.deleteOne)]);return;}
-        if(event.target.closest('[data-batch-mark]')){messages.forEach(item=>{if(state.selected.has(item.id))item.important=true;});persistMessages();resetSelection();render();return;}
         if(event.target.closest('[data-batch-delete]')){requestDelete([...state.selected]);return;}
         if(event.target.closest('[data-close-detail]') || event.target === app.querySelector('[data-detail-mask]')){app.querySelector('[data-detail-mask]').hidden=true;return;}
         if(event.target.closest('[data-cancel-delete]') || event.target === app.querySelector('[data-confirm-mask]')){app.querySelector('[data-confirm-mask]').hidden=true;state.pendingDelete=[];return;}
