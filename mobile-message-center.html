@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>消息中心 - 合肥 BIM 数据中台</title>
+  <title>通知中心 - 合肥 BIM 数据中台</title>
   <style>
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:#eef1ef;color:#303b34;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
@@ -20,6 +20,11 @@
     .message-tab.active:after{position:absolute;right:calc(50% - 18px);bottom:0;left:calc(50% - 18px);height:3px;border-radius:2px;background:#1a9f5f;content:""}
     .message-tab em{display:inline-grid;place-items:center;min-width:17px;height:17px;margin-left:4px;padding:0 4px;border-radius:9px;background:#eef4f0;color:#647169;font-size:10px;font-style:normal;vertical-align:1px}
     .message-tab.active em{background:#e2f2e8;color:#187a4d}
+    .notice-filter{position:sticky;top:94px;z-index:17;display:flex;gap:10px;padding:7px 12px;border-bottom:1px solid #e7ebe8;background:#fff}
+    .notice-filter label{display:flex;align-items:center;gap:6px;min-width:0;color:#7a867f;font-size:12px;white-space:nowrap}
+    .notice-filter select{min-width:0;height:27px;padding:0 22px 0 7px;border:1px solid #dfe6e1;border-radius:4px;background:#fff;color:#47554c;font-size:12px;outline:0}
+    .notice-filter label:first-child{flex:1}
+    .notice-filter label:first-child select{width:100%}
     .manage-strip{display:flex;align-items:center;justify-content:space-between;height:42px;padding:0 14px;border-bottom:1px solid #e5ebe7;background:#f1f7f3;color:#66736b;font-size:13px}
     .select-all{display:flex;align-items:center;gap:7px;cursor:pointer}
     .select-all input,.message-select input{width:17px;height:17px;margin:0;accent-color:#1a8a57}
@@ -36,6 +41,7 @@
     .message-subject{display:flex;align-items:center;gap:7px;margin-bottom:10px;color:#26332b;font-size:15px;font-weight:500;line-height:1.45}
     .unread-dot{flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:#1a9f5f}
     .important-label{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:3px;background:#fff5d9;color:#9b7224;font-size:11px;font-weight:400}
+    .notice-type{display:inline-flex;align-items:center;height:19px;padding:0 5px;border-radius:3px;background:#f1f5f2;color:#66766c;font-size:10px;font-weight:400;white-space:nowrap}
     .message-meta{display:grid;gap:7px;color:#7d8981;font-size:12px;line-height:1.35}
     .message-meta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .message-meta b{margin-right:7px;color:#58665d;font-weight:400}
@@ -73,13 +79,30 @@
   <main class="mobile-app" id="mobileMessageApp">
     <header class="app-header">
       <button class="header-button back" type="button" aria-label="返回">‹</button>
-      <h1>消息中心</h1>
+      <h1>通知中心</h1>
       <button class="header-button" type="button" data-manage>管理</button>
     </header>
-    <nav class="message-tabs" aria-label="消息状态">
+    <nav class="message-tabs" aria-label="通知状态">
       <button class="message-tab active" type="button" data-tab="unread">待阅 <em data-unread-count></em></button>
       <button class="message-tab" type="button" data-tab="read">已阅 <em data-read-count></em></button>
     </nav>
+    <section class="notice-filter" aria-label="通知筛选">
+      <label>通知类型
+        <select data-notice-type aria-label="通知类型">
+          <option value="all">全部类型</option>
+          <option value="quality">质检结果</option>
+          <option value="model">模型/文件更新</option>
+          <option value="approval">审批动态</option>
+          <option value="system">系统通知</option>
+        </select>
+      </label>
+      <label>时间
+        <select data-notice-sort aria-label="通知时间排序">
+          <option value="latest">最新</option>
+          <option value="earliest">最早</option>
+        </select>
+      </label>
+    </section>
     <section class="manage-strip" data-manage-strip hidden>
       <label class="select-all"><input type="checkbox" data-select-all>全选</label>
       <span data-selected-label>已选择 0 条</span>
@@ -90,14 +113,14 @@
       <button class="batch-action danger" type="button" data-batch-delete disabled>删除</button>
     </footer>
     <section class="sheet-mask" data-detail-mask hidden>
-      <article class="sheet" role="dialog" aria-modal="true" aria-label="消息详情">
-        <header class="sheet-head"><span></span><h2>消息详情</h2><button type="button" data-close-detail>关闭</button></header>
+      <article class="sheet" role="dialog" aria-modal="true" aria-label="通知详情">
+        <header class="sheet-head"><span></span><h2>通知详情</h2><button type="button" data-close-detail>关闭</button></header>
         <div class="sheet-content" data-detail-content></div>
       </article>
     </section>
     <section class="sheet-mask" data-confirm-mask hidden>
       <article class="confirm-box" role="dialog" aria-modal="true" aria-label="删除确认">
-        <h3>删除消息</h3>
+        <h3>删除通知</h3>
         <p data-confirm-text></p>
         <div class="confirm-actions"><button type="button" data-cancel-delete>取消</button><button type="button" data-confirm-delete>删除</button></div>
       </article>
@@ -107,19 +130,19 @@
     (() => {
       const app = document.getElementById('mobileMessageApp');
       const defaultMessages = [
-        {id:1,read:false,important:true,sender:'BIM 数据管理平台',time:'2026-09-14 10:20',subject:'白玉兰测试20260203 数据质检已完成',content:'项目数据质检任务已完成，请进入质检结果查看本次检查情况。'},
-        {id:2,read:false,important:false,sender:'项目负责人 · 张伟',time:'2026-09-14 09:35',subject:'联合工房项目模型资料已更新',content:'联合工房土建专业模型资料已更新，请及时查看最新版本。'},
-        {id:3,read:false,important:false,sender:'审批中心',time:'2026-09-13 16:48',subject:'项目数据入库申请待审批',content:'您有一条项目数据入库申请待处理，请在审批中心完成审批。'},
-        {id:4,read:false,important:false,sender:'系统管理员',time:'2026-09-13 14:12',subject:'平台维护时间调整通知',content:'平台计划维护时间已调整，请提前保存正在处理的业务数据。'},
-        {id:5,read:true,important:true,sender:'BIM 数据管理平台',time:'2026-09-12 15:30',subject:'完整性检查已通过',content:'白玉兰测试20260203 完整性检查已通过，可继续发起数据质检。'},
-        {id:6,read:true,important:false,sender:'审批中心',time:'2026-09-11 11:28',subject:'模型数据使用申请已同意',content:'您提交的模型数据使用申请已审批通过。'},
-        {id:7,read:true,important:false,sender:'项目负责人 · 李敏',time:'2026-09-10 17:05',subject:'机电专业文件重新上传完成',content:'机电专业模型文件已重新上传，可重新执行相关检查。'}
+        {id:1,read:false,important:true,type:'quality',typeLabel:'质检结果',sender:'BIM 数据管理平台',time:'2026-09-14 10:20',subject:'白玉兰测试20260203 数据质检已完成',content:'项目数据质检任务已完成，请进入质检结果查看本次检查情况。'},
+        {id:2,read:false,important:false,type:'model',typeLabel:'模型/文件更新',sender:'项目负责人 · 张伟',time:'2026-09-14 09:35',subject:'联合工房项目模型资料已更新',content:'联合工房土建专业模型资料已更新，请及时查看最新版本。'},
+        {id:3,read:false,important:false,type:'approval',typeLabel:'审批动态',sender:'审批中心',time:'2026-09-13 16:48',subject:'项目数据入库申请待审批',content:'您有一条项目数据入库申请待处理，请在审批中心完成审批。'},
+        {id:4,read:false,important:false,type:'system',typeLabel:'系统通知',sender:'系统管理员',time:'2026-09-13 14:12',subject:'平台维护时间调整通知',content:'平台计划维护时间已调整，请提前保存正在处理的业务数据。'},
+        {id:5,read:true,important:true,type:'quality',typeLabel:'质检结果',sender:'BIM 数据管理平台',time:'2026-09-12 15:30',subject:'完整性检查已通过',content:'白玉兰测试20260203 完整性检查已通过，可继续发起数据质检。'},
+        {id:6,read:true,important:false,type:'approval',typeLabel:'审批动态',sender:'审批中心',time:'2026-09-11 11:28',subject:'模型数据使用申请已同意',content:'您提交的模型数据使用申请已审批通过。'},
+        {id:7,read:true,important:false,type:'model',typeLabel:'模型/文件更新',sender:'项目负责人 · 李敏',time:'2026-09-10 17:05',subject:'机电专业文件重新上传完成',content:'机电专业模型文件已重新上传，可重新执行相关检查。'}
       ];
-      const storageKey = 'hfyc-mobile-message-center-v1';
+      const storageKey = 'hfyc-mobile-notice-center-v2';
       const loadMessages = () => {
         try {
           const saved = JSON.parse(window.localStorage.getItem(storageKey));
-          return Array.isArray(saved) && saved.every(item => item && Number.isInteger(item.id))
+          return Array.isArray(saved) && saved.every(item => item && Number.isInteger(item.id) && item.type && item.typeLabel)
             ? saved
             : defaultMessages.map(item => ({...item}));
         } catch (error) {
@@ -130,10 +153,18 @@
       const persistMessages = () => {
         try { window.localStorage.setItem(storageKey, JSON.stringify(messages)); } catch (error) { /* 原型在无存储权限时仍可正常演示 */ }
       };
-      const state = {tab:'unread',managing:false,selected:new Set(),pendingDelete:[]};
+      const state = {tab:'unread',managing:false,selected:new Set(),pendingDelete:[],notificationType:'all',timeOrder:'latest'};
       const list = app.querySelector('[data-message-list]');
       const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-      const visibleMessages = () => messages.filter(item => state.tab === 'unread' ? !item.read : item.read).sort((a,b) => Number(b.important) - Number(a.important));
+      const visibleMessages = () => messages
+        .filter(item => state.tab === 'unread' ? !item.read : item.read)
+        .filter(item => state.notificationType === 'all' || item.type === state.notificationType)
+        .sort((a,b) => {
+          const importantDiff = Number(b.important) - Number(a.important);
+          if(importantDiff) return importantDiff;
+          const timeDiff = new Date(b.time.replace(' ','T')) - new Date(a.time.replace(' ','T'));
+          return state.timeOrder === 'latest' ? timeDiff : -timeDiff;
+        });
 
       function render(){
         const canManage = state.tab === 'read';
@@ -142,6 +173,8 @@
         app.querySelectorAll('[data-tab]').forEach(button => button.classList.toggle('active',button.dataset.tab === state.tab));
         app.querySelector('[data-unread-count]').textContent = messages.filter(item => !item.read).length;
         app.querySelector('[data-read-count]').textContent = messages.filter(item => item.read).length;
+        app.querySelector('[data-notice-type]').value = state.notificationType;
+        app.querySelector('[data-notice-sort]').value = state.timeOrder;
         const manageButton = app.querySelector('[data-manage]');
         manageButton.hidden = !canManage;
         manageButton.textContent = managingRead ? '完成' : '管理';
@@ -150,7 +183,7 @@
         app.querySelector('[data-manage-strip]').hidden = !managingRead;
         app.querySelector('[data-batch-bar]').hidden = !managingRead;
         app.querySelector('[data-selected-label]').textContent = `已选择 ${state.selected.size} 条`;
-        app.querySelector('[data-batch-summary]').textContent = state.selected.size ? `已选择 ${state.selected.size} 条消息` : '请选择消息';
+        app.querySelector('[data-batch-summary]').textContent = state.selected.size ? `已选择 ${state.selected.size} 条通知` : '请选择通知';
         app.querySelector('[data-batch-delete]').disabled = state.selected.size === 0;
         const selectAll = app.querySelector('[data-select-all]');
         selectAll.checked = current.length > 0 && current.every(item => state.selected.has(item.id));
@@ -158,18 +191,18 @@
         list.innerHTML = current.length ? current.map(item => `
           <article class="message-card ${item.important ? 'important' : ''} ${managingRead ? 'managing' : ''}" data-message-id="${item.id}">
             <div class="message-card-main">
-              <label class="message-select" aria-label="选择消息"><input type="checkbox" data-select-message="${item.id}" ${state.selected.has(item.id) ? 'checked' : ''}></label>
+              <label class="message-select" aria-label="选择通知"><input type="checkbox" data-select-message="${item.id}" ${state.selected.has(item.id) ? 'checked' : ''}></label>
               <button class="message-open" type="button" data-open-message="${item.id}">
-                <div class="message-subject">${item.read ? '' : '<i class="unread-dot"></i>'}<span>${escapeHtml(item.subject)}</span>${item.important ? '<em class="important-label">重要</em>' : ''}</div>
+                <div class="message-subject">${item.read ? '' : '<i class="unread-dot"></i>'}<span>${escapeHtml(item.subject)}</span><em class="notice-type">${escapeHtml(item.typeLabel)}</em>${item.important ? '<em class="important-label">重要</em>' : ''}</div>
                 <div class="message-meta"><span><b>发送者</b>${escapeHtml(item.sender)}</span><span><b>发送时间</b>${escapeHtml(item.time)}</span></div>
               </button>
-              ${state.tab === 'unread' ? `<button class="card-action ${item.important ? 'important' : ''}" type="button" data-toggle-important="${item.id}" aria-label="${item.important ? '取消重要标记' : '标记重要'}" title="${item.important ? '取消重要标记' : '标记重要'}">${item.important ? '★' : '☆'}</button>` : `<button class="card-action delete" type="button" data-delete-one="${item.id}" aria-label="删除消息">删除</button>`}
+              ${state.tab === 'unread' ? `<button class="card-action ${item.important ? 'important' : ''}" type="button" data-toggle-important="${item.id}" aria-label="${item.important ? '取消重要标记' : '标记重要'}" title="${item.important ? '取消重要标记' : '标记重要'}">${item.important ? '★' : '☆'}</button>` : `<button class="card-action delete" type="button" data-delete-one="${item.id}" aria-label="删除通知">删除</button>`}
             </div>
-          </article>`).join('') : `<div class="empty">暂无${state.tab === 'unread' ? '待阅' : '已阅'}消息</div>`;
+          </article>`).join('') : `<div class="empty">暂无${state.tab === 'unread' ? '待阅' : '已阅'}通知</div>`;
       }
 
       function resetSelection(){state.selected.clear();state.managing=false;}
-      function requestDelete(ids){state.pendingDelete = ids;app.querySelector('[data-confirm-text]').textContent = ids.length > 1 ? `确定删除选中的 ${ids.length} 条已阅消息吗？删除后无法恢复。` : '确定删除这条已阅消息吗？删除后无法恢复。';app.querySelector('[data-confirm-mask]').hidden = false;}
+      function requestDelete(ids){state.pendingDelete = ids;app.querySelector('[data-confirm-text]').textContent = ids.length > 1 ? `确定删除选中的 ${ids.length} 条已阅通知吗？删除后无法恢复。` : '确定删除这条已阅通知吗？删除后无法恢复。';app.querySelector('[data-confirm-mask]').hidden = false;}
 
       app.addEventListener('click',event => {
         const tab = event.target.closest('[data-tab]');
@@ -178,7 +211,7 @@
         const important = event.target.closest('[data-toggle-important]');
         if(important){const item=messages.find(message=>message.id===Number(important.dataset.toggleImportant));if(item){item.important=!item.important;persistMessages();}render();return;}
         const open = event.target.closest('[data-open-message]');
-        if(open && !state.managing){const item=messages.find(message=>message.id===Number(open.dataset.openMessage));if(!item)return;item.read=true;persistMessages();app.querySelector('[data-detail-content]').innerHTML=`<h3>${escapeHtml(item.subject)}</h3><div class="detail-meta"><span><b>发送者</b>${escapeHtml(item.sender)}</span><span><b>发送时间</b>${escapeHtml(item.time)}</span>${item.important?'<span><b>消息标记</b>重要</span>':''}</div><p>${escapeHtml(item.content)}</p>`;app.querySelector('[data-detail-mask]').hidden=false;render();return;}
+        if(open && !state.managing){const item=messages.find(message=>message.id===Number(open.dataset.openMessage));if(!item)return;item.read=true;persistMessages();app.querySelector('[data-detail-content]').innerHTML=`<h3>${escapeHtml(item.subject)}</h3><div class="detail-meta"><span><b>通知类型</b>${escapeHtml(item.typeLabel)}</span><span><b>发送者</b>${escapeHtml(item.sender)}</span><span><b>发送时间</b>${escapeHtml(item.time)}</span>${item.important?'<span><b>重要标记</b>已标记</span>':''}</div><p>${escapeHtml(item.content)}</p>`;app.querySelector('[data-detail-mask]').hidden=false;render();return;}
         const singleDelete = event.target.closest('[data-delete-one]');
         if(singleDelete){requestDelete([Number(singleDelete.dataset.deleteOne)]);return;}
         if(event.target.closest('[data-batch-delete]')){requestDelete([...state.selected]);return;}
@@ -189,6 +222,8 @@
       app.addEventListener('change',event => {
         if(event.target.matches('[data-select-message]')){const id=Number(event.target.dataset.selectMessage);event.target.checked?state.selected.add(id):state.selected.delete(id);render();}
         if(event.target.matches('[data-select-all]')){const current=visibleMessages();current.forEach(item=>event.target.checked?state.selected.add(item.id):state.selected.delete(item.id));render();}
+        if(event.target.matches('[data-notice-type]')){state.notificationType=event.target.value;resetSelection();render();}
+        if(event.target.matches('[data-notice-sort]')){state.timeOrder=event.target.value;resetSelection();render();}
       });
       render();
     })();
